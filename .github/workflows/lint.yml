@@ -13,7 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Detect JS/TS changes
         id: changes
         uses: dorny/paths-filter@v3
