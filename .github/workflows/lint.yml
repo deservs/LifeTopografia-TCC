@@ -11,13 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Baixa o código do seu repositório
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Roda o Oxlint Oficial direto do ecossistema deles, sem precisar de Node ou npm install
+      - name: Detect JS/TS changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            lintable:
+              - '**/*.js'
+              - '**/*.jsx'
+              - '**/*.ts'
+              - '**/*.tsx'
+
       - name: Run Oxlint Action
+        if: steps.changes.outputs.lintable == 'true'
         uses: oxc-project/oxlint-action@v1
         with:
-          # Adiciona a regra para falhar o build caso existam avisos ou erros
           params: --deny-warnings
