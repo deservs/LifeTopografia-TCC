@@ -30,6 +30,11 @@ function App() {
         body: formData, // O navegador define o Content-Type multipart/form-data automaticamente
       })
 
+      if (!response.ok) {
+        const errorBody = await response.text()
+        throw new Error(`Upload falhou (${response.status}): ${errorBody}`)
+      }
+
       const result = await response.json()
       console.log('Resposta do servidor:', result)
     } catch (error) {
