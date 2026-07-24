@@ -1,16 +1,19 @@
 import type { FastifyInstance } from 'fastify'
 import path from 'path'
-import { env } from '../../env'
-import { createClient } from '@supabase/supabase-js'
+import { createAuthenticatedSupabaseClient } from '../../repositories/banco'
 
 export async function uploadRoute(app: FastifyInstance) {
-  // Create Supabase client
-  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY)
-
   app.post('/upload', async (request, reply) => {
+    const authHeader = request.headers.authorization
+
+    if (!authHeader) {
+      return reply.status(401).send({ error: 'Token não fornecido' })
+    }
+
+    const supabase = createAuthenticatedSupabaseClient(authHeader)
+
     // Extrai o arquivo da requisição
     const data = await request.file()
-
     // Se o usuário enviou o formulário sem anexar arquivo
     if (!data) {
       return reply.status(400).send({ error: 'Nenhum arquivo enviado.' })
