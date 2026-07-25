@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
@@ -116,6 +117,20 @@ function App() {
       <div className="ticks"></div>
       <section id="spacer"></section>
     </>
+=======
+import { BrowserRouter, Routes, Route } from "react-router"
+import EnviarArquivos from './container/enviar_arquivos'
+
+import './App.css'
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<EnviarArquivos />} />
+      </Routes>
+    </BrowserRouter>
+>>>>>>> Stashed changes
   )
 }
 
