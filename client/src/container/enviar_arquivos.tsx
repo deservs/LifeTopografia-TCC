@@ -1,8 +1,15 @@
 import { useState, ChangeEvent } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { DxfViewer } from 'dxf-viewer'
+import * as THREE from 'three'
 
 export default function EnviarArquivos() {  // 1. Estado para guardar o arquivo selecionado
     const [file, setFile] = useState<File | null>(null)
     const [letra, setLetra] = useState<string>('transparent') // Estado para guardar a letra digitada
+    const supabase = createClient(
+        import.meta.env.VITE_SUPABASE_URL || 'none',
+        import.meta.env.VITE_SUPABASE_ANON_KEY || 'none'
+    )
 
     // 2. Função acionada quando o usuário escolhe um arquivo no <input>
     function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -37,10 +44,38 @@ export default function EnviarArquivos() {  // 1. Estado para guardar o arquivo 
             const result = await response.json()
             console.log('Resposta do servidor:', result)
             setLetra('transparent') // Muda a cor da letra para transparente em caso de sucesso
+
+            // Pega a URL pública do arquivo DXF no Storage
+            const { data } = supabase.storage
+                .from('arquivos')
+                .getPublicUrl('cad/' + result.file)
+
+            const fileUrl = data.publicUrl
+
+            // Pega a `<div>` da tela onde o desenho vai aparecer
+            const container = document.getElementById('cad-preview')
+
+            if (!container) {
+                throw new Error('Container de visualização não encontrado')
+            }
+
+            // Instancia o visualizador
+            const viewer = new DxfViewer(container, {
+                autoResize: true,
+                canvasWidth: 800,
+                canvasHeight: 600,
+                clearColor: new THREE.Color(0x111111), // Cor de fundo estilo AutoCAD (escuro)
+            })
+
+            // Pega o arquivo do seu backend/Supabase e manda renderizar
+            async function carregarDesenho(urlDoDxf: string) {
+                console.log('Carregando desenho do DXF em:', urlDoDxf)
+                await viewer.Load({ url: 'https://mdlmevtqjgqheytkgxuo.supabase.co/storage/v1/object/public/arquivos/cad/1785016168788/file_path.pdf.dxf' })
+            }
+            carregarDesenho(fileUrl) // Ajuste a URL conforme seu backend
         } catch (error) {
             console.error('Erro ao enviar o arquivo:', error)
             setLetra('red') // Muda a cor da letra para vermelho em caso de erro
-
         }
     }
 
@@ -54,6 +89,7 @@ export default function EnviarArquivos() {  // 1. Estado para guardar o arquivo 
                 <button onClick={enviarArquivo}>Enviar Arquivo</button>
             </div>
             <div id='div' style={{ color: letra }}>Bixo tem algo errado</div>
+            <div id={'cad-preview'} className="cad-preview" style={{ width: '100%', height: '600px', position: 'relative' }}></div>
         </>
     )
 }

@@ -2,9 +2,9 @@
 import { DadosDesmanteladosPDF } from '../../@types/pdf.type'
 
 export class ExtrairPdf {
-  async desmantelar(fileBuffer: Buffer): Promise<DadosDesmanteladosPDF> {
+  async Extrair(fileBuffer: Buffer): Promise<DadosDesmanteladosPDF> {
     // Aqui vai a sua biblioteca que lê o PDF (ex: pdf-parse, pdfjs, etc.)
-    console.log('📄 [PdfService] Desmantelando o arquivo PDF...')
+    console.log('📄 [PdfService] Extraindo dados do arquivo PDF')
 
     // Exemplo do resultado extraído
     return {

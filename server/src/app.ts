@@ -1,8 +1,6 @@
 import { fastify } from 'fastify'
 import fastifyCors from '@fastify/cors'
 import fastifyMultipart from '@fastify/multipart'
-import { usersRoutes } from './http/routes/users.routes'
-import { getTabelaRoute } from './http/routes/get-tabela'
 import { arquivosRoute } from './http/routes/arquivos.route'
 // Outros imports e plugins do Zod/Swagger...
 
@@ -21,9 +19,5 @@ app.register(fastifyMultipart, {
   },
 })
 
-// Registrando o grupo de rotas de usuários
-app.register(usersRoutes)
-
-app.register(getTabelaRoute)
-
+// Registrando o grupo de rotas
 app.register(arquivosRoute)
