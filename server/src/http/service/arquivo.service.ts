@@ -1,7 +1,8 @@
-// src/http/service/upload.service.ts
 import { ExtrairPdf } from './extrair-pdf.service'
 import { AutoCad } from './autoCad.service'
 import { SendToSupabaseService } from './enviaSupabase.service'
+import fs from 'fs/promises'
+import path from 'path'
 
 export class arquivoPdfService {
   constructor(
@@ -17,9 +18,6 @@ export class arquivoPdfService {
       throw new Error('O arquivo enviado não é um PDF válido.')
     }
 
-    // Envia o PDF para o Supabase (ou outro serviço de armazenamento)
-    await SendToSupabaseService(fileBuffer, fileName, 'pdf', 'token-de-autenticacao')
-
     // Extrai os dados do PDF
     const dadosPdf = await this.pdfService.Extrair(fileBuffer)
 
@@ -29,13 +27,10 @@ export class arquivoPdfService {
       numeros.map((num) => ({ x: num * 10, y: num * 10 })),
     ) // Exemplo de pontos
 
-    // Envia o arquivo do AutoCAD para o Supabase (ou outro serviço de armazenamento)
-    const caminhoAutoCad = await SendToSupabaseService(
-      estruturaAutoCad,
-      fileName + '.dxf',
-      'cad',
-      'token-de-autenticacao',
-    )
-    return caminhoAutoCad // Retorna o caminho do arquivo no Supabase;
+    // Salva o arquivo DXF no disco do servidor para visualização posterior
+    const filePath = path.join(__dirname, '../routes/desenho.dxf')
+    await fs.writeFile(filePath, estruturaAutoCad)
+
+    return { message: 'DXF gerado com sucesso', dxf: estruturaAutoCad.toString('utf-8') }
   }
 }

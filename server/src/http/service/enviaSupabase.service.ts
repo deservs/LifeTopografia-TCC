@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { createAuthenticatedSupabaseClient } from '../../repositories/banco'
+import { createAuthenticatedSupabaseClient } from '../../repositories/'
 import { date } from 'zod'
 
 export async function SendToSupabaseService(
@@ -22,5 +22,5 @@ export async function SendToSupabaseService(
     throw new Error('Falha ao salvar o arquivo no storage.')
   }
 
-  return userID + '/' + fileName // Retorna o caminho do arquivo no Supabase
+  //return { path: userID + '/' + fileName } // Retorna o caminho do arquivo no Supabase
 }
