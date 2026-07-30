@@ -1,0 +1,13 @@
+img{
+    height: 100vh;
+    width: 250vw;
+}
+#bg1{
+    margin-left: -25vw;
+}
+#bg2{
+    width: 300vw;
+}
+#bg3{
+    margin-left: -30vw;
+}
