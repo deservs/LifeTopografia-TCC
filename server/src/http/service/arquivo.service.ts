@@ -17,11 +17,11 @@ export class arquivoPdfService {
       // O Service lança o erro (não responde HTTP)
       throw new Error('O arquivo enviado não é um PDF válido.')
     }
-
     // Extrai os dados do PDF
     const dadosPdf = await this.pdfService.Extrair(fileBuffer)
 
-    const numeros = [0, 0, 1, 0, 1, 2.219, 2, 2.219, 1, 3.064]
+    const numeros = Object.values(dadosPdf).filter((value) => typeof value === 'number') as number[]
+    console.log('[arquivoPdfService] Números extraídos do PDF:', numeros)
     // Transforma os dados em estrutura do AutoCAD
     const estruturaAutoCad = await this.autoCadService.transformarEmDxf(
       numeros.map((num) => ({ x: num * 10, y: num * 10 })),

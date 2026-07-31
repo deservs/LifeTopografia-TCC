@@ -2,10 +2,14 @@ import { fastify } from 'fastify'
 import fastifyCors from '@fastify/cors'
 import fastifyMultipart from '@fastify/multipart'
 import { arquivosRoute } from './http/routes/arquivos.route'
-// Outros imports e plugins do Zod/Swagger...
+import { validatorCompiler, serializerCompiler, ZodTypeProvider } from 'fastify-type-provider-zod'
 
 // Registra o suporte a upload de arquivos
-export const app = fastify()
+export const app = fastify().withTypeProvider<ZodTypeProvider>()
+
+// Configura o compilador de validação e serialização do Zod
+app.setValidatorCompiler(validatorCompiler)
+app.setSerializerCompiler(serializerCompiler)
 
 // Registra o CORS liberando acesso geral
 app.register(fastifyCors, {

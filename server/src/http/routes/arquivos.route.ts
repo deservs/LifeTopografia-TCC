@@ -1,5 +1,7 @@
 // src/http/routes/arquivos.route.ts
 import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 import { uploadPdfController } from '../controllers/arquivo.controller'
 import fs from 'fs/promises'
 import path from 'path'
@@ -7,7 +9,16 @@ import path from 'path'
 export async function arquivosRoute(app: FastifyInstance) {
   // Quando fizerem POST em /upload, o Fastify dispara o controller
   app.post('/upload', uploadPdfController)
-  app.get('/ver', async (request, reply) => {
+  app.withTypeProvider<ZodTypeProvider>().get('/ver', {
+    schema: {
+      summary: 'Retorna o conteúdo do arquivo DXF gerado',
+      response: {
+        200: z.string(),
+        404: z.object({ error: z.string() }),
+        500: z.object({ error: z.string() }),
+      },
+    },
+  }, async (request, reply) => {
     try {
       const filePath = path.join(__dirname, 'desenho.dxf')
       try {
@@ -22,4 +33,5 @@ export async function arquivosRoute(app: FastifyInstance) {
       return reply.status(500).send({ error: 'Erro ao ler o arquivo DXF' })
     }
   })
+
 }

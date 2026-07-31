@@ -4,7 +4,7 @@ import Fastify from 'fastify'
 import fs from 'fs/promises'
 import path from 'path'
 import { z } from 'zod'
-import { DadosDesmanteladosPDF } from '../../@types/pdf.type'
+import { SegmentoTopografico } from '../../@types/pdf.type'
 
 const FILE_PATH = './dados.json';
 
@@ -14,10 +14,14 @@ export interface EstruturaAutoCad {
   convertidoEm: string
 }
 
-export interface Ponto {
-  x: number
-  y: number
-}
+export const PontoSchema = z.object({
+  x: z.number().finite('Coordenada X deve ser um número finito'),
+  y: z.number().finite('Coordenada Y deve ser um número finito'),
+})
+
+export const ListaPontosSchema = z.array(PontoSchema).min(1, 'A lista deve conter ao menos um ponto')
+
+export type Ponto = z.infer<typeof PontoSchema>
 
 export class AutoCad {
   async transformarEmDxf(pontos: Ponto[]): Promise<Buffer> {
@@ -36,14 +40,7 @@ export class AutoCad {
     drawing.drawLine(10, 22.19, -10, 22.19) // Lado 3 (Descendo pra esquerda)
     drawing.drawLine(-10, 22.19, 0, 0) // Lado 4 (Subindo pra esquerda)
 
-    // 2. O Semi-círculo no centro do losango (X=100, Y=50)
-    drawing.drawArc(
-      100, // X do Centro
-      50, // Y do Centro
-      50, // Raio (tamanho do arco)
-      0, // Ângulo inicial (0 graus)
-      180, // Ângulo final (180 graus = Metade de um círculo)
-    )
+
 
     // Exporta como String e converte para Buffer
     const dxfContent = drawing.toDxfString()
