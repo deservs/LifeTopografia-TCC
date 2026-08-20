@@ -3,12 +3,21 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+<<<<<<< HEAD
  "scripts": {
   "dev": "tsx watch --env-file=.env src/server.ts",
   "build": "npm install && tsc",
   "start": "node --env-file=.env dist/server.js",
   "format": "npx @biomejs/biome format --write"
 },
+=======
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "format": "npx @biomejs/biome format --write"
+  },
+>>>>>>> origin/home-barra-lateral
   "keywords": [],
   "author": "",
   "license": "ISC",
