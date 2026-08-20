@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* import type { FastifyInstance } from 'fastify'
+=======
+import type { FastifyInstance } from 'fastify'
+>>>>>>> envio-de-arquivos
 import path from 'path'
 import { createAuthenticatedSupabaseClient } from '../../repositories/banco'
 
@@ -30,7 +34,11 @@ export async function uploadRoute(app: FastifyInstance) {
       2. Salvar no disco local
       3. Processar em memória
       
+<<<<<<< HEAD
     
+=======
+    */
+>>>>>>> envio-de-arquivos
     //Transforma o arquivo em Buffer (necessário para o Node.js)
     const fileBuffer = await data.toBuffer()
     // Gera um nome único para evitar sobrescrever arquivos com o mesmo nome
@@ -59,4 +67,7 @@ export async function uploadRoute(app: FastifyInstance) {
     })
   })
 }
+<<<<<<< HEAD
  */
+=======
+>>>>>>> envio-de-arquivos

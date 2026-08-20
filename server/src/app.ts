@@ -1,7 +1,13 @@
 import { fastify } from 'fastify'
 import fastifyCors from '@fastify/cors'
 import fastifyMultipart from '@fastify/multipart'
+<<<<<<< HEAD
 import { arquivosRoute } from './http/routes/arquivos.route'
+=======
+import { usersRoutes } from './http/routes/users.routes'
+import { getTabelaRoute } from './http/routes/get-tabela'
+import { uploadRoute } from './http/routes/upload'
+>>>>>>> envio-de-arquivos
 // Outros imports e plugins do Zod/Swagger...
 
 // Registra o suporte a upload de arquivos
@@ -19,5 +25,14 @@ app.register(fastifyMultipart, {
   },
 })
 
+<<<<<<< HEAD
 // Registrando o grupo de rotas
 app.register(arquivosRoute)
+=======
+// Registrando o grupo de rotas de usuários
+app.register(usersRoutes)
+
+app.register(getTabelaRoute)
+
+app.register(uploadRoute)
+>>>>>>> envio-de-arquivos

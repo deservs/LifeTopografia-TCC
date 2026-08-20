@@ -24,9 +24,14 @@
     "@fastify/multipart": "^10.1.0",
     "@fastify/swagger": "^9.8.1",
     "@scalar/fastify-api-reference": "^1.62.8",
+<<<<<<< HEAD
     "@supabase/supabase-js": "^2.110.8",
     "dotenv": "^17.4.2",
     "dxf-writer": "^1.18.4",
+=======
+    "@supabase/server": "^1.4.1",
+    "dotenv": "^17.4.2",
+>>>>>>> envio-de-arquivos
     "fastify": "^5.10.0",
     "fastify-type-provider-zod": "^7.0.0",
     "file-type": "^22.0.1",
