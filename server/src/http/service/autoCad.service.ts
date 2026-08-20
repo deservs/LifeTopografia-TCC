@@ -1,6 +1,12 @@
 // src/http/service/autoCad.service.ts
 import Drawing from 'dxf-writer'
+import Fastify from 'fastify'
+import fs from 'fs/promises'
+import path from 'path'
+import { z } from 'zod'
 import { DadosDesmanteladosPDF } from '../../@types/pdf.type'
+
+const FILE_PATH = './dados.json';
 
 export interface EstruturaAutoCad {
   layers: string[]
@@ -25,10 +31,10 @@ export class AutoCad {
     drawing.setActiveLayer('PAREDES')
 
     // 1. O Losango (4 Linhas)
-    drawing.drawLine(50, 50, 100, 100) // Lado 1 (Subindo pra direita)
-    drawing.drawLine(100, 100, 150, 50) // Lado 2 (Descendo pra direita)
-    drawing.drawLine(150, 50, 100, 0) // Lado 3 (Descendo pra esquerda)
-    drawing.drawLine(100, 0, 50, 50) // Lado 4 (Subindo pra esquerda)
+    drawing.drawLine(0, 0, 10, 0) // Lado 1 (Subindo pra direita)
+    drawing.drawLine(10, 0, 10, 22.19) // Lado 2 (Descendo pra direita)
+    drawing.drawLine(10, 22.19, -10, 22.19) // Lado 3 (Descendo pra esquerda)
+    drawing.drawLine(-10, 22.19, 0, 0) // Lado 4 (Subindo pra esquerda)
 
     // 2. O Semi-círculo no centro do losango (X=100, Y=50)
     drawing.drawArc(

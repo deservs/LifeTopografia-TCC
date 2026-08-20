@@ -26,7 +26,7 @@ export async function uploadPdfController(
     const file = await uploadPdfService.execute(fileBuffer, fileName)
 
     //  em caso de sucesso, retorna uma resposta HTTP 201 (Created)
-    return reply.status(201).send({ message: 'PDF enviado com sucesso!', file: file } )
+    return reply.status(201).send({ message: 'PDF enviado com sucesso!', file: file })
   } catch (error: any) {
     // O Controller captura o erro lançado pelo Service e devolve pro cliente
     return reply.status(400).send({ error: error.message })
