@@ -6,7 +6,7 @@ import path from 'path'
 import { z } from 'zod'
 import { SegmentoTopografico } from '../../@types/pdf.type'
 
-const FILE_PATH = './dados.json';
+const FILE_PATH = './dados.json'
 
 export interface EstruturaAutoCad {
   layers: string[]
@@ -19,7 +19,9 @@ export const PontoSchema = z.object({
   y: z.number().finite('Coordenada Y deve ser um número finito'),
 })
 
-export const ListaPontosSchema = z.array(PontoSchema).min(1, 'A lista deve conter ao menos um ponto')
+export const ListaPontosSchema = z
+  .array(PontoSchema)
+  .min(1, 'A lista deve conter ao menos um ponto')
 
 export type Ponto = z.infer<typeof PontoSchema>
 
@@ -39,8 +41,6 @@ export class AutoCad {
     drawing.drawLine(10, 0, 10, 22.19) // Lado 2 (Descendo pra direita)
     drawing.drawLine(10, 22.19, -10, 22.19) // Lado 3 (Descendo pra esquerda)
     drawing.drawLine(-10, 22.19, 0, 0) // Lado 4 (Subindo pra esquerda)
-
-
 
     // Exporta como String e converte para Buffer
     const dxfContent = drawing.toDxfString()

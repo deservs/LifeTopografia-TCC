@@ -1,4 +1,10 @@
-# React + TypeScript + Vite
+# Life Topografia - TCC Escolar
+
+Este projeto é um **Trabalho de Conclusão de Curso (TCC)** escolar desenvolvido para auxílio e automação em processos de topografia.
+
+> 📖 **Diário de Aprendizado:** Consulte o arquivo [APRENDIZADO.md](file:///d:/projeto/LifeTopografia-TCC/APRENDIZADO.md) na raiz do projeto para acompanhar os aprendizados, soluções de erros e decisões técnicas.
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
