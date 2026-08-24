@@ -1,4 +1,3 @@
-// src/workers/ocr.worker.ts
 import * as ort from 'onnxruntime-web';
 
 // Regra vital: Força o ONNX a buscar os binários WebAssembly na pasta pública,
