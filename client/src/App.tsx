@@ -1,7 +1,8 @@
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router'
-import EnviarArquivos from './container/Enviar-arquivos/enviar_arquivos'
-import Home from './container/Home/home'
+/* import EnviarArquivos from './container/Enviar-arquivos/enviar_arquivos'
+ */import Home from './container/Home/home'
+import EnviarArquivos from './workers/kaka'
 
 function App() {
   return (
