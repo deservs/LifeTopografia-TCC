@@ -6,7 +6,8 @@
     "react/only-export-components": ["warn", { "allowConstantExport": true }]
   },
   "ignorePatterns": [
-    "client/public/wasm/**"
+    "public/wasm/**",
+    "**/wasm/**"
   ]
   
 }
