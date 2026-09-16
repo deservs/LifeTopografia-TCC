@@ -1,7 +1,8 @@
 import { PdfpageToImage } from '../../utils/pdfConvert';
+import type { ChangeEvent } from 'react';
 
 // Dentro do seu componente React:
-const handleTestUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+const handleTestUpload = async (event: ChangeEvent<HTMLInputElement>) => {
   const file = event.target.files?.[0];
   if (!file) return;
 
