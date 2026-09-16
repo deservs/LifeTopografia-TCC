@@ -2,7 +2,7 @@ import {z} from 'zod';
 
 export const envSchema = z.object({
   VITE_SUPABASE_URL: z.string({ message: 'URL do Supabase é obrigatória' }).url('URL do Supabase inválida'),
-  VITE_SUPABASE_PUBLISHABLE_KEY: z.string({ message: 'Chave publicável do Supabase é obrigatória' }),
+  VITE_SUPABASE_PUBLISHABLE_KEY: z.string({ message: 'Chave publicável do Supabase é obrigatória' }).min(1, 'Chave publicável do Supabase é obrigatória'),
 });
 
 const _env = envSchema.safeParse(import.meta.env);

@@ -7,7 +7,7 @@ export default function EnviarArquivos() {
   useEffect(() => {
     // Instancia o Worker de forma compatível com o bundler do Vite
     workerRef.current = new Worker(
-      new URL('../../workers/ocr.worker.ts', import.meta.url),
+      new URL('../../../workers/ocr.worker.ts', import.meta.url),
       { type: 'module' }
     );
 

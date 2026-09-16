@@ -50,7 +50,7 @@ export async function PdfpageToImage( file:File, pageNumber: number = 1): Promis
     canvas.height = viewport.height;
     
     // Renderiza a página do PDF no canvas
-    await page.render({ canvas, canvasContext: ctx, viewport }).promise;
+    await page.render({  canvas, canvasContext: ctx, viewport  }).promise;
 
     // Retorna os dados da imagem do canvas
     const imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);

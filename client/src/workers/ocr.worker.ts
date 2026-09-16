@@ -1,10 +1,12 @@
 import { PaddleOCR } from '@paddleocr/paddleocr-js';
 
+type OcrEngine = Awaited<ReturnType<typeof PaddleOCR.create>>;
+
 // Variável global do Worker para guardar a instância da IA na memória RAM (Singleton)
-let ocrEngineInstance: PaddleOCR | null = null;
+let ocrEngineInstance: OcrEngine | null = null;
 
 // Função auxiliar para carregar o modelo ONNX apenas UMA VEZ (Lazy Warm-up)
-async function getOcrEngine(): Promise<PaddleOCR> {
+async function getOcrEngine(): Promise<OcrEngine> {
   if (!ocrEngineInstance) {
     console.log("[Worker] Inicializando modelos ONNX/PaddleOCR via WebAssembly...");
     
@@ -21,7 +23,13 @@ async function getOcrEngine(): Promise<PaddleOCR> {
     
     console.log("[Worker] Motor de IA pronto para inferência!");
   }
-  return ocrEngineInstance;
+
+      const engine = ocrEngineInstance;
+      if (!engine) {
+        throw new Error('Falha ao inicializar o motor OCR');
+      }
+
+      return engine;
 }
 
 // 2. Escuta de mensagens vindo da Main Thread (React)
@@ -36,8 +44,10 @@ self.onmessage = async (event: MessageEvent<{ type: string; image: ImageData }>)
       console.log("[Worker] Processando imagem de", image.width, "x", image.height, "px...");
 
       // TODO: Passaremos os pixels (image) para a inferência da IA
-      const result = await engine.detect(image);
-      const textExtraido = result.map((item:{text:string}) => item.text).join('\n');
+      const result = await engine.predict(image);
+      const textExtraido = result
+        .flatMap((item) => item.items.map((registro) => registro.text))
+        .join('\n');
 
       // Devolve a resposta para a Main Thread (React)
       self.postMessage({
