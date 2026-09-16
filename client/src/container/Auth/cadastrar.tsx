@@ -1,4 +1,3 @@
-import { input } from 'zod';
 import { PdfpageToImage } from '../../utils/pdfConvert';
 
 // Dentro do seu componente React:
