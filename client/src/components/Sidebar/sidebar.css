@@ -1,0 +1,61 @@
+/* --- ESTILOS DA BARRA LATERAL MODULAR (80% OPACIDADE) --- */
+
+#overlay-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+
+    &.open {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+#menu-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    
+    /* 80% de opacidade na cor de fundo */
+    background-color: rgba(26, 26, 26, 0.8);
+    
+    /* Efeito de desfoque no fundo que fica atrás da barra */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    
+    color: #ffffff;
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    &.open {
+        transform: translateX(0);
+    }
+
+    #btn-fechar-sidebar {
+        align-self: flex-end;
+        background: none;
+        border: none;
+        color: #ffffff;
+        font-size: 2rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    #conteudo-sidebar {
+        margin-top: 20px;
+    }
+}
