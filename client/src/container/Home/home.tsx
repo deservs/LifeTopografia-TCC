@@ -18,7 +18,7 @@ import './home.css';
 export default function Home() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+const [currentUser,] = useState<UserProfile | null>(null);
 
     return (
         <div id="initial-card">
