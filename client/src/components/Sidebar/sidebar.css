@@ -1,61 +1,246 @@
-/* --- ESTILOS DA BARRA LATERAL MODULAR (80% OPACIDADE) --- */
-
+/* --- FUNDO ESCURO EXTERNO (OVERLAY) --- */
 #overlay-sidebar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 200;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 998;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-
-    &.open {
-        opacity: 1;
-        visibility: visible;
-    }
 }
 
+#overlay-sidebar.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- PAINEL DA BARRA LATERAL --- */
 #menu-drawer {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 280px;
+    left: -100%;
+    width: 85vw;
+    max-width: 340px;
     height: 100vh;
     
-    /* 80% de opacidade na cor de fundo */
-    background-color: rgba(26, 26, 26, 0.8);
-    
-    /* Efeito de desfoque no fundo que fica atrás da barra */
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    
+    background-color: rgba(11, 19, 43, 0.96); 
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
     color: #ffffff;
-    z-index: 300;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    padding: 20px;
+    z-index: 999;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+    padding: 24px 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+}
 
-    &.open {
-        transform: translateX(0);
-    }
+#menu-drawer.open {
+    left: 0;
+}
 
-    #btn-fechar-sidebar {
-        align-self: flex-end;
-        background: none;
-        border: none;
-        color: #ffffff;
-        font-size: 2rem;
-        cursor: pointer;
-        line-height: 1;
-    }
+/* --- CABEÇALHO --- */
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+}
 
-    #conteudo-sidebar {
-        margin-top: 20px;
-    }
+.btn-close-sidebar {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 300;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.btn-close-sidebar:hover {
+    color: #00a2ff;
+}
+
+.sidebar-logo-icon {
+    height: 40px;
+    width: auto;
+}
+
+/* --- CONTEÚDO PRINCIPAL --- */
+#conteudo-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#conteudo-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+#conteudo-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+/* --- BLOCO DO PERFIL --- */
+.sidebar-profile {
+    padding: 4px 0;
+}
+
+.user-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar-img, .avatar-placeholder, .avatar-icon svg {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.avatar-img {
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    background-color: #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+
+.avatar-icon svg {
+    fill: #e0e0e0;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.profile-details h2, .user-name {
+    font-size: 1.25rem;
+    margin: 0 0 4px 0;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.user-role {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.auth-btn, .account-link {
+    display: block;
+    color: #00a2ff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-top: 3px;
+    letter-spacing: 0.6px;
+    transition: opacity 0.2s ease;
+}
+
+.auth-btn:hover, .account-link:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+}
+
+/* --- DIVISÓRIAS --- */
+.sidebar-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 24px 0; /* Aumentado espaçamento externo das divisórias */
+}
+
+.sidebar-divider .line {
+    flex: 1;
+    height: 1px;
+    background-color: #ffffff;
+    opacity: 0.25;
+}
+
+.sidebar-divider .rhombus {
+    width: 6px;
+    height: 6px;
+    background-color: #ffffff;
+    transform: rotate(45deg);
+    margin: 0 10px;
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+/* --- NAVEGAÇÃO DE PÁGINAS --- */
+.sidebar-nav {
+    margin: 12px 0 20px 0; /* Afasta mais do perfil superior */
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 22px; /* Maior distância entre cada link do menu */
+}
+
+.sidebar-nav a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: inline-block;
+}
+
+.sidebar-nav a:hover {
+    color: #00a2ff;
+    transform: translateX(4px);
+}
+
+/* --- RODAPÉ DA SIDEBAR --- */
+.sidebar-footer {
+    margin-top: auto; 
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.sidebar-footer h4 {
+    font-size: 1.15rem; /* Aumentado título do rodapé */
+    margin: 0 0 10px 0;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.sidebar-footer p {
+    font-size: 0.98rem; /* Aumentado texto descritivo do rodapé */
+    color: #e0e0e0;
+    line-height: 1.55;
+    margin: 0;
 }
