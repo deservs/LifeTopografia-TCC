@@ -86,7 +86,7 @@ export default function Home() {
                 slidesPerView={1}
                 spaceBetween={0}
                 loop={true}
-                speed={3000} /* Duração da animação do deslize (1,5 segundos) */
+                speed={3000} /* Duração da animação do deslize (3 segundos) */
                 autoplay={{
                     delay: 8000, /* Cada imagem fica parada na tela por 8 segundos */
                     disableOnInteraction: false,
