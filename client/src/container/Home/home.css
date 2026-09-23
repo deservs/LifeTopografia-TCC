@@ -43,7 +43,7 @@
     width: 100%;
     object-fit: cover;
     /* Aplica o efeito fosco leve (blur) e escurece a imagem (brightness) */
-    filter: blur(1px) brightness(0.89);
+    filter: blur(2px) brightness(0.89);
     /* Scale evita bordas brancas/transparentes causadas pelo blur */
     transform: scale(1.05); 
     transition: filter 0.3s ease;

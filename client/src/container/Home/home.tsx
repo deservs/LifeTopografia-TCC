@@ -5,10 +5,10 @@ import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import Sidebar from '../../components/Sidebar/sidebar.tsx';
 import type { UserProfile } from '../../components/Sidebar/sidebar';
 
-import Fundo1 from '../../assets/image/background/firstcard.png';
-import Fundo2 from '../../assets/image/background/secondcard.png';
-import Fundo3 from '../../assets/image/background/thirdcard.png';
-import Logo from '../../assets/image/logo-front.png';
+import Fundo1 from '../../assets/image/background/firstcard.webp';
+import Fundo2 from '../../assets/image/background/secondcard.webp';
+import Fundo3 from '../../assets/image/background/thirdcard.webp';
+import Logo from '../../assets/image/logo-front.webp';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
