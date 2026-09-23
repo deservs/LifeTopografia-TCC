@@ -13,12 +13,13 @@ import Logo from '../../assets/image/logo-front.webp';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import 'swiper/css/effect-fade'; // CSS necessário para o fade suave
 import './home.css';
 
 export default function Home() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-const [currentUser,] = useState<UserProfile | null>(null);
+    const [currentUser] = useState<UserProfile | null>(null);
 
     return (
         <div id="initial-card">
@@ -79,18 +80,28 @@ const [currentUser,] = useState<UserProfile | null>(null);
                 </div>
             </div>
 
-            {/* Carrossel de Fundo */}
+            {/* Carrossel de Fundo Otimizado e Suave */}
             <Swiper
                 id="init-carrossel"
                 modules={[Navigation, Pagination, Autoplay, EffectFade]}
-                loop={true}
-                speed={400}
                 effect="fade"
-                autoplay={true}
+                fadeEffect={{ crossFade: true }}
+                loop={true}
+                speed={1200}
+                autoplay={{
+                    delay: 4000,
+                    disableOnInteraction: false,
+                }}
             >
-                <SwiperSlide><img id="bg1" src={Fundo1} alt="" /></SwiperSlide>
-                <SwiperSlide><img id="bg2" src={Fundo2} alt="" /></SwiperSlide>
-                <SwiperSlide><img id="bg3" src={Fundo3} alt="" /></SwiperSlide>
+                <SwiperSlide>
+                    <img id="bg1" src={Fundo1} alt="Fundo Topografia 1" loading="eager" />
+                </SwiperSlide>
+                <SwiperSlide>
+                    <img id="bg2" src={Fundo2} alt="Fundo Topografia 2" loading="lazy" />
+                </SwiperSlide>
+                <SwiperSlide>
+                    <img id="bg3" src={Fundo3} alt="Fundo Topografia 3" loading="lazy" />
+                </SwiperSlide>
             </Swiper>
         </div>
     );
