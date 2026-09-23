@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
 import Sidebar from '../../components/Sidebar/sidebar.tsx';
 import type { UserProfile } from '../../components/Sidebar/sidebar';
@@ -18,14 +18,14 @@ import './home.css';
 export default function Home() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-const [currentUser,] = useState<UserProfile | null>(null);
+    const [currentUser] = useState<UserProfile | null>(null);
 
     return (
         <div id="initial-card">
             {/* Sidebar com a prop 'user' injetada */}
-            <Sidebar 
-                isOpen={isSidebarOpen} 
-                onClose={() => setIsSidebarOpen(false)} 
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
                 user={currentUser}
             />
 
@@ -60,8 +60,8 @@ const [currentUser,] = useState<UserProfile | null>(null);
                     </div>
 
                     <h2>
-                        Precisão, confiança e agilidade para transformar projetos em realidade. 
-                        Trabalhamos com excelência em levantamentos topográficos, 
+                        Precisão, confiança e agilidade para transformar projetos em realidade.
+                        Trabalhamos com excelência em levantamentos topográficos,
                         georreferenciamento, acompanhamento de obras e muito mais.
                     </h2>
 
@@ -79,18 +79,28 @@ const [currentUser,] = useState<UserProfile | null>(null);
                 </div>
             </div>
 
-            {/* Carrossel de Fundo */}
+            {/* Carrossel de Fundo com efeito de deslizar suave */}
             <Swiper
                 id="init-carrossel"
-                modules={[Navigation, Pagination, Autoplay, EffectFade]}
+                modules={[Navigation, Pagination, Autoplay]}
+                slidesPerView={1}
+                spaceBetween={0}
                 loop={true}
-                speed={400}
-                effect="fade"
-                autoplay={true}
+                speed={3000} /* Duração da animação do deslize (3 segundos) */
+                autoplay={{
+                    delay: 8000, /* Cada imagem fica parada na tela por 8 segundos */
+                    disableOnInteraction: false,
+                }}
             >
-                <SwiperSlide><img id="bg1" src={Fundo1} alt="" /></SwiperSlide>
-                <SwiperSlide><img id="bg2" src={Fundo2} alt="" /></SwiperSlide>
-                <SwiperSlide><img id="bg3" src={Fundo3} alt="" /></SwiperSlide>
+                <SwiperSlide>
+                    <img id="bg1" src={Fundo1} alt="Fundo Topografia 1" loading="eager" />
+                </SwiperSlide>
+                <SwiperSlide>
+                    <img id="bg2" src={Fundo2} alt="Fundo Topografia 2" loading="lazy" />
+                </SwiperSlide>
+                <SwiperSlide>
+                    <img id="bg3" src={Fundo3} alt="Fundo Topografia 3" loading="lazy" />
+                </SwiperSlide>
             </Swiper>
         </div>
     );
