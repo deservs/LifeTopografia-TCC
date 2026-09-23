@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
 import Sidebar from '../../components/Sidebar/sidebar.tsx';
 import type { UserProfile } from '../../components/Sidebar/sidebar';
@@ -13,7 +13,6 @@ import Logo from '../../assets/image/logo-front.webp';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/effect-fade'; // CSS necessário para o fade suave
 import './home.css';
 
 export default function Home() {
@@ -24,9 +23,9 @@ export default function Home() {
     return (
         <div id="initial-card">
             {/* Sidebar com a prop 'user' injetada */}
-            <Sidebar 
-                isOpen={isSidebarOpen} 
-                onClose={() => setIsSidebarOpen(false)} 
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
                 user={currentUser}
             />
 
@@ -61,8 +60,8 @@ export default function Home() {
                     </div>
 
                     <h2>
-                        Precisão, confiança e agilidade para transformar projetos em realidade. 
-                        Trabalhamos com excelência em levantamentos topográficos, 
+                        Precisão, confiança e agilidade para transformar projetos em realidade.
+                        Trabalhamos com excelência em levantamentos topográficos,
                         georreferenciamento, acompanhamento de obras e muito mais.
                     </h2>
 
@@ -80,16 +79,16 @@ export default function Home() {
                 </div>
             </div>
 
-            {/* Carrossel de Fundo Otimizado e Suave */}
+            {/* Carrossel de Fundo com efeito de deslizar suave */}
             <Swiper
                 id="init-carrossel"
-                modules={[Navigation, Pagination, Autoplay, EffectFade]}
-                effect="fade"
-                fadeEffect={{ crossFade: true }}
+                modules={[Navigation, Pagination, Autoplay]}
+                slidesPerView={1}
+                spaceBetween={0}
                 loop={true}
-                speed={1200}
+                speed={3000} /* Duração da animação do deslize (1,5 segundos) */
                 autoplay={{
-                    delay: 4000,
+                    delay: 8000, /* Cada imagem fica parada na tela por 8 segundos */
                     disableOnInteraction: false,
                 }}
             >
