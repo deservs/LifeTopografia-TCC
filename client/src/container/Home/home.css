@@ -32,10 +32,17 @@
     box-sizing: border-box;
 }
 
-/* Carrossel de Fundo com Efeito Fosco e Brilho Reduzido */
+/* Carrossel de Fundo */
 #init-carrossel {
     width: 100%;
     height: 100vh;
+}
+
+/* Garante que o slide não vaze além da largura da tela */
+#init-carrossel .swiper-slide {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 #init-carrossel img {
@@ -43,10 +50,12 @@
     width: 100%;
     object-fit: cover;
     /* Aplica o efeito fosco leve (blur) e escurece a imagem (brightness) */
-    filter: blur(1px) brightness(0.89);
+    filter: blur(2px) brightness(0.89);
     /* Scale evita bordas brancas/transparentes causadas pelo blur */
     transform: scale(1.05); 
     transition: filter 0.3s ease;
+    /* Impede estouro de layout do zoom */
+    display: block;
 }
 
 /* Menu Hambúrguer */

@@ -1,6 +1,6 @@
 import React from 'react';
 import './sidebar.css';
-import LogoIcon from '../../assets/image/logo-front.png';
+import LogoIcon from '../../assets/image/logo-front.webp';
 
 export interface UserProfile {
     name: string;
