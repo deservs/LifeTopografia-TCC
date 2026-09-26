@@ -1,62 +1,74 @@
-import { PdfpageToImage } from '../utils/pdfConvert';
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { PaddleOCR } from "@paddleocr/paddleocr-js";
+import { PdfpageToImage } from "../utils/pdfConvert";
+import { useCallback, useRef, useState, useEffect } from "react";
 
-type StatusProcesso = 'idle' | 'carregando' | 'sucesso' | 'erro';
+type StatusProcesso = "idle" | "carregando" | "sucesso" | "erro";
 
 export default function useOcrPipeline() {
-const [status, setStatus] = useState<StatusProcesso>('idle');
+  const [status, setStatus] = useState<StatusProcesso>("idle");
+  const ocrEngineRef = useRef<Awaited<
+    ReturnType<typeof PaddleOCR.create>
+  > | null>(null);
+  const statusRef = useRef(false);
 
-const workerRef = useRef<Worker | null>(null);
-
-// processo para finalizar o worker
-const finalizarWorker = useCallback(() => {
-    if (workerRef.current) {
-        //comando que finaliza
-        workerRef.current.terminate();
-        workerRef.current = null;
+  const limparMotor = useCallback(async () => {
+    const instancia = ocrEngineRef.current;
+    ocrEngineRef.current = null;
+    if (instancia) {
+      await instancia.dispose();
     }
-    setStatus('idle');
-},[]);
-
-// processo que garante que será finalizado
-useEffect(() => {
+  }, []);
+  useEffect(() => {
     return () => {
-        finalizarWorker();
+      void limparMotor().catch((error) => {
+        console.error(
+          "Erro ao limpar o motor OCR na desmontagem do componente:",
+          error,
+        );
+      });
     };
-}, [finalizarWorker]);
+  }, [limparMotor]);
 
-const executarTarefa = useCallback(async (dados: File) =>{
-    //impedir que o usuario inicie mais de um worker
-    finalizarWorker();
-    setStatus('carregando');
-    const image = await PdfpageToImage(dados, 1);
-    const imgBuffer = image.data.buffer;
-    const imgwidth = image.width;
-    const imgheight = image.height;
-
-    const worker = new Worker(
-        new URL('../workers/ocr.worker.ts', import.meta.url),
-        { type: 'module' }
-    );
-    workerRef.current = worker;
-
-    worker.onmessage = (event) => {
-        if (event.data.status === 'sucesso') {
-            setStatus('sucesso');
-        }
-        if (event.data.status === 'erro') {
-            setStatus('erro');
-        }
-        console.log('Mensagem recebida do worker:', event.data);
-        finalizarWorker();
-    };
-
-    worker.onerror = (error) => {
-        console.error('Erro no worker:', error);
-        setStatus('erro');
-        finalizarWorker();
+  const executarTarefa = useCallback(async (dados: File) => {
+    if (statusRef.current) {
+      console.warn("Processo já em andamento. Aguarde a conclusão.");
+      return;
     }
-    worker.postMessage({dados}, [dados]);
-},[finalizarWorker]);
-return { status, executarTarefa, finalizarWorker};
+    // Variável para armazenar a instância do motor OCR
+    let ocrEngineInstance: Awaited<ReturnType<typeof PaddleOCR.create>> | null =
+      ocrEngineRef.current;
+    try {
+      statusRef.current = true;
+      setStatus("carregando");
+      ocrEngineInstance = await PaddleOCR.create({
+        lang: "pt",
+        ocrVersion: "PP-OCRv6",
+        worker: true,
+      });
+      ocrEngineRef.current = ocrEngineInstance;
+      const image = await PdfpageToImage(dados, 1);
+
+      await ocrEngineInstance.predict(image).then((result) => {
+        const textExtraido = result
+          .flatMap((item) => item.items.map((registro) => registro.text))
+          .join("\n");
+        console.log("Texto extraído:", textExtraido);
+      });
+      setStatus("sucesso");
+    } catch (error) {
+      console.error("Erro no pipeline OCR:", error);
+      setStatus("erro");
+    } finally {
+      // Teste defensivo para garantir que a instância do motor OCR seja limpa corretamente
+      try {
+        // Limpeza da instância do motor OCR para liberar memória
+        await limparMotor();
+      } catch (cleanupError) {
+        console.error("Erro ao limpar a instância do motor OCR:", cleanupError);
+      } finally {
+        statusRef.current = false;
+      }
+    }
+  }, [limparMotor]);
+  return { status, executarTarefa };
 }
