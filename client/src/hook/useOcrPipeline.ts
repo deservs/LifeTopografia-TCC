@@ -44,6 +44,13 @@ export default function useOcrPipeline() {
         lang: "pt",
         ocrVersion: "PP-OCRv6",
         worker: true,
+        textDetectionModelAsset: {url: "/models/ocr/PP-OCRv6_small_det_onnx_infer.tar"},
+        textDetectionModelName: "PP-OCRv6_small_det",
+        textRecognitionModelAsset: {url: "/models/ocr/PP-OCRv6_small_rec_onnx_infer.tar"},
+        textRecognitionModelName: "PP-OCRv6_small_rec",
+        ortOptions: {
+          wasmPaths: "/wasm/",
+        }
       });
       ocrEngineRef.current = ocrEngineInstance;
       const image = await PdfpageToImage(dados, 1);
