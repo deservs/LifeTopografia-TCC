@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
+import { Link } from 'react-router';
+
 import Sidebar from '../../components/Sidebar/sidebar.tsx';
 import type { UserProfile } from '../../components/Sidebar/sidebar';
 
@@ -73,7 +75,7 @@ export default function Home() {
 
                     <div id="btn-solicite">
                         <button type="button">
-                            SOLICITE UM ORÇAMENTO
+                            <Link to="/teste">SOLICITE UM ORÇAMENTO</Link>        
                         </button>
                     </div>
                 </div>
