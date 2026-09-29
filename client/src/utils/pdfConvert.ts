@@ -1,9 +1,9 @@
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from "pdfjs-dist";
 
 //configuração do worker para o pdfjs
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.mjs',
-  import.meta.url
+  "pdfjs-dist/build/pdf.worker.mjs",
+  import.meta.url,
 ).toString();
 
 export async function getPdfArrayBuffer(file: File): Promise<ArrayBuffer> {
@@ -13,53 +13,74 @@ export async function getPdfArrayBuffer(file: File): Promise<ArrayBuffer> {
 
 export function isMobileOrTablet(): boolean {
   // Testa dispositivos móveis convencionais via User Agent
-  const isStandardMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isStandardMobile = /iPhone|iPad|iPod|Android/i.test(
+    navigator.userAgent,
+  );
 
   // Captura iPads modernos rodando iPadOS (que fingem ser MacBooks)
-  const isIpadosFakeMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  const isIpadosFakeMac =
+    navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
 
   // Validação secundária por ponto de toque e proporção de ecrã
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isTouchDevice =
+    "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
   // Retorna verdadeiro se for um dispositivo móvel ou tablet, considerando os casos acima
-  return isStandardMobile || isIpadosFakeMac || (isTouchDevice && window.innerWidth <= 1024);
+  return (
+    isStandardMobile ||
+    isIpadosFakeMac ||
+    (isTouchDevice && window.innerWidth <= 1024)
+  );
 }
 
-export async function PdfpageToImage( file:File, pageNumber: number = 1): Promise<ImageData>{
-    // converter o arquivo em ArrayBuffer
-    const arrayBuffer = await getPdfArrayBuffer(file);
+export async function PdfpageToImage(
+  file: File,
+  pageNumber: number = 1,
+): Promise<ImageData> {
+  // converter o arquivo em ArrayBuffer
+  const arrayBuffer = await getPdfArrayBuffer(file);
 
+  let loadingTask: ReturnType<typeof pdfjsLib.getDocument> | null = null;
+  let canvas: HTMLCanvasElement | null = null;
+  let page: pdfjsLib.PDFPageProxy | null = null;
+  try { 
     // Carrega a estrutura na memória
-    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
     const pdfDoc = await loadingTask.promise;
-    const page = await pdfDoc.getPage(pageNumber);
+    page = await pdfDoc.getPage(pageNumber);
 
     // Deifine as dimensões do canvas com base na escala
     const scale = isMobileOrTablet() ? 1.0 : 2.0;
     const viewport = page.getViewport({ scale });
 
     // Intanciar Canvas invisível na main thread
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d', {willReadFrequently: true});
-    
+    canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
     if (!ctx) {
-        throw new Error('Não foi possível obter o contexto 2D do Canvas.');
+      throw new Error("Não foi possível obter o contexto 2D do Canvas.");
     }
-    
+
     canvas.width = viewport.width;
     canvas.height = viewport.height;
-    
+
     // Renderiza a página do PDF no canvas
-    await page.render({  canvas, canvasContext: ctx, viewport  }).promise;
+    await page.render({ canvas, canvasContext: ctx, viewport }).promise;
 
     // Retorna os dados da imagem do canvas
     const imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
+    return imagedata;
+  } catch (error) {
+    console.error("Erro ao processar a página do PDF:", error);
+    throw error;
+  } finally {
     // Limpar o canvas para liberar memória
-    page.cleanup(); 
-    await loadingTask.destroy();
+    if (page) page.cleanup();
+    if (loadingTask) await loadingTask.destroy();
+    if (canvas) {
     canvas.width = 0;
     canvas.height = 0;
-
-    return imagedata;
+    }
+  }
 }

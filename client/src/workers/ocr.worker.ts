@@ -12,13 +12,7 @@ async function getOcrEngine(): Promise<OcrEngine> {
     
     ocrEngineInstance = await PaddleOCR.create({
       lang: 'pt',
-
-      // Aponta para os artefatos estáticos compilados para WebAssembly
-      detPath: '/models/ocr/det.onnx',
-      recPath: '/models/ocr/rec.onnx',
-      dicPath: '/models/ocr/latin_dict.txt',
-
-      wasmPath: '/wasm/'
+      ocrVersion: 'PP-OCRv6',
     });
     
     console.log("[Worker] Motor de IA pronto para inferência!");
