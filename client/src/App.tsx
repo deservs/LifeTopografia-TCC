@@ -3,19 +3,17 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import Home from './container/Home/home';
 import Cadastrar from './container/Auth/cadastrar';
+import Login from './container/Auth/login'; // 1. Importar o componente Login
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rota da Página Inicial */}
         <Route path="/" element={<Home />} />
-
-        {/* Rota de Cadastro (Casando com o Link to="/cadastrar" da Sidebar) */}
         <Route path="/cadastrar" element={<Cadastrar />} />
         
-        {/* Alias opcional: se alguém acessar /auth, também carrega o Cadastrar */}
-        <Route path="/auth" element={<Cadastrar />} />
+        {/* 2. Declarar a rota /login */}
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );
