@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './sidebar.css';
 import LogoIcon from '../../assets/image/logo-front.webp';
 
@@ -55,7 +56,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, user }) => {
                                 <div className="profile-details">
                                     <h2 className="user-name">{user.name}</h2>
                                     <span className="user-role">{user.role}</span>
-                                    <a href="#minha-conta" className="account-link">Acesse sua conta</a>
+                                    <Link to="/perfil" className="account-link" onClick={onClose}>
+                                        Acesse sua conta
+                                    </Link>
                                 </div>
                             </div>
                         ) : (
@@ -68,8 +71,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, user }) => {
                                 </div>
                                 <div className="profile-details">
                                     <h2>Acesse sua conta</h2>
-                                    <a href="#cadastrar" className="auth-btn">CADASTRAR</a>
-                                    <a href="#entrar" className="auth-btn">ENTRAR</a>
+                                    <Link to="/cadastrar" className="auth-btn" onClick={onClose}>
+                                        CADASTRAR
+                                    </Link>
+                                    <Link to="/login" className="auth-btn" onClick={onClose}>
+                                        ENTRAR
+                                    </Link>
                                 </div>
                             </div>
                         )}
@@ -84,11 +91,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, user }) => {
                     {/* Navegação de Páginas */}
                     <nav className="sidebar-nav">
                         <ul>
-                            <li><a href="#inicio">INÍCIO</a></li>
-                            <li><a href="#sobre">SOBRE NÓS</a></li>
-                            <li><a href="#servicos">SERVIÇOS</a></li>
-                            <li><a href="#faq">FAQ</a></li>
-                            <li><a href="#contato">CONTATO</a></li>
+                            <li><Link to="/" onClick={onClose}>INÍCIO</Link></li>
+                            <li><Link to="/sobre" onClick={onClose}>SOBRE NÓS</Link></li>
+                            <li><Link to="/servicos" onClick={onClose}>SERVIÇOS</Link></li>
+                            <li><Link to="/faq" onClick={onClose}>FAQ</Link></li>
+                            <li><Link to="/contato" onClick={onClose}>CONTATO</Link></li>
                         </ul>
                     </nav>
 
