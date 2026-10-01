@@ -1,4 +1,4 @@
-/* --- RESET GLOBAL PARA REMOVER MARGENS PADRÃO --- */
+/* --- RESET GLOBAL --- */
 html, body, #root {
     margin: 0 !important;
     padding: 0 !important;
@@ -20,6 +20,7 @@ html, body, #root {
     font-family: 'Poppins', sans-serif;
     margin: 0;
     overflow-x: hidden;
+    position: relative;
 }
 
 /* --- BARRA SUPERIOR (HEADER) --- */
@@ -384,6 +385,11 @@ html, body, #root {
     outline: none;
 }
 
+.digit-box:focus {
+    border-color: #0b50bd;
+    box-shadow: 0 0 4px rgba(11, 80, 189, 0.4);
+}
+
 .timer-text {
     font-size: 0.85rem;
     color: #333333;
@@ -397,6 +403,65 @@ html, body, #root {
     font-weight: bold;
     cursor: pointer;
     text-decoration: underline;
+}
+
+/* --- MODAL DE CÓDIGO REENVIADO (IMAGEM 1) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 320px;
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.modal-title {
+    color: #0b50bd;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0 0 12px 0;
+    letter-spacing: 0.3px;
+}
+
+.modal-text {
+    font-size: 0.9rem;
+    color: #333333;
+    line-height: 1.35;
+    margin: 0 0 20px 0;
+}
+
+.btn-modal-ok {
+    width: 100%;
+    background-color: #0b50bd;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s ease;
+}
+
+.btn-modal-ok:hover {
+    background-color: #083d93;
 }
 
 .animation-fade-in {
