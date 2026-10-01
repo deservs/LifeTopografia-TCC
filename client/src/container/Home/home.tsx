@@ -75,7 +75,7 @@ export default function Home() {
           </div>
 
           <div id="btn-solicite">
-            <Link to="/teste">SOLICITE UM ORÇAMENTO</Link>
+            <Link to="/">SOLICITE UM ORÇAMENTO</Link>
           </div>
         </div>
       </div>
