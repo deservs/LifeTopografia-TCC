@@ -1,7 +1,13 @@
 {
   "services": {
     "frontend": {
-      "root": "."
+      "root": ".",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "index.html"
+        }
+      ]
     },
     "backend": {
       "entrypoint": "src/server.ts",
@@ -21,10 +27,6 @@
       "destination": {
         "service": "frontend"
       }
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
