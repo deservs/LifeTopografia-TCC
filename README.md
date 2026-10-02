@@ -19,13 +19,16 @@ O processamento de OCR foi planejado para ocorrer no navegador, em uma thread se
 
 ## Estrutura do repositório
 
-- `client/`: interface em React e TypeScript, conversão de PDF e integração do OCR.
-- `server/`: aplicação Fastify com rotas e serviços próprios, incluindo o envio de arquivos para outras funcionalidades.
+- `src/` e `public/`: interface em React e TypeScript, conversão de PDF e integração do OCR.
+- `server/src/`: aplicação Fastify para as funcionalidades do servidor.
+- `package.json` e `package-lock.json` na raiz: dependências e scripts do frontend e do servidor.
 - `supabase/`: configuração relacionada ao Supabase.
 
-## Executar o client
+## Executar localmente
 
-Na pasta `client`, instale as dependências com `npm install` e inicie o ambiente de desenvolvimento com `npm run dev`.
+Na raiz do projeto, instale as dependências com `npm install`. Use `npm run dev` para iniciar o frontend. O servidor usa `npm run dev:server` e lê um arquivo `.env` na raiz com as variáveis descritas em `server/src/config/env.ts`.
+
+Para compilar, use `npm run build` para o frontend e `npm run build:server` para o servidor.
 
 ## Limitações atuais
 

@@ -1,8 +1,32 @@
 {
+  "services": {
+    "frontend": {
+      "root": ".",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "index.html"
+        }
+      ]
+    },
+    "backend": {
+      "entrypoint": "src/server.ts",
+      "root": "server/"
+    }
+  },
+
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": {
+        "service": "frontend"
+      }
     }
   ]
 }
