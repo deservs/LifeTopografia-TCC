@@ -1,60 +1,180 @@
 #footer-container {
     position: relative;
-    width: 100%;
-    background-image: url('../../assets/image/footer-front.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    color: #ffffff;
-    padding: 15px 30px; /* Reduzido para deixar o rodapé mais fino */
-    box-sizing: border-box;
-}
 
-/* Camada escura por cima da imagem de fundo */
-#footer-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    z-index: 1;
+    min-height: 190px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 30px 6%;
+
+    color: #ffffff;
+
+    background-image:
+        linear-gradient(
+            rgba(0, 0, 0, 0.58),
+            rgba(0, 0, 0, 0.58)
+        ),
+        url('../../assets/image/footer-front.webp');
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
 }
 
 #footer-content {
     position: relative;
-    z-index: 2;
+    z-index: 1;
+
     width: 100%;
-    display: flex;
-    flex-direction: row; /* Coloca os elementos lado a lado */
+
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     align-items: center;
-    justify-content: space-between; /* Distribui o espaço entre as seções */
-    gap: 20px;
+    gap: 40px;
+}
+
+#footer-logo {
+    display: flex;
+    justify-content: flex-start;
 }
 
 #footer-logo img {
-    height: 45px; /* Tamanho reduzido para otimizar altura */
     width: auto;
+    max-width: 220px;
+    height: auto;
+
+    object-fit: contain;
+
+    filter: drop-shadow(
+        0 2px 4px rgba(0, 0, 0, 0.6)
+    );
+}
+
+#footer-address,
+#footer-contact {
+    margin: 0;
+
+    font-style: normal;
+    font-size: 0.9rem;
+    line-height: 1.6;
 }
 
 #footer-address p,
 #footer-contact p {
     margin: 0;
-    font-size: 0.9rem;
-    line-height: 1.3;
-    font-family: serif, 'Times New Roman', Times;
 }
 
-/* Em telas pequenas (celulares), empilha os itens de forma compacta */
-@media screen and (max-width: 768px) {
-    #footer-content {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+#footer-address {
+    text-align: center;
+}
+
+#footer-contact {
+    text-align: right;
+}
+
+#footer-contact strong {
+    font-weight: 700;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media screen and (max-width: 850px) {
+    #footer-container {
+        padding: 30px 5%;
     }
 
+    #footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    #footer-logo {
+        grid-column: 1 / -1;
+
+        justify-content: center;
+    }
+
+    #footer-address {
+        text-align: left;
+    }
+
+    #footer-contact {
+        text-align: right;
+    }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media screen and (max-width: 600px) {
     #footer-container {
-        padding: 20px 20px;
+        padding: 30px 20px;
+    }
+
+    #footer-content {
+        grid-template-columns: 1fr;
+
+        gap: 22px;
+    }
+
+    #footer-logo {
+        grid-column: auto;
+
+        justify-content: center;
+    }
+
+    #footer-logo img {
+        max-width: 190px;
+    }
+
+    #footer-address,
+    #footer-contact {
+        text-align: center;
+    }
+
+    #footer-address,
+    #footer-contact {
+        font-size: 0.85rem;
+    }
+}
+
+/* =========================================================
+   TELAS MUITO PEQUENAS
+   ========================================================= */
+
+@media screen and (max-width: 380px) {
+    #footer-container {
+        padding: 26px 14px;
+    }
+
+    #footer-content {
+        gap: 18px;
+    }
+
+    #footer-logo img {
+        max-width: 165px;
+    }
+
+    #footer-address,
+    #footer-contact {
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+}
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    #footer-logo img {
+        transition: none;
     }
 }
