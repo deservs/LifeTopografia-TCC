@@ -29,33 +29,37 @@ const services: ServiceCardData[] = [
     {
         title: 'Locação de Obras',
         image: Obra,
-        description:
-            'Garantimos a exatidão na locação dos elementos da construção com equipamentos modernos e equipe especializada.',
+        
         alternateDescription:
+            'Garantimos a exatidão na locação dos elementos da construção com equipamentos modernos e equipe especializada.',
+        description:
             'Posicionamento preciso dos elementos construtivos, garantindo que o projeto seja executado conforme a planta aprovada.',
     },
     {
         title: 'Verticalidade e Nivelamento',
         image: Nivelamento,
-        description:
-            'Fundamental para nivelar o terreno e garantir a estabilidade da construção com base em dados do subsolo.',
+        
         alternateDescription:
+            'Com equipamentos de precisão, verificamos a correta posição vertical e horizontal das estruturas em cada etapa.',
+        description:
             'Conferência de prumo e nivelamento de estruturas, garantindo a qualidade e a conformidade da obra.',
     },
     {
         title: 'Terraplanagem e Sondagem',
         image: Terraplanagem,
-        description:
-            'Fundamental para nivelar o terreno e garantir a estabilidade da construção com base em dados do subsolo.',
+        
         alternateDescription:
+            'Fundamental para nivelar o terreno e garantir a estabilidade da construção com base em dados do subsolo.',
+        description:
             'Locação para execução de terraplenagem e pontos de sondagem, essenciais para fundações e estudos geotécnicos.',
     },
     {
         title: 'Acompanhamento Técnico de Obra',
         image: Acompanhamento,
-        description:
-            'Oferece dados em tempo real e correções técnicas durante a execução da obra para evitar desvios e retrabalhos.',
+        
         alternateDescription:
+            'Oferece dados em tempo real e correções técnicas durante a execução da obra para evitar desvios e retrabalhos.',
+        description:
             'Monitoramento técnico da obra com vistorias e medições que asseguram a execução fiel ao projeto.',
     },
 ];
@@ -236,7 +240,16 @@ function ServiceCard({
                 }`}
             >
                 <span className="service-card__inner">
+
+                    {/* Frente: estado inicial, sem filtro azul */}
                     <span className="service-card__face service-card__front">
+                        <span className="service-card__image">
+                            <img
+                                src={service.image}
+                                alt=""
+                            />
+                        </span>
+
                         <span className="service-card__content">
                             <span className="service-card__title">
                                 {service.title}
@@ -247,6 +260,16 @@ function ServiceCard({
                             </span>
                         </span>
 
+                        <span
+                            className="service-card__arrow"
+                            aria-hidden="true"
+                        >
+                            →
+                        </span>
+                    </span>
+
+                    {/* Verso: estado alternativo, imagem à direita e azulada */}
+                    <span className="service-card__face service-card__back">
                         <span className="service-card__image">
                             <img
                                 src={service.image}
@@ -256,22 +279,6 @@ function ServiceCard({
                             <span
                                 className="service-card__image-overlay"
                                 aria-hidden="true"
-                            />
-                        </span>
-
-                        <span
-                            className="service-card__arrow"
-                            aria-hidden="true"
-                        >
-                            →
-                        </span>
-                    </span>
-
-                    <span className="service-card__face service-card__back">
-                        <span className="service-card__image">
-                            <img
-                                src={service.image}
-                                alt=""
                             />
                         </span>
 
@@ -292,6 +299,7 @@ function ServiceCard({
                             ←
                         </span>
                     </span>
+
                 </span>
             </button>
         </div>
