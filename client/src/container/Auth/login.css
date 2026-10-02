@@ -16,6 +16,7 @@
     background-color: #ffffff;
 
     overflow-x: hidden;
+    position: relative;
 }
 
 /* =========================================================
@@ -618,6 +619,11 @@
 .digit-box:focus {
     border-color: #0b50bd;
 
+    box-shadow: 0 0 4px rgba(11, 80, 189, 0.4);
+}
+
+.digit-box:focus {
+    border-color: #0b50bd;
     box-shadow: 0 0 4px rgba(11, 80, 189, 0.4);
 }
 

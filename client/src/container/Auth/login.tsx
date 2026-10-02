@@ -227,9 +227,9 @@ export const Login = () => {
 
     return (
         <div className="login-page">
-            <Sidebar
-                isOpen={isSidebarOpen}
-                onClose={() => setIsSidebarOpen(false)}
+            <Sidebar 
+                isOpen={isSidebarOpen} 
+                onClose={() => setIsSidebarOpen(false)} 
                 user={currentUser}
             />
 
@@ -245,9 +245,9 @@ export const Login = () => {
                     `,
                 }}
             >
-                <button
-                    type="button"
-                    className="btn-menu-header"
+                <button 
+                    type="button" 
+                    className="btn-menu-header" 
                     onClick={() => setIsSidebarOpen(true)}
                     aria-label="Abrir menu"
                     aria-expanded={isSidebarOpen}
@@ -428,8 +428,8 @@ export const Login = () => {
                                 )}
 
                                 <div className="forgot-password-link-container">
-                                    <button
-                                        type="button"
+                                    <button 
+                                        type="button" 
                                         className="btn-forgot-password"
                                         onClick={() => {
                                             setEtapa('esqueci_email');
@@ -527,8 +527,8 @@ export const Login = () => {
                                 <span>ENVIAR</span>
                             </button>
 
-                            <button
-                                type="button"
+                            <button 
+                                type="button" 
                                 className="btn-back-login"
                                 onClick={voltarParaLogin}
                             >
