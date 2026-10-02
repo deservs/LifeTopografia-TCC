@@ -1,7 +1,7 @@
 {
   "services": {
     "frontend": {
-      "root": "/index.html"
+      "root": "."
     },
     "backend": {
       "entrypoint": "src/server.ts",
@@ -21,6 +21,10 @@
       "destination": {
         "service": "frontend"
       }
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
