@@ -1,22 +1,23 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+
 import './App.css';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import Home from './container/Home/home';
 import Cadastrar from './container/Auth/cadastrar';
-import Login from './container/Auth/login'; // 1. Importar o componente Login
+import Login from './container/Auth/login';
+import Services from './container/Services/services';
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/cadastrar" element={<Cadastrar />} />
-        
-        {/* 2. Declarar a rota /login */}
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/cadastrar" element={<Cadastrar />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/servicos" element={<Services />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;
