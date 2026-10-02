@@ -7,8 +7,6 @@ import {
   ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 
-import { arquivosRoute } from './modules/AutoCad/arquivos.route'
-
 export const app = fastify().withTypeProvider<ZodTypeProvider>()
 
 app.setValidatorCompiler(validatorCompiler)
@@ -25,6 +23,3 @@ app.register(fastifyMultipart, {
     fileSize: 10 * 1024 * 1024, // Limite de 10MB por arquivo
   },
 })
-
-// Registrando o grupo de rotas
-app.register(arquivosRoute)

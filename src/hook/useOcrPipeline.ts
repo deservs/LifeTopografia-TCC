@@ -49,7 +49,9 @@ export default function useOcrPipeline() {
         textRecognitionModelAsset: {url: "/models/ocr/PP-OCRv6_small_rec_onnx_infer.tar"},
         textRecognitionModelName: "PP-OCRv6_small_rec",
         ortOptions: {
-          wasmPaths: "/wasm/",
+          // O SDK aceita apenas string no tipo, mas encaminha o objeto suportado pelo ONNX Runtime.
+          // Informar só o WASM usa o módulo JS já embutido no worker.
+          wasmPaths: { wasm: "/wasm/ort-wasm-simd-threaded.jsep.wasm" } as unknown as string,
         }
       });
       ocrEngineRef.current = ocrEngineInstance;
