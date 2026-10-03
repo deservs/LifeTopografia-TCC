@@ -122,7 +122,7 @@ export default function Home() {
                      * fluxo de envio/processamento dessa solicitação.
                      */}
                     <div id="btn-solicite">
-                        <Link to="/teste">
+                        <Link to="/">
                             SOLICITE UM ORÇAMENTO
                         </Link>
                     </div>
