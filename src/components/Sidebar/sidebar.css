@@ -1,71 +1,128 @@
-/* --- FUNDO ESCURO EXTERNO (OVERLAY) --- */
+/* =========================================================
+   OVERLAY
+   Camada escura exibida atrás da Sidebar quando ela está aberta.
+   ========================================================= */
+
 #overlay-sidebar {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0;
+
     background-color: rgba(0, 0, 0, 0.6);
+
+    /* Fica acima da página e abaixo do drawer. */
     z-index: 998;
+
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+
+    transition:
+        opacity 0.3s ease,
+        visibility 0s linear 0.3s;
 }
 
 #overlay-sidebar.open {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
 }
 
-/* --- PAINEL DA BARRA LATERAL --- */
+
+/* =========================================================
+   PAINEL DA SIDEBAR
+   ========================================================= */
+
 #menu-drawer {
     position: fixed;
     top: 0;
-    left: -100%;
+    left: 0;
+
     width: 85vw;
     max-width: 340px;
+
+    /*
+     * 100vh funciona como fallback.
+     * 100dvh acompanha melhor a viewport dinâmica em celulares.
+     */
     height: 100vh;
-    
-    background-color: rgba(11, 19, 43, 0.96); 
+    height: 100dvh;
+
+    box-sizing: border-box;
+
+    padding: 24px 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    background-color: rgba(11, 19, 43, 0.96);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 
     color: #ffffff;
+
     z-index: 999;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /*
+     * O transform anima a entrada sem alterar o layout da página.
+     * visibility também impede foco em links quando o drawer está fechado.
+     */
+    transform: translateX(-100%);
+    visibility: hidden;
+
+    transition:
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0s linear 0.3s;
+
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
-    padding: 24px 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+
+    /* O conteúdo interno controla sua própria rolagem. */
+    overflow: hidden;
 }
 
 #menu-drawer.open {
-    left: 0;
+    transform: translateX(0);
+    visibility: visible;
+    transition-delay: 0s;
 }
 
-/* --- CABEÇALHO --- */
+
+/* =========================================================
+   CABEÇALHO
+   ========================================================= */
+
 .sidebar-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+
     width: 100%;
     margin-bottom: 24px;
+
+    /* Evita compressão quando o conteúdo interno cresce. */
     flex-shrink: 0;
 }
 
 .btn-close-sidebar {
-    background: none;
-    border: none;
-    color: #ffffff;
-    font-size: 2.2rem;
-    font-weight: 300;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    width: 44px;
+    height: 44px;
+    padding: 0;
+
+    background: none;
+    border: none;
+
+    color: #ffffff;
+
+    font-size: 2.2rem;
+    font-weight: 300;
+    line-height: 1;
+
+    cursor: pointer;
+
     transition: color 0.2s ease;
 }
 
@@ -73,28 +130,48 @@
     color: #00a2ff;
 }
 
-.sidebar-logo-icon {
-    height: 40px;
-    width: auto;
+.btn-close-sidebar:focus-visible {
+    outline: 2px solid #00a2ff;
+    outline-offset: 3px;
+    border-radius: 4px;
 }
 
-/* --- CONTEÚDO PRINCIPAL --- */
+.sidebar-logo-icon {
+    width: auto;
+    height: 40px;
+}
+
+
+/* =========================================================
+   CONTEÚDO INTERNO
+   ========================================================= */
+
 #conteudo-sidebar {
-    flex: 1;
     display: flex;
+    flex: 1;
     flex-direction: column;
+
+    /* Permite rolagem sem mover o painel fixo. */
+    min-height: 0;
     overflow-y: auto;
+
+    padding-right: 4px;
 }
 
 #conteudo-sidebar::-webkit-scrollbar {
     width: 4px;
 }
+
 #conteudo-sidebar::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 4px;
 }
 
-/* --- BLOCO DO PERFIL --- */
+
+/* =========================================================
+   PERFIL
+   ========================================================= */
+
 .sidebar-profile {
     padding: 4px 0;
 }
@@ -105,7 +182,9 @@
     gap: 16px;
 }
 
-.avatar-img, .avatar-placeholder, .avatar-icon svg {
+.avatar-img,
+.avatar-placeholder,
+.avatar-icon svg {
     width: 58px;
     height: 58px;
     border-radius: 50%;
@@ -117,13 +196,15 @@
 }
 
 .avatar-placeholder {
-    background-color: #007bff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 1.5rem;
+
+    background-color: #007bff;
     color: #ffffff;
+
+    font-size: 1.5rem;
+    font-weight: bold;
 }
 
 .avatar-icon svg {
@@ -134,47 +215,78 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    min-width: 0;
 }
 
-.profile-details h2, .user-name {
-    font-size: 1.25rem;
-    margin: 0 0 4px 0;
-    font-weight: 700;
+.profile-details h2,
+.user-name {
+    margin: 0 0 4px;
+
     color: #ffffff;
+
+    font-size: 1.25rem;
+    font-weight: 700;
     line-height: 1.2;
+
+    /* Nomes longos não devem estourar o drawer. */
+    overflow-wrap: anywhere;
 }
 
 .user-role {
-    font-size: 0.8rem;
-    color: #a0a0a0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     margin-bottom: 4px;
+
+    color: #a0a0a0;
+
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
-.auth-btn, .account-link {
+.auth-btn,
+.account-link {
     display: block;
+
+    margin-top: 3px;
+
     color: #00a2ff;
-    text-decoration: none;
+
     font-size: 0.95rem;
     font-weight: 700;
-    margin-top: 3px;
     letter-spacing: 0.6px;
-    transition: opacity 0.2s ease;
+
+    text-decoration: none;
+
+    transition:
+        opacity 0.2s ease,
+        color 0.2s ease;
 }
 
-.auth-btn:hover, .account-link:hover {
+.auth-btn:hover,
+.account-link:hover {
+    color: #33b4ff;
     text-decoration: underline;
     opacity: 0.85;
 }
 
-/* --- DIVISÓRIAS --- */
+.auth-btn:focus-visible,
+.account-link:focus-visible {
+    outline: 2px solid #00a2ff;
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+
+/* =========================================================
+   DIVISÓRIAS
+   ========================================================= */
+
 .sidebar-divider {
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 100%;
-    margin: 24px 0; /* Aumentado espaçamento externo das divisórias */
+    margin: 24px 0;
 }
 
 .sidebar-divider .line {
@@ -187,36 +299,50 @@
 .sidebar-divider .rhombus {
     width: 6px;
     height: 6px;
-    background-color: #ffffff;
-    transform: rotate(45deg);
-    margin: 0 10px;
+
     flex-shrink: 0;
+    margin: 0 10px;
+
+    background-color: #ffffff;
     opacity: 0.6;
+
+    transform: rotate(45deg);
 }
 
-/* --- NAVEGAÇÃO DE PÁGINAS --- */
+
+/* =========================================================
+   NAVEGAÇÃO
+   ========================================================= */
+
 .sidebar-nav {
-    margin: 12px 0 20px 0; /* Afasta mais do perfil superior */
+    margin: 12px 0 20px;
 }
 
 .sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 22px; /* Maior distância entre cada link do menu */
+    gap: 22px;
+
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .sidebar-nav a {
+    display: inline-block;
+
     color: #ffffff;
-    text-decoration: none;
+
     font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: 1.2px;
+
+    text-decoration: none;
     text-transform: uppercase;
-    transition: color 0.2s ease, transform 0.2s ease;
-    display: inline-block;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .sidebar-nav a:hover {
@@ -224,23 +350,77 @@
     transform: translateX(4px);
 }
 
-/* --- RODAPÉ DA SIDEBAR --- */
+.sidebar-nav a:focus-visible {
+    outline: 2px solid #00a2ff;
+    outline-offset: 4px;
+    border-radius: 2px;
+}
+
+
+/* =========================================================
+   RODAPÉ DA SIDEBAR
+   ========================================================= */
+
 .sidebar-footer {
-    margin-top: auto; 
+    margin-top: auto;
     padding-top: 8px;
     padding-bottom: 8px;
 }
 
 .sidebar-footer h4 {
-    font-size: 1.15rem; /* Aumentado título do rodapé */
-    margin: 0 0 10px 0;
+    margin: 0 0 10px;
+
     color: #ffffff;
+
+    font-size: 1.15rem;
     font-weight: 700;
 }
 
 .sidebar-footer p {
-    font-size: 0.98rem; /* Aumentado texto descritivo do rodapé */
-    color: #e0e0e0;
-    line-height: 1.55;
     margin: 0;
+
+    color: #e0e0e0;
+
+    font-size: 0.98rem;
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   TELAS PEQUENAS
+   ========================================================= */
+
+@media screen and (max-width: 380px) {
+    #menu-drawer {
+        width: 90vw;
+        padding: 20px 16px;
+    }
+
+    .sidebar-nav ul {
+        gap: 18px;
+    }
+
+    .sidebar-nav a {
+        font-size: 1.1rem;
+    }
+
+    .sidebar-footer p {
+        font-size: 0.9rem;
+    }
+}
+
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    #overlay-sidebar,
+    #menu-drawer,
+    .btn-close-sidebar,
+    .auth-btn,
+    .account-link,
+    .sidebar-nav a {
+        transition: none;
+    }
 }
