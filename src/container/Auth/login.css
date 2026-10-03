@@ -1,294 +1,480 @@
-/* --- RESET GLOBAL PARA REMOVER MARGENS PADRÃO --- */
-html, body, #root {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-}
+/* =========================================================
+   PÁGINA DE LOGIN
+   ========================================================= */
 
-/* --- CONTAINER GLOBAL --- */
 .login-page {
-    min-height: 100vh;
     width: 100%;
-    background-color: #ffffff;
+    min-height: 100vh;
+    min-height: 100dvh;
+
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-sizing: border-box;
+
     padding-bottom: 40px;
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
+
+    background-color: #ffffff;
+
     overflow-x: hidden;
+    position: relative;
 }
 
-/* --- BARRA SUPERIOR (HEADER) --- */
+/* =========================================================
+   BARRA SUPERIOR
+   ========================================================= */
+
 .login-topbar {
+    position: relative;
+
     width: 100%;
     height: 85px;
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     padding: 0 20px;
-    box-sizing: border-box;
-    position: relative;
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .btn-menu-header {
     position: absolute;
     left: 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
+
+    width: 44px;
+    height: 44px;
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 32px;
-    height: 22px;
-    padding: 0;
+
+    padding: 10px;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    transition: background-color 0.2s ease;
+}
+
+.btn-menu-header:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.btn-menu-header:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
 }
 
 .btn-menu-header span {
     width: 100%;
     height: 3.5px;
+
     background-color: #ffffff;
     border-radius: 4px;
 }
 
 .topbar-logo img {
-    height: 48px;
+    display: block;
+
     width: auto;
-    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.6));
+    height: 48px;
+
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
-/* --- CONTEÚDO PRINCIPAL --- */
+/* =========================================================
+   CONTEÚDO
+   ========================================================= */
+
 .login-main-content {
     width: 100%;
     max-width: 440px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
+
     padding: 24px 16px;
-    box-sizing: border-box;
 }
 
-/* --- TÍTULO --- */
+/* =========================================================
+   TÍTULO
+   ========================================================= */
+
 .login-title-container {
-    text-align: center;
-    margin-bottom: 20px;
     width: 100%;
+
+    margin-bottom: 20px;
+
+    text-align: center;
 }
 
 .login-title {
+    margin: 0 0 10px;
+
     color: #0b50bd;
-    font-size: 2.2rem;
+
+    font-size: clamp(1.8rem, 7vw, 2.2rem);
     font-weight: 800;
-    margin: 0 0 10px 0;
+
     letter-spacing: 0.5px;
 }
 
+/* =========================================================
+   DIVISÓRIA
+   ========================================================= */
+
 .title-divider {
+    width: 100%;
+
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100%;
 }
 
 .title-divider .line {
     flex: 1;
+
     height: 2.5px;
+
     background-color: #0b50bd;
 }
 
 .title-divider .rhombus {
     width: 10px;
     height: 10px;
-    background-color: #00ff00;
-    transform: rotate(45deg);
-    margin: 0 10px;
     flex-shrink: 0;
+
+    margin: 0 10px;
+
+    background-color: #00ff00;
+
+    transform: rotate(45deg);
+
     box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
 }
 
-/* --- CARTÃO --- */
+/* =========================================================
+   CARTÃO
+   ========================================================= */
+
 .login-card {
-    background-color: #dcdcdc;
     width: 100%;
-    border-radius: 28px;
+
     padding: 22px 20px;
-    box-sizing: border-box;
+
+    background-color: #dcdcdc;
+
+    border-radius: 28px;
+
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
-/* --- ABAS (PESSOAS / EMPRESAS) --- */
+/* =========================================================
+   ABAS
+   ========================================================= */
+
 .tabs-header {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    border-bottom: 2px solid #000000;
-    padding-bottom: 8px;
+
     margin-bottom: 20px;
+    padding-bottom: 8px;
+
+    border-bottom: 2px solid #000000;
 }
 
 .tab-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
+
+    padding: 6px 8px;
+
+    color: #000000;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    font-family: inherit;
     font-size: 1.4rem;
     font-weight: 800;
-    color: #000000;
-    padding: 4px 6px;
-    transition: all 0.2s ease;
+
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
 }
 
-.tab-btn .tab-icon {
-    width: 28px;
-    height: 28px;
-    fill: #000000;
+.tab-btn:hover {
+    background-color: rgba(11, 80, 189, 0.08);
+}
+
+.tab-btn:focus-visible {
+    outline: 2px solid #0b50bd;
+    outline-offset: 2px;
 }
 
 .tab-btn.active {
     color: #0b50bd;
 }
 
-.tab-btn.active .tab-icon {
-    fill: #0b50bd;
+.tab-icon {
+    width: 28px;
+    height: 28px;
 }
 
 .tab-separator {
-    font-size: 1.6rem;
     color: #333333;
-    font-weight: 400;
+    font-size: 1.6rem;
 }
 
-/* --- FORMULÁRIO --- */
+/* =========================================================
+   FORMULÁRIO
+   ========================================================= */
+
 .login-form {
+    width: 100%;
+
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
 .form-group {
+    width: 100%;
+
     display: flex;
     align-items: flex-end;
     gap: 10px;
 }
 
 .input-icon-box {
+    position: relative;
+
     width: 48px;
     height: 48px;
-    background-color: #dcdcdc;
-    border: 1.5px solid #8e939d;
-    border-radius: 14px;
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    position: relative;
+
+    background-color: #dcdcdc;
+
+    border: 1.5px solid #8e939d;
+    border-radius: 14px;
 }
 
 .input-icon-box svg {
     width: 28px;
     height: 28px;
+
     fill: #0b50bd;
 }
 
 .relative-badge .check-badge {
     position: absolute;
-    bottom: -2px;
     right: -2px;
-    background-color: #00c853;
-    color: #ffffff;
-    font-size: 0.6rem;
-    font-weight: bold;
+    bottom: -2px;
+
     width: 14px;
     height: 14px;
-    border-radius: 50%;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    color: #ffffff;
+
+    background-color: #00c853;
+
     border: 1px solid #ffffff;
+    border-radius: 50%;
+
+    font-size: 0.6rem;
+    font-weight: bold;
 }
 
 .input-field-wrapper {
+    min-width: 0;
     flex: 1;
+
     display: flex;
     flex-direction: column;
 }
 
 .input-field-wrapper label {
+    margin-bottom: 3px;
+
+    color: #0b50bd;
+
     font-size: 1.05rem;
     font-weight: 700;
-    color: #0b50bd;
-    margin-bottom: 3px;
 }
 
 .input-field-wrapper input {
     width: 100%;
     height: 32px;
-    border-radius: 6px;
-    border: 1px solid #666666;
-    background-color: #ffffff;
+
     padding: 0 10px;
-    box-sizing: border-box;
-    font-size: 0.95rem;
+
     color: #000000;
+    background-color: #ffffff;
+
+    border: 1px solid #666666;
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-size: 0.95rem;
+
     outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.input-field-wrapper input::placeholder {
+    color: #777777;
 }
 
 .input-field-wrapper input:focus {
     border-color: #0b50bd;
+
     box-shadow: 0 0 3px rgba(11, 80, 189, 0.5);
 }
 
-/* Link Esqueceu a Senha */
+/* =========================================================
+   FEEDBACK
+   ========================================================= */
+
+.form-feedback {
+    margin: 0;
+
+    padding: 10px 12px;
+
+    color: #8a1c1c;
+
+    background-color: #ffe5e5;
+
+    border: 1px solid #d66a6a;
+    border-radius: 8px;
+
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* =========================================================
+   RECUPERAÇÃO
+   ========================================================= */
+
 .forgot-password-link-container {
     margin-top: -6px;
     margin-bottom: 4px;
 }
 
-.btn-forgot-password {
-    background: none;
+.btn-forgot-password,
+.btn-resend,
+.btn-back-login {
+    background: transparent;
     border: none;
-    color: #0b50bd;
-    font-size: 0.85rem;
-    font-weight: 600;
+
+    font-family: inherit;
+
     cursor: pointer;
-    padding: 0;
 }
 
-.btn-forgot-password:hover {
+.btn-forgot-password {
+    padding: 4px 0;
+
+    color: #0b50bd;
+
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.btn-forgot-password:hover,
+.btn-resend:hover {
     text-decoration: underline;
 }
 
-/* --- BOTÕES DE AÇÃO --- */
+.btn-forgot-password:focus-visible,
+.btn-resend:focus-visible,
+.btn-back-login:focus-visible {
+    outline: 2px solid #0b50bd;
+    outline-offset: 3px;
+}
+
+.btn-back-login {
+    align-self: center;
+
+    margin-top: 8px;
+    padding: 4px 6px;
+
+    color: #555555;
+
+    font-size: 0.9rem;
+
+    text-decoration: underline;
+}
+
+.btn-back-login:hover {
+    color: #0b50bd;
+}
+
+/* =========================================================
+   BOTÃO PRINCIPAL
+   ========================================================= */
+
 .btn-action-login {
-    margin-top: 10px;
-    background-color: #0b50bd;
-    color: #ffffff;
-    border: none;
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 1.2rem;
-    font-weight: 800;
-    cursor: pointer;
+    width: 100%;
+
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+
+    margin-top: 10px;
+    padding: 12px;
+
+    color: #ffffff;
+
+    background-color: #0b50bd;
+
+    border: none;
+    border-radius: 12px;
+
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: 800;
+
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s ease;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .btn-action-login:hover {
     background-color: #083d93;
+    transform: translateY(-1px);
+}
+
+.btn-action-login:active {
+    transform: translateY(0);
+}
+
+.btn-action-login:focus-visible {
+    outline: 2px solid #0b50bd;
+    outline-offset: 3px;
 }
 
 .btn-key-icon {
@@ -296,10 +482,14 @@ html, body, #root {
     height: 24px;
 }
 
+/* =========================================================
+   CADASTRO
+   ========================================================= */
+
 .ou-divider {
     display: flex;
     align-items: center;
-    justify-content: center;
+
     margin: 2px 0;
 }
 
@@ -310,103 +500,264 @@ html, body, #root {
 }
 
 .ou-divider .text {
-    font-size: 0.85rem;
-    color: #555555;
     margin: 0 8px;
+
+    color: #555555;
+    font-size: 0.85rem;
 }
 
 .btn-register-redirect {
+    width: 100%;
+
     display: block;
-    text-align: center;
-    background-color: #0b50bd;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 12px;
+
     padding: 12px;
+
+    color: #ffffff;
+    background-color: #0b50bd;
+
+    border-radius: 12px;
+
+    text-align: center;
+    text-decoration: none;
+
     font-size: 1.05rem;
     font-weight: 800;
+
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s ease;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .btn-register-redirect:hover {
     background-color: #083d93;
+    transform: translateY(-1px);
 }
 
-.btn-back-login {
-    background: none;
-    border: none;
-    color: #555555;
-    font-size: 0.9rem;
-    cursor: pointer;
-    margin-top: 8px;
-    text-decoration: underline;
+.btn-register-redirect:active {
+    transform: translateY(0);
 }
 
-/* --- QUADROS DE CÓDIGO (ETAPA 2) --- */
+.btn-register-redirect:focus-visible {
+    outline: 2px solid #0b50bd;
+    outline-offset: 3px;
+}
+
+/* =========================================================
+   CÓDIGO
+   ========================================================= */
+
 .text-center {
     text-align: center;
 }
 
 .codigo-subtitle-title {
+    margin: 10px 0 6px;
+
+    color: #0b50bd;
+
     font-size: 1.35rem;
     font-weight: 800;
-    color: #0b50bd;
-    margin: 10px 0 6px 0;
 }
 
 .codigo-subtitle-desc {
-    font-size: 0.9rem;
+    margin: 0 0 20px;
+
     color: #333333;
-    margin-bottom: 20px;
+
+    font-size: 0.9rem;
+    line-height: 1.4;
 }
 
 .email-highlight {
     color: #0b50bd;
     font-weight: 600;
+
+    overflow-wrap: anywhere;
 }
 
 .digits-container {
+    width: 100%;
+
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: 6px;
+
     margin-bottom: 20px;
 }
 
 .digit-box {
     width: 44px;
     height: 48px;
-    border: 2px solid #000000;
+    max-width: 48px;
+
+    flex: 1 1 0;
+
+    padding: 0;
+
+    color: #000000;
     background-color: #ffffff;
+
+    border: 2px solid #000000;
+    border-radius: 6px;
+
     text-align: center;
+
+    font-family: inherit;
     font-size: 1.4rem;
     font-weight: 800;
+
     outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.digit-box:focus {
+    border-color: #0b50bd;
+
+    box-shadow: 0 0 4px rgba(11, 80, 189, 0.4);
+}
+
+.digit-box:focus {
+    border-color: #0b50bd;
+    box-shadow: 0 0 4px rgba(11, 80, 189, 0.4);
 }
 
 .timer-text {
-    font-size: 0.85rem;
+    margin: 14px 0 0;
+
     color: #333333;
-    margin-top: 14px;
+
+    font-size: 0.85rem;
+    line-height: 1.4;
 }
 
 .btn-resend {
-    background: none;
-    border: none;
+    padding: 2px 4px;
+
     color: #0b50bd;
+
+    font-size: inherit;
     font-weight: bold;
-    cursor: pointer;
+
     text-decoration: underline;
 }
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 320px;
+
+    padding: 24px 20px;
+
+    background-color: #ffffff;
+
+    border-radius: 20px;
+
+    text-align: center;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.modal-title {
+    margin: 0 0 12px;
+
+    color: #0b50bd;
+
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.modal-text {
+    margin: 0 0 20px;
+
+    color: #333333;
+
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.btn-modal-ok {
+    width: 100%;
+
+    padding: 10px 0;
+
+    color: #ffffff;
+    background-color: #0b50bd;
+
+    border: none;
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 800;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn-modal-ok:hover {
+    background-color: #083d93;
+    transform: translateY(-1px);
+}
+
+.btn-modal-ok:active {
+    transform: translateY(0);
+}
+
+.btn-modal-ok:focus-visible {
+    outline: 2px solid #0b50bd;
+    outline-offset: 3px;
+}
+
+/* =========================================================
+   ANIMAÇÃO
+   ========================================================= */
 
 .animation-fade-in {
     animation: fadeIn 0.25s ease-in-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
 
 @media screen and (min-width: 768px) {
     .login-main-content {
@@ -416,5 +767,86 @@ html, body, #root {
 
     .login-card {
         padding: 26px 28px;
+    }
+}
+
+/* =========================================================
+   TELAS PEQUENAS
+   ========================================================= */
+
+@media screen and (max-width: 380px) {
+    .login-topbar {
+        height: 76px;
+    }
+
+    .btn-menu-header {
+        left: 12px;
+    }
+
+    .topbar-logo img {
+        height: 42px;
+    }
+
+    .login-main-content {
+        padding: 20px 12px;
+    }
+
+    .login-card {
+        padding: 18px 14px;
+        border-radius: 22px;
+    }
+
+    .tab-btn {
+        font-size: 1.15rem;
+    }
+
+    .tab-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .input-icon-box {
+        width: 42px;
+        height: 42px;
+
+        border-radius: 12px;
+    }
+
+    .input-icon-box svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .input-field-wrapper label {
+        font-size: 0.95rem;
+    }
+
+    .digits-container {
+        gap: 4px;
+    }
+
+    .digit-box {
+        height: 44px;
+        font-size: 1.25rem;
+    }
+}
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-menu-header,
+    .tab-btn,
+    .input-field-wrapper input,
+    .btn-action-login,
+    .btn-register-redirect,
+    .btn-modal-ok,
+    .digit-box {
+        transition: none;
+    }
+
+    .animation-fade-in {
+        animation: none;
     }
 }

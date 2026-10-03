@@ -1,206 +1,356 @@
-/* Container principal fixo em 100vh sem scrollbar no PC */
+/* =========================================================
+   CONTAINER PRINCIPAL
+   ========================================================= */
+
 #initial-card {
     position: relative;
+
     width: 100%;
     height: 100vh;
+    height: 100dvh;
+
     overflow: hidden;
+
     background-color: #000;
 }
 
-/* Superposição distribuindo o conteúdo central e o footer */
+
+/* =========================================================
+   CAMADA DE CONTEÚDO
+   ========================================================= */
+
+/*
+ * O conteúdo permanece acima do carrossel.
+ *
+ * O próprio elemento pode rolar verticalmente em telas menores,
+ * evitando que textos ou botões sejam cortados quando a altura
+ * disponível for pequena.
+ */
 #superposition {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
+
     width: 100%;
-    height: 100vh;
-    z-index: 100;
+    height: 100%;
+
+    z-index: 2;
+
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+
     box-sizing: border-box;
-    /* Overlay escuro sutil sobre o conteúdo todo */
+
     background: rgba(0, 0, 0, 0.35);
+
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
+
+/* =========================================================
+   CONTEÚDO PRINCIPAL
+   ========================================================= */
+
 #main-content {
-    padding: 15px 5vw 0 5vw;
+    width: 100%;
+    min-height: 100%;
+
+    padding: 15px 5vw 40px;
+
+    box-sizing: border-box;
+
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    box-sizing: border-box;
+
+    margin: 0 auto;
 }
 
-/* Carrossel de Fundo */
+
+/* =========================================================
+   CARROSSEL DE FUNDO
+   ========================================================= */
+
 #init-carrossel {
+    position: absolute;
+    inset: 0;
+
     width: 100%;
-    height: 100vh;
+    height: 100%;
+
+    z-index: 1;
+
+    pointer-events: none;
 }
 
-/* Garante que o slide não vaze além da largura da tela */
 #init-carrossel .swiper-slide {
     width: 100%;
     height: 100%;
+
     overflow: hidden;
 }
 
 #init-carrossel img {
-    height: 100vh;
-    width: 100%;
-    object-fit: cover;
-    /* Aplica o efeito fosco leve (blur) e escurece a imagem (brightness) */
-    filter: blur(2px) brightness(0.89);
-    /* Scale evita bordas brancas/transparentes causadas pelo blur */
-    transform: scale(1.05); 
-    transition: filter 0.3s ease;
-    /* Impede estouro de layout do zoom */
     display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    /*
+     * O desfoque reduz a quantidade de detalhes do fundo
+     * e mantém o texto em primeiro plano mais legível.
+     *
+     * O scale evita que o blur exponha as bordas da imagem.
+     */
+    filter: blur(2px) brightness(0.89);
+    transform: scale(1.05);
 }
 
-/* Menu Hambúrguer */
+
+/* =========================================================
+   MENU HAMBÚRGUER
+   ========================================================= */
+
 #barra-lateral {
-    display: flex;
-    justify-content: flex-start;
-    width: 100%;
-    align-items: center;
-    margin-bottom: 5px;
     position: relative;
-    z-index: 1001;
+    z-index: 3;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    width: 100%;
+
+    margin-bottom: 5px;
 }
 
 .btn-menu {
-    background: none;
-    border: none;
-    cursor: pointer;
+    position: relative;
+
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    width: 36px;
-    height: 28px;
-    padding: 0;
-    position: relative;
-    z-index: 1002;
+
+    width: 44px;
+    height: 44px;
+
+    padding: 8px;
+
+    background: none;
+    border: none;
+
+    cursor: pointer;
 }
 
 .btn-menu span {
+    display: block;
+
     width: 100%;
     height: 4px;
+
     background-color: #ffffff;
+
     border-radius: 4px;
-    transition: all 0.3s ease-in-out;
-    transform-origin: 1px;
+
+    transition: background-color 0.2s ease;
 }
 
-/* Logótipo */
+.btn-menu:hover span {
+    background-color: #00a2ff;
+}
+
+.btn-menu:focus-visible {
+    outline: 2px solid #00a2ff;
+    outline-offset: 3px;
+
+    border-radius: 4px;
+}
+
+
+/* =========================================================
+   LOGOTIPO
+   ========================================================= */
+
 #logo {
     display: flex;
-    justify-content: center;
-    width: 100%;
     align-items: center;
+    justify-content: center;
+
+    width: 100%;
 }
 
 #logo img {
-    height: clamp(80px, 8vh, 140px);
     width: auto;
-    filter: drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.8));
+
+    height: clamp(80px, 8vh, 140px);
+
+    filter: drop-shadow(
+        0 2px 8px rgba(0, 0, 0, 0.8)
+    );
 }
 
-/* Título Principal */
+
+/* =========================================================
+   TÍTULO PRINCIPAL
+   ========================================================= */
+
 #text {
-    color: #ffffff;
     display: flex;
-    justify-content: center;
-    width: 100%;
-    align-items: center;
-    text-align: center;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
     margin-top: 10px;
+
+    color: #ffffff;
+
+    text-align: center;
 }
 
 #text h1 {
-    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
     margin: 0;
-    font-weight: bold;
-    text-shadow: 0px 2px 10px rgba(0, 0, 0, 0.7);
+
+    color: #ffffff;
+
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+
+    text-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.7);
 }
 
-#text span.highlight {
+#text .highlight {
     color: #007bff;
 }
 
-/* Divisórias com Linhas e Losango */
+
+/* =========================================================
+   DIVISÓRIAS
+   ========================================================= */
+
 .divider-container {
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 100%;
     max-width: 1100px;
+
     margin: 15px 0;
+
     box-sizing: border-box;
 }
 
 .divider-container .line {
     flex: 1;
+
     height: 2px;
+
     background-color: #007bff;
-    box-shadow: 0px 0px 6px rgba(0, 123, 255, 0.8);
+
+    box-shadow:
+        0 0 6px rgba(0, 123, 255, 0.8);
 }
 
 .divider-container .rhombus {
+    flex-shrink: 0;
+
     width: 10px;
     height: 10px;
-    background-color: #00ff00;
-    transform: rotate(45deg);
+
     margin: 0 10px;
-    flex-shrink: 0;
-    box-shadow: 0px 0px 8px rgba(0, 255, 0, 0.8);
+
+    background-color: #00ff00;
+
+    transform: rotate(45deg);
+
+    box-shadow:
+        0 0 8px rgba(0, 255, 0, 0.8);
 }
 
-/* Subtítulo / Descrição */
-h2 {
-    color: #ffffff;
-    text-align: center;
-    font-weight: normal;
-    font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+
+/* =========================================================
+   DESCRIÇÃO
+   ========================================================= */
+
+.home-description {
+    width: 100%;
     max-width: 1000px;
+
     margin: 0;
+
+    color: #ffffff;
+
+    font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+    font-weight: 400;
     line-height: 1.5;
-    text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.8);
+
+    text-align: center;
+
+    text-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
-/* Botão de Solicitação */
+
+/* =========================================================
+   BOTÃO DE SOLICITAÇÃO
+   ========================================================= */
+
 #btn-solicite {
     display: flex;
-    justify-content: center;
-    width: 100%;
     align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
     margin-top: 20px;
 }
 
 #btn-solicite a {
     display: inline-block;
+
+    box-sizing: border-box;
+
+    padding: 14px 32px;
+
     background-color: rgba(0, 110, 255, 0.35);
+
     border: 2px solid #00a2ff;
+    border-radius: 50px;
+
     color: #ffffff;
+
     font-size: clamp(1.1rem, 1.2vw, 1.15rem);
-    font-weight: bold;
+    font-weight: 700;
+    letter-spacing: 1px;
+
     text-align: center;
     text-decoration: none;
-    letter-spacing: 1px;
-    padding: 14px 32px;
-    border-radius: 50px;
+
     cursor: pointer;
-    transition: all 0.3s ease;
+
     backdrop-filter: blur(8px);
-    box-sizing: border-box;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.5);
+
+    transition:
+        background-color 0.3s ease,
+        box-shadow 0.3s ease,
+        transform 0.2s ease;
 }
 
 #btn-solicite a:hover {
     background-color: rgba(0, 162, 255, 0.85);
-    color: #ffffff;
-    box-shadow: 0 0 20px rgba(0, 162, 255, 0.7);
+
+    box-shadow:
+        0 0 20px rgba(0, 162, 255, 0.7);
+
     transform: translateY(-2px);
 }
 
@@ -208,84 +358,16 @@ h2 {
     transform: translateY(0);
 }
 
-/* =========================================================
-   REGRAS ESPECÍFICAS PARA DISPOSITIVOS MÓVEIS (MOBILE)
-   ========================================================= */
-@media screen and (max-width: 768px) {
-    #initial-card {
-        height: auto;
-        min-height: 100vh;
-        overflow-x: hidden;
-        width: 100%;
-    }
-
-    #superposition {
-        position: relative;
-        height: auto;
-        min-height: 100vh;
-        width: 100%;
-    }
-
-    #init-carrossel {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        z-index: 1;
-    }
-
-    #main-content {
-        padding: 20px 20px 40px 20px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    #logo img {
-        height: 110px;
-        width: auto;
-    }
-
-    #text {
-        margin-top: 20px;
-    }
-
-    #text h1 {
-        font-size: 2.3rem;
-        line-height: 1.2;
-    }
-
-    h2 {
-        font-size: 1.35rem;
-        line-height: 1.5;
-        margin: 10px 0;
-    }
-
-    .divider-container {
-        margin: 22px 0;
-        width: 100%;
-    }
-
-    .divider-container .rhombus {
-        width: 12px;
-        height: 12px;
-    }
-
-    #btn-solicite {
-        margin-top: 25px;
-        margin-bottom: 30px;
-        width: 100%;
-    }
-
-    #btn-solicite a {
-        font-size: 1.15rem;
-        padding: 16px 28px;
-        width: 100%;
-        max-width: 340px;
-    }
+#btn-solicite a:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 4px;
 }
 
-/* Regras Mantidas para Desktop */
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
 @media screen and (min-width: 1024px) {
     #main-content {
         padding-top: 3vh;
@@ -297,5 +379,104 @@ h2 {
 
     #btn-solicite {
         margin-top: 25px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media screen and (max-width: 768px) {
+    #main-content {
+        padding: 20px 20px 40px;
+    }
+
+    #logo img {
+        height: clamp(80px, 14vw, 110px);
+    }
+
+    #text {
+        margin-top: 20px;
+    }
+
+    #text h1 {
+        font-size: clamp(1.8rem, 9vw, 2.3rem);
+    }
+
+    .home-description {
+        margin: 10px 0;
+
+        font-size: clamp(1.05rem, 5vw, 1.35rem);
+        line-height: 1.5;
+    }
+
+    .divider-container {
+        margin: 22px 0;
+    }
+
+    .divider-container .rhombus {
+        width: 12px;
+        height: 12px;
+    }
+
+    #btn-solicite {
+        margin-top: 25px;
+    }
+
+    #btn-solicite a {
+        width: 100%;
+        max-width: 340px;
+
+        padding: 16px 28px;
+
+        font-size: 1.15rem;
+    }
+}
+
+
+/* =========================================================
+   TELAS MUITO PEQUENAS
+   ========================================================= */
+
+@media screen and (max-width: 380px) {
+    #main-content {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    #text h1 {
+        font-size: 1.7rem;
+    }
+
+    .home-description {
+        font-size: 1rem;
+    }
+
+    .divider-container {
+        margin: 16px 0;
+    }
+
+    #btn-solicite a {
+        padding: 14px 20px;
+
+        font-size: 1rem;
+    }
+}
+
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-menu span,
+    #btn-solicite a {
+        transition: none;
+    }
+
+    #init-carrossel img {
+        transform: none;
+        filter: brightness(0.89);
     }
 }

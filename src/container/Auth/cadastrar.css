@@ -1,280 +1,440 @@
-/* --- RESET GLOBAL PARA REMOVER MARGENS PADRÃO DO VITE/NAVEGADOR --- */
-html, body, #root {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-}
+/* =========================================================
+   PÁGINA DE CADASTRO
+   ========================================================= */
 
-/* --- CONTAINER GLOBAL DA PÁGINA DE CADASTRO --- */
 .cadastrar-page {
-    min-height: 100vh;
     width: 100%;
-    background-color: #ffffff;
+    min-height: 100vh;
+    min-height: 100dvh;
+
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-sizing: border-box;
+
     padding-bottom: 40px;
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
+
+    background-color: #ffffff;
+
     overflow-x: hidden;
 }
 
-/* --- BARRA SUPERIOR (HEADER) --- */
+/* =========================================================
+   BARRA SUPERIOR
+   ========================================================= */
+
 .cadastrar-topbar {
+    position: relative;
+
     width: 100%;
     height: 85px;
-    margin: 0;
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     padding: 0 20px;
-    box-sizing: border-box;
-    position: relative;
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    border: none;
-    outline: none;
 }
 
 .btn-menu-header {
     position: absolute;
     left: 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
+
+    width: 44px;
+    height: 44px;
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 32px;
-    height: 22px;
-    padding: 0;
+
+    padding: 10px;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    transition: background-color 0.2s ease;
+}
+
+.btn-menu-header:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.btn-menu-header:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
 }
 
 .btn-menu-header span {
     width: 100%;
     height: 3.5px;
+
     background-color: #ffffff;
     border-radius: 4px;
 }
 
 .topbar-logo img {
-    height: 48px;
+    display: block;
+
     width: auto;
-    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.6));
+    height: 48px;
+
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
-/* --- CONTEÚDO PRINCIPAL --- */
+/* =========================================================
+   CONTEÚDO PRINCIPAL
+   ========================================================= */
+
 .cadastrar-main-content {
     width: 100%;
     max-width: 440px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
+
     padding: 24px 16px;
-    box-sizing: border-box;
 }
 
-/* --- SEÇÃO DO TÍTULO --- */
+/* =========================================================
+   TÍTULO
+   ========================================================= */
+
 .cadastrar-title-container {
-    text-align: center;
-    margin-bottom: 20px;
     width: 100%;
+
+    margin-bottom: 20px;
+
+    text-align: center;
 }
 
 .cadastrar-title {
+    margin: 0 0 10px;
+
     color: #0b50bd;
-    font-size: 2.2rem;
+
+    font-size: clamp(1.8rem, 7vw, 2.2rem);
     font-weight: 800;
-    margin: 0 0 10px 0;
+
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
-/* Divisória Azul com Losango Verde */
+/* =========================================================
+   DIVISÓRIA DO TÍTULO
+   ========================================================= */
+
 .title-divider {
+    width: 100%;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
 }
 
 .title-divider .line {
     flex: 1;
+
     height: 2.5px;
+
     background-color: #0b50bd;
 }
 
 .title-divider .rhombus {
     width: 10px;
     height: 10px;
-    background-color: #00ff00;
-    transform: rotate(45deg);
-    margin: 0 10px;
     flex-shrink: 0;
+
+    margin: 0 10px;
+
+    background-color: #00ff00;
+
+    transform: rotate(45deg);
+
     box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
 }
 
-/* --- CARTÃO DE CADASTRO (CINZA) --- */
+/* =========================================================
+   CARTÃO DE CADASTRO
+   ========================================================= */
+
 .cadastrar-card {
-    background-color: #dcdcdc;
     width: 100%;
-    border-radius: 28px;
+
     padding: 22px 20px;
-    box-sizing: border-box;
+
+    background-color: #dcdcdc;
+
+    border-radius: 28px;
+
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
-/* --- ABAS (PESSOAS / EMPRESAS) --- */
+/* =========================================================
+   SELEÇÃO: PESSOA / EMPRESA
+   ========================================================= */
+
 .tabs-header {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    border-bottom: 2px solid #000000;
-    padding-bottom: 8px;
+
     margin-bottom: 20px;
+    padding-bottom: 8px;
+
+    border-bottom: 2px solid #000000;
 }
 
 .tab-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
+
+    padding: 6px 8px;
+
+    color: #000000;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
     font-size: 1.4rem;
     font-weight: 800;
-    color: #000000;
-    padding: 4px 6px;
-    transition: all 0.2s ease;
+
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.tab-btn:hover {
+    background-color: rgba(11, 80, 189, 0.08);
+}
+
+.tab-btn:focus-visible {
+    outline: 2px solid #0b50bd;
+    outline-offset: 2px;
 }
 
 .tab-btn .tab-icon {
     width: 28px;
     height: 28px;
-    fill: #000000;
+
+    fill: currentColor;
 }
 
 .tab-btn.active {
     color: #0b50bd;
 }
 
-.tab-btn.active .tab-icon {
-    fill: #0b50bd;
-}
-
 .tab-separator {
-    font-size: 1.6rem;
     color: #333333;
+
+    font-size: 1.6rem;
     font-weight: 400;
 }
 
-/* --- FORMULÁRIO E CAMPOS --- */
+/* =========================================================
+   FORMULÁRIO
+   ========================================================= */
+
 .cadastrar-form {
+    width: 100%;
+
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
 .form-group {
+    width: 100%;
+
     display: flex;
     align-items: flex-end;
     gap: 10px;
 }
 
+/* =========================================================
+   ÍCONES DOS CAMPOS
+   ========================================================= */
+
 .input-icon-box {
+    position: relative;
+
     width: 48px;
     height: 48px;
-    background-color: #dcdcdc;
-    border: 1.5px solid #8e939d;
-    border-radius: 14px;
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    position: relative;
+
+    background-color: #dcdcdc;
+
+    border: 1.5px solid #8e939d;
+    border-radius: 14px;
 }
 
 .input-icon-box svg {
     width: 28px;
     height: 28px;
+
     fill: #0b50bd;
 }
 
 .relative-badge .check-badge {
     position: absolute;
-    bottom: -2px;
     right: -2px;
-    background-color: #00c853;
-    color: #ffffff;
-    font-size: 0.6rem;
-    font-weight: bold;
+    bottom: -2px;
+
     width: 14px;
     height: 14px;
-    border-radius: 50%;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    color: #ffffff;
+
+    background-color: #00c853;
+
     border: 1px solid #ffffff;
+    border-radius: 50%;
+
+    font-size: 0.6rem;
+    font-weight: bold;
 }
 
+/* =========================================================
+   CAMPOS DE TEXTO
+   ========================================================= */
+
 .input-field-wrapper {
+    min-width: 0;
     flex: 1;
+
     display: flex;
     flex-direction: column;
 }
 
 .input-field-wrapper label {
+    margin-bottom: 3px;
+
+    color: #0b50bd;
+
     font-size: 1.05rem;
     font-weight: 700;
-    color: #0b50bd;
-    margin-bottom: 3px;
 }
 
 .input-field-wrapper input {
     width: 100%;
     height: 32px;
-    border-radius: 6px;
-    border: 1px solid #666666;
-    background-color: #ffffff;
+
     padding: 0 10px;
-    box-sizing: border-box;
-    font-size: 0.95rem;
+
     color: #000000;
+    background-color: #ffffff;
+
+    border: 1px solid #666666;
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-size: 0.95rem;
+
     outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.input-field-wrapper input::placeholder {
+    color: #777777;
 }
 
 .input-field-wrapper input:focus {
     border-color: #0b50bd;
+
     box-shadow: 0 0 3px rgba(11, 80, 189, 0.5);
 }
 
-/* --- BOTÕES DE AÇÃO --- */
+/* =========================================================
+   FEEDBACK DE VALIDAÇÃO
+   ========================================================= */
+
+.form-feedback {
+    margin: 0;
+
+    padding: 10px 12px;
+
+    border-radius: 8px;
+
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.form-feedback.error {
+    color: #8a1c1c;
+
+    background-color: #ffe5e5;
+
+    border: 1px solid #d66a6a;
+}
+
+/* =========================================================
+   BOTÃO DE CADASTRO
+   ========================================================= */
+
 .btn-action-cadastrar {
-    margin-top: 10px;
-    background-color: #0b50bd;
-    color: #ffffff;
-    border: none;
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 1.2rem;
-    font-weight: 800;
-    cursor: pointer;
+    width: 100%;
+
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+
+    margin-top: 10px;
+    padding: 12px;
+
+    color: #ffffff;
+
+    background-color: #0b50bd;
+
+    border: none;
+    border-radius: 12px;
+
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: 800;
+
     letter-spacing: 0.5px;
+
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s ease;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .btn-action-cadastrar:hover {
     background-color: #083d93;
+
+    transform: translateY(-1px);
+}
+
+.btn-action-cadastrar:active {
+    transform: translateY(0);
+}
+
+.btn-action-cadastrar:focus-visible {
+    outline: 2px solid #0b50bd;
+    outline-offset: 3px;
 }
 
 .btn-add-user-icon {
@@ -282,54 +442,107 @@ html, body, #root {
     height: 24px;
 }
 
+/* =========================================================
+   DIVISÓRIA "OU"
+   ========================================================= */
+
 .ou-divider {
     display: flex;
     align-items: center;
     justify-content: center;
+
     margin: 2px 0;
 }
 
 .ou-divider .line {
     flex: 1;
+
     height: 1px;
+
     background-color: #999999;
 }
 
 .ou-divider .text {
-    font-size: 0.85rem;
-    color: #555555;
     margin: 0 8px;
+
+    color: #555555;
+
+    font-size: 0.85rem;
 }
 
+/* =========================================================
+   BOTÃO PARA LOGIN
+   ========================================================= */
+
 .btn-login-redirect {
+    width: 100%;
+
     display: block;
-    text-align: center;
-    background-color: #0b50bd;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 12px;
+
     padding: 12px;
+
+    box-sizing: border-box;
+
+    color: #ffffff;
+
+    background-color: #0b50bd;
+
+    border-radius: 12px;
+
+    text-align: center;
+    text-decoration: none;
+
     font-size: 1.05rem;
     font-weight: 800;
+
     letter-spacing: 0.5px;
+
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s ease;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .btn-login-redirect:hover {
     background-color: #083d93;
+
+    transform: translateY(-1px);
 }
+
+.btn-login-redirect:active {
+    transform: translateY(0);
+}
+
+.btn-login-redirect:focus-visible {
+    outline: 2px solid #0b50bd;
+    outline-offset: 3px;
+}
+
+/* =========================================================
+   ANIMAÇÃO DO CAMPO CNPJ
+   ========================================================= */
 
 .animation-fade-in {
     animation: fadeIn 0.25s ease-in-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* --- DESKTOP --- */
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
 @media screen and (min-width: 768px) {
     .cadastrar-main-content {
         max-width: 480px;
@@ -338,5 +551,75 @@ html, body, #root {
 
     .cadastrar-card {
         padding: 26px 28px;
+    }
+}
+
+/* =========================================================
+   TELAS MUITO PEQUENAS
+   ========================================================= */
+
+@media screen and (max-width: 380px) {
+    .cadastrar-topbar {
+        height: 76px;
+    }
+
+    .btn-menu-header {
+        left: 12px;
+    }
+
+    .topbar-logo img {
+        height: 42px;
+    }
+
+    .cadastrar-main-content {
+        padding: 20px 12px;
+    }
+
+    .cadastrar-card {
+        padding: 18px 14px;
+        border-radius: 22px;
+    }
+
+    .tab-btn {
+        font-size: 1.15rem;
+    }
+
+    .tab-btn .tab-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .input-icon-box {
+        width: 42px;
+        height: 42px;
+
+        border-radius: 12px;
+    }
+
+    .input-icon-box svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .input-field-wrapper label {
+        font-size: 0.95rem;
+    }
+}
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-menu-header,
+    .tab-btn,
+    .input-field-wrapper input,
+    .btn-action-cadastrar,
+    .btn-login-redirect {
+        transition: none;
+    }
+
+    .animation-fade-in {
+        animation: none;
     }
 }
