@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { Register } from '../../lib/supabase/auth.ts';
 
 import Sidebar from '../../components/Sidebar/sidebar.tsx';
 import type { UserProfile } from '../../components/Sidebar/sidebar';
@@ -84,6 +85,17 @@ export const Cadastrar = () => {
             return;
         }
 
+        Register(formData.email, formData.senha, formData.nome)
+            .then((data) => {
+                console.log('Usuário cadastrado com sucesso:', data);
+                // Redirecionar ou exibir mensagem de sucesso, se necessário.
+            })
+            .catch((error) => {
+                console.error('Erro ao cadastrar usuário:', error);
+                setFormError(
+                    'Ocorreu um erro ao cadastrar. Tente novamente mais tarde.'
+                );
+            });
         /*
          * Ponto de integração com o backend.
          *
