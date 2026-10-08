@@ -1,4 +1,3 @@
-import { uuid } from 'zod';
 import { supabase } from './supabaseClient';
 
 export async function SignUp(email: string, password: string) {
@@ -21,19 +20,6 @@ const { data, error } = await supabase.auth.getSession();
         throw new Error(error.message);
     }
     return data.session;
-}
-
-async function singIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
-
-    if (error) {
-        throw new Error(error.message);
-    }
-
-    return data;
 }
 
 export async function Register(email: string, password: string, nome: string) {
