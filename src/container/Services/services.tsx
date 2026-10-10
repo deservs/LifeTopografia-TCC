@@ -8,7 +8,8 @@ import Logo from '../../assets/image/logo-front.webp';
 import Obra from '../../assets/image/obra.webp';
 import Nivelamento from '../../assets/image/leveling.webp';
 import Terraplanagem from '../../assets/image/surfacing.webp';
-import Acompanhamento from '../../assets/image/why-choose.webp';
+import LogoIcon from '../../assets/image/logo-front-icon.webp';
+import Acompanhamento from '../../assets/image/supervision.webp';
 
 import './services.css';
 
@@ -29,7 +30,7 @@ const services: ServiceCardData[] = [
     {
         title: 'Locação de Obras',
         image: Obra,
-        
+
         alternateDescription:
             'Garantimos a exatidão na locação dos elementos da construção com equipamentos modernos e equipe especializada.',
         description:
@@ -38,7 +39,7 @@ const services: ServiceCardData[] = [
     {
         title: 'Verticalidade e Nivelamento',
         image: Nivelamento,
-        
+
         alternateDescription:
             'Com equipamentos de precisão, verificamos a correta posição vertical e horizontal das estruturas em cada etapa.',
         description:
@@ -47,7 +48,7 @@ const services: ServiceCardData[] = [
     {
         title: 'Terraplanagem e Sondagem',
         image: Terraplanagem,
-        
+
         alternateDescription:
             'Fundamental para nivelar o terreno e garantir a estabilidade da construção com base em dados do subsolo.',
         description:
@@ -56,7 +57,7 @@ const services: ServiceCardData[] = [
     {
         title: 'Acompanhamento Técnico de Obra',
         image: Acompanhamento,
-        
+
         alternateDescription:
             'Oferece dados em tempo real e correções técnicas durante a execução da obra para evitar desvios e retrabalhos.',
         description:
@@ -228,16 +229,14 @@ function ServiceCard({
         <div className="service-card-wrapper">
             <button
                 type="button"
-                className={`service-card ${
-                    isFlipped ? 'is-flipped' : ''
-                }`}
+                className={`service-card ${isFlipped ? 'is-flipped' : ''
+                    }`}
                 onClick={handleFlip}
                 aria-expanded={isFlipped}
-                aria-label={`${service.title}: ${
-                    isFlipped
+                aria-label={`${service.title}: ${isFlipped
                         ? 'voltar para a frente do card'
                         : 'ver informações adicionais'
-                }`}
+                    }`}
             >
                 <span className="service-card__inner">
 
@@ -280,6 +279,13 @@ function ServiceCard({
                                 className="service-card__image-overlay"
                                 aria-hidden="true"
                             />
+
+                            <img
+                                className="service-card__brand-icon"
+                                src={LogoIcon}
+                                alt=""
+                                aria-hidden="true"
+                            />
                         </span>
 
                         <span className="service-card__content">
@@ -298,6 +304,7 @@ function ServiceCard({
                         >
                             ←
                         </span>
+                        
                     </span>
 
                 </span>
