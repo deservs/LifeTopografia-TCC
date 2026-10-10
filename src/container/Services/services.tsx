@@ -234,8 +234,8 @@ function ServiceCard({
                 onClick={handleFlip}
                 aria-expanded={isFlipped}
                 aria-label={`${service.title}: ${isFlipped
-                        ? 'voltar para a frente do card'
-                        : 'ver informações adicionais'
+                    ? 'voltar para a frente do card'
+                    : 'ver informações adicionais'
                     }`}
             >
                 <span className="service-card__inner">
@@ -304,7 +304,7 @@ function ServiceCard({
                         >
                             ←
                         </span>
-                        
+
                     </span>
 
                 </span>

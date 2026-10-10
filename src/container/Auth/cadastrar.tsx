@@ -156,9 +156,8 @@ export const Cadastrar = () => {
                     <div className="tabs-header">
                         <button
                             type="button"
-                            className={`tab-btn ${
-                                tipoCadastro === 'pessoa' ? 'active' : ''
-                            }`}
+                            className={`tab-btn ${tipoCadastro === 'pessoa' ? 'active' : ''
+                                }`}
                             onClick={() =>
                                 handleTipoCadastroChange('pessoa')
                             }
@@ -187,9 +186,8 @@ export const Cadastrar = () => {
 
                         <button
                             type="button"
-                            className={`tab-btn ${
-                                tipoCadastro === 'empresa' ? 'active' : ''
-                            }`}
+                            className={`tab-btn ${tipoCadastro === 'empresa' ? 'active' : ''
+                                }`}
                             onClick={() =>
                                 handleTipoCadastroChange('empresa')
                             }
