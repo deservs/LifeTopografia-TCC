@@ -1,52 +1,88 @@
-import { supabase } from './supabaseClient';
+import { supabase } from "./supabaseClient";
 
-export async function SignUp(email: string, password: string) {
-    const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-    });
+/* função que irá registrar um novo usuário */
+export async function SignUp(
+  email: string,
+  password: string,
+  nome: string,
+  cnpj: string | null = null,
+) {
+  if (
+    cnpj === "" ||
+    cnpj === undefined ||
+    cnpj === null ||
+    cnpj == "null" ||
+    cnpj == "undefined"
+  ) {
+    cnpj = null;
+  }
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password: password,
+    options: {
+      data: {
+        nome_ou_razao: nome,
+        cnpj: cnpj,
+      },
+    },
+  });
 
-    if (error) {
-        throw new Error(error.message);
-    }
+  if (error) {
+    throw new Error(error.message);
+  }
 
-    return data;
+  console.log("Usuário registrado com sucesso:", data);
+  return data;
 }
 
-async function getSession() {
-    const { data, error } = await supabase.auth.getSession();
+/* função que irá fazer login de um usuário existente */
+export async function SignIn(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
+  });
 
-    if (error) {
-        throw new Error(error.message);
-    }
-    return data.session;
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  console.log("Usuário logado com sucesso:", data);
+  return data;
 }
 
-export async function Register(email: string, password: string, nome: string) {
-    try {
-
-        await SignUp(email, password);
-        console.log("teste diferente:", getSession());
-        const { data, error } = await supabase
-            .from('perfis')
-            .insert({
-                id: (await getSession())?.user?.id,
-                email: email,
-                tipo_perfil: 'PESSOA_FISICA',
-                status: 'ATIVO',
-                nome_ou_razao: nome,
-                cnpj: null,
-                foto_url: null,
-            })
-            .select()
-
-            if (error) {
-                throw new Error(error.message);
-            }
-            console.log('Inserção realizada com sucesso:', data)
-            return { success: true, data }
-    } catch (error) {
-        console.error('Erro ao inserir dados:', error.message)
-        return { success: false, error: error.message }
+/* função que irá enviar um código para o email do usuário */
+export async function SendResetPassword(email: string): Promise<boolean> {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) {
+      throw new Error(error.message);
     }
+    console.log("Email de redefinição de senha enviado com sucesso:", data);
+    return true;
+}
+
+/* função que irá confirmar o código inserido pelo usuário */
+export async function ConfirmOTP(
+  accessToken: string,
+  email: string
+) {
+  const { data, error } = await supabase.auth.verifyOtp({token: accessToken, email: email, type: 'recovery'});
+  if (error) {
+    throw new Error(error.message);
+  }
+  console.log("Email confirmado com sucesso:", data);
+  return data;
+}
+
+/* função que irá alterar a senha do usuário */
+export async function ConfirmResetPassword(
+  newPassword: string
+) {
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+  console.log("Senha redefinida com sucesso:", data);
+  return data;
 }

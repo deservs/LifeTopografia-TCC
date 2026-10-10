@@ -1,8 +1,9 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { data, Link } from 'react-router-dom';
 
 import Sidebar from '../../components/Sidebar/sidebar.tsx';
 import type { UserProfile } from '../../components/Sidebar/sidebar';
+import { SendResetPassword, ConfirmResetPassword, ConfirmOTP } from '../../lib/supabase/auth.ts';
 
 import Logo from '../../assets/image/logo-front.webp';
 import FundoHeader from '../../assets/image/background/firstcard.webp';
@@ -26,7 +27,7 @@ interface LoginFormData {
     confirmarNovaSenha: string;
 }
 
-const CODIGO_LENGTH = 6;
+const CODIGO_LENGTH = 8;
 const TEMPO_REENVIO = 60;
 
 export const Login = () => {
@@ -155,7 +156,7 @@ export const Login = () => {
          */
     };
 
-    const handleSubmitRecoveryEmail = (
+    const handleSubmitRecoveryEmail = async(
         event: FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
@@ -166,11 +167,16 @@ export const Login = () => {
          * Na integração definitiva, esta transição deve ocorrer somente
          * após o serviço de recuperação aceitar a solicitação.
          */
-        setTimer(TEMPO_REENVIO);
-        setEtapa('esqueci_codigo');
+        try{
+            await SendResetPassword(formData.emailRecuperacao);
+            setEtapa('esqueci_codigo');
+        }catch(error){
+            setFeedback('Erro ao enviar solicitação de recuperação. Verifique o email informado.');
+            return;
+        }
     };
 
-    const handleSubmitRecoveryCode = (
+    const handleSubmitRecoveryCode = async(
         event: FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
@@ -183,16 +189,21 @@ export const Login = () => {
         }
 
         setFeedback('');
-
+        try{
+            await ConfirmOTP(codigoCompleto, formData.emailRecuperacao);
+            setEtapa('esqueci_nova_senha');
+        }catch(error){
+            setFeedback('Erro ao confirmar o código. Verifique se o código informado está correto.');
+            return;
+        }
         /*
          * Integração futura:
          * o backend deverá validar o código e fornecer a autorização
          * necessária para permitir a troca da senha.
          */
-        setEtapa('esqueci_nova_senha');
     };
 
-    const handleSubmitNewPassword = (
+    const handleSubmitNewPassword = async(
         event: FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
@@ -217,6 +228,13 @@ export const Login = () => {
          * Não retornamos automaticamente para o login aqui, pois
          * ainda não existe confirmação de sucesso da operação.
          */
+        try{
+            await ConfirmResetPassword(formData.novaSenha);
+            setEtapa('login');
+        }catch(error){
+            setFeedback('Erro ao confirmar a nova senha. Tente novamente.');
+            return;
+        }
     };
 
     const voltarParaLogin = () => {
