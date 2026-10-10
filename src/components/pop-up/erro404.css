@@ -1,0 +1,147 @@
+.erro404-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(4, 12, 31, 0.75);
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+}
+
+.erro404-card {
+    position: relative;
+    width: min(100%, 480px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    padding: clamp(28px, 6vw, 44px);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 22px;
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    animation: erro404-enter 0.25s ease-out both;
+}
+
+.erro404-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 5px;
+    background: linear-gradient(90deg, #0b50bd 0%, #00a2ff 75%, #00c853 100%);
+}
+
+.erro404-symbol {
+    display: grid;
+    place-items: center;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    color: #0b50bd;
+}
+.erro404-symbol img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: brightness(0);
+}
+
+.erro404-symbol svg {
+    width: 54px;
+    height: 54px;
+}
+
+.erro404-code {
+    display: block;
+    margin-bottom: 8px;
+    color: #0b50bd;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+}
+
+#erro404-title {
+    margin: 0 0 12px;
+    color: #0b132b;
+    font-size: clamp(1.65rem, 5vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+#erro404-description {
+    max-width: 360px;
+    margin: 0 auto 28px;
+    color: #42516b;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+.erro404-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 18px;
+    border: 2px solid #0b50bd;
+    border-radius: 12px;
+    background: #0b50bd;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.erro404-action:hover {
+    background: #083d93;
+    box-shadow: 0 6px 16px rgba(11, 80, 189, 0.25);
+    transform: translateY(-2px);
+}
+
+.erro404-action:active {
+    transform: translateY(0);
+}
+
+.erro404-action:focus-visible {
+    outline: 3px solid #00a2ff;
+    outline-offset: 3px;
+}
+
+.erro404-action span {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+@keyframes erro404-enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .erro404-overlay {
+        padding: 16px;
+    }
+
+    .erro404-card {
+        max-height: calc(100dvh - 32px);
+        padding: 30px 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .erro404-card {
+        animation: none;
+    }
+}
