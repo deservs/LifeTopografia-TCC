@@ -17,7 +17,7 @@
     "@fastify/cors": "^11.3.0",
     "@fastify/multipart": "^10.1.0",
     "@paddleocr/paddleocr-js": "^0.4.2",
-    "@supabase/supabase-js": "^2.112.4",
+    "@supabase/supabase-js": "^2.117.3",
     "dotenv": "^17.4.2",
     "fastify": "^5.10.0",
     "fastify-type-provider-zod": "^7.0.0",
