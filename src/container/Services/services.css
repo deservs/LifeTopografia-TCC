@@ -309,6 +309,8 @@
     overflow: hidden;
 
     flex-shrink: 0;
+
+    filter: blur(0.5px);
 }
 
 .service-card__image img {
