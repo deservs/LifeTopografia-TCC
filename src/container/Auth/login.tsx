@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react';
-import { data, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import Sidebar from '../../components/Sidebar/sidebar.tsx';
 import type { UserProfile } from '../../components/Sidebar/sidebar';
