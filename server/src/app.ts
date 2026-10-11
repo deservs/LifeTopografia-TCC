@@ -1,25 +1,25 @@
-import { fastify } from 'fastify'
-import fastifyCors from '@fastify/cors'
-import fastifyMultipart from '@fastify/multipart'
+import { fastify } from "fastify";
+import fastifyCors from "@fastify/cors";
+import fastifyMultipart from "@fastify/multipart";
 import {
   serializerCompiler,
   validatorCompiler,
   ZodTypeProvider,
-} from 'fastify-type-provider-zod'
+} from "fastify-type-provider-zod";
 
-export const app = fastify().withTypeProvider<ZodTypeProvider>()
+export const app = fastify().withTypeProvider<ZodTypeProvider>();
 
-app.setValidatorCompiler(validatorCompiler)
-app.setSerializerCompiler(serializerCompiler)
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
 
 // Registra o CORS liberando acesso geral
 app.register(fastifyCors, {
   origin: true, // Permite qualquer origem (localhost:5173, localhost:3000, etc.)
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-})
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+});
 
 app.register(fastifyMultipart, {
   limits: {
     fileSize: 10 * 1024 * 1024, // Limite de 10MB por arquivo
   },
-})
+});

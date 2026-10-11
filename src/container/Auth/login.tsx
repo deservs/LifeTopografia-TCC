@@ -245,9 +245,9 @@ export const Login = () => {
 
     return (
         <div className="login-page">
-            <Sidebar 
-                isOpen={isSidebarOpen} 
-                onClose={() => setIsSidebarOpen(false)} 
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
                 user={currentUser}
             />
 
@@ -263,9 +263,9 @@ export const Login = () => {
                     `,
                 }}
             >
-                <button 
-                    type="button" 
-                    className="btn-menu-header" 
+                <button
+                    type="button"
+                    className="btn-menu-header"
                     onClick={() => setIsSidebarOpen(true)}
                     aria-label="Abrir menu"
                     aria-expanded={isSidebarOpen}
@@ -308,11 +308,10 @@ export const Login = () => {
                             <div className="tabs-header">
                                 <button
                                     type="button"
-                                    className={`tab-btn ${
-                                        tipoLogin === 'pessoa'
+                                    className={`tab-btn ${tipoLogin === 'pessoa'
                                             ? 'active'
                                             : ''
-                                    }`}
+                                        }`}
                                     onClick={() => {
                                         setTipoLogin('pessoa');
                                         setFeedback('');
@@ -342,11 +341,10 @@ export const Login = () => {
 
                                 <button
                                     type="button"
-                                    className={`tab-btn ${
-                                        tipoLogin === 'empresa'
+                                    className={`tab-btn ${tipoLogin === 'empresa'
                                             ? 'active'
                                             : ''
-                                    }`}
+                                        }`}
                                     onClick={() => {
                                         setTipoLogin('empresa');
                                         setFeedback('');
@@ -446,8 +444,8 @@ export const Login = () => {
                                 )}
 
                                 <div className="forgot-password-link-container">
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         className="btn-forgot-password"
                                         onClick={() => {
                                             setEtapa('esqueci_email');
@@ -545,8 +543,8 @@ export const Login = () => {
                                 <span>ENVIAR</span>
                             </button>
 
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="btn-back-login"
                                 onClick={voltarParaLogin}
                             >
@@ -600,9 +598,8 @@ export const Login = () => {
                                                 )
                                             }
                                             className="digit-box"
-                                            aria-label={`Dígito ${
-                                                index + 1
-                                            } de ${CODIGO_LENGTH}`}
+                                            aria-label={`Dígito ${index + 1
+                                                } de ${CODIGO_LENGTH}`}
                                             autoComplete={
                                                 index === 0
                                                     ? 'one-time-code'

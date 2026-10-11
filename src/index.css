@@ -12,70 +12,70 @@
 html,
 body,
 #root {
-    width: 100%;
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #ffffff;
-    color: #000000;
-    overflow-x: hidden;
+  font-family: "Poppins", sans-serif;
+  background-color: #ffffff;
+  color: #000000;
+  overflow-x: hidden;
 }
 
 button,
 input,
 textarea,
 select {
-    font: inherit;
+  font: inherit;
 }
 
 button,
 a {
-    -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 img,
 svg {
-    display: block;
+  display: block;
 }
 
 img {
-    max-width: 100%;
+  max-width: 100%;
 }
 
 button {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 a {
-    color: inherit;
+  color: inherit;
 }
 
 :focus-visible {
-    outline: 3px solid #00a2ff;
-    outline-offset: 3px;
+  outline: 3px solid #00a2ff;
+  outline-offset: 3px;
 }
 
 /* Evita animações/transições excessivas para usuários
    que solicitaram redução de movimento no sistema operacional. */
 @media (prefers-reduced-motion: reduce) {
-    html {
-        scroll-behavior: auto;
-    }
+  html {
+    scroll-behavior: auto;
+  }
 
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
