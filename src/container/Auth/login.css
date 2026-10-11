@@ -414,7 +414,7 @@
   outline-offset: 3px;
 }
 
-.captcha-container{
+.captcha-container {
   display: flex;
   justify-content: flex-start;
   margin-top: 10px;

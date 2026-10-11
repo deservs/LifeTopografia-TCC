@@ -7,7 +7,7 @@ import Home from "./container/Home/home";
 import Cadastrar from "./container/Auth/cadastrar";
 import Login from "./container/Auth/login";
 import Logout from "./container/Auth/logout";
-import CheckSession  from "./container/Auth/checar";
+import CheckSession from "./container/Auth/checar";
 
 import Services from "./container/Services/services";
 import Teste from "./container/Enviar-arquivos/enviar_arquivos";
@@ -18,8 +18,24 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/cadastrar" element={<><CheckSession /><Cadastrar /></>} />
-        <Route path="/login" element={<><CheckSession /><Login /></>} />
+        <Route
+          path="/cadastrar"
+          element={
+            <>
+              <CheckSession />
+              <Cadastrar />
+            </>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <>
+              <CheckSession />
+              <Login />
+            </>
+          }
+        />
         <Route path="/servicos" element={<Services />} />
         <Route path="/teste" element={<Teste />} />
         <Route path="/perfil" element={<Logout />} />

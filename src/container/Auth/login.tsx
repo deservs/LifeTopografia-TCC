@@ -151,7 +151,7 @@ export const Login = () => {
     try {
       await SendResetPassword(formData.emailRecuperacao);
     } catch (error) {
-      console.log("Erro ao reenviar código:", error);
+      console.error("Erro ao reenviar código:", error);
       setFeedback("Erro ao reenviar o código. Tente novamente.");
       return;
     }
@@ -171,10 +171,24 @@ export const Login = () => {
       return;
     }
     const indentificador = formData.loginIdentificador.trim();
-    const cnpjRegex = formData.loginIdentificador.replace(/[./-]/g,"").toUpperCase();
-    const formaDeLogin = tipoLogin === "pessoa" ? indentificador.includes("@") ? "email" : "nome" : /^[A-Z0-9]{12}[0-9]{2}$/.test(cnpjRegex) ? "cnpj" : "nome";
+    const cnpjRegex = formData.loginIdentificador
+      .replace(/[./-]/g, "")
+      .toUpperCase();
+    const formaDeLogin =
+      tipoLogin === "pessoa"
+        ? indentificador.includes("@")
+          ? "email"
+          : "nome"
+        : /^[A-Z0-9]{12}[0-9]{2}$/.test(cnpjRegex)
+          ? "cnpj"
+          : "nome";
     try {
-      await SignIn(formData.loginIdentificador, formData.senha, captchaToken, formaDeLogin);
+      await SignIn(
+        formData.loginIdentificador,
+        formData.senha,
+        captchaToken,
+        formaDeLogin,
+      );
       window.location.href = "/";
     } catch (error) {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");
@@ -207,7 +221,7 @@ export const Login = () => {
       await SendResetPassword(formData.emailRecuperacao);
       setEtapa("esqueci_codigo");
     } catch (error) {
-      console.log("Erro ao enviar solicitação de recuperação:", error);
+      console.error("Erro ao enviar solicitação de recuperação:", error);
       setFeedback(
         "Erro ao enviar solicitação de recuperação. Verifique o email informado.",
       );
@@ -232,7 +246,7 @@ export const Login = () => {
       await ConfirmOTP(codigoCompleto, formData.emailRecuperacao);
       setEtapa("esqueci_nova_senha");
     } catch (error) {
-      console.log("Erro ao confirmar o código:", error);
+      console.error("Erro ao confirmar o código:", error);
       setFeedback(
         "Erro ao confirmar o código. Verifique se o código informado está correto.",
       );
@@ -272,7 +286,7 @@ export const Login = () => {
       await ConfirmResetPassword(formData.novaSenha);
       setEtapa("login");
     } catch (error) {
-      console.log("Erro ao confirmar a nova senha:", error);
+      console.error("Erro ao confirmar a nova senha:", error);
       setFeedback("Erro ao confirmar a nova senha. Tente novamente.");
       return;
     }

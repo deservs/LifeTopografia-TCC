@@ -27,14 +27,15 @@ app.register(fastifyMultipart, {
 })
 
 app.get('/api/login', async (request, reply) => {
-  const {valor, type} = request.query as {valor: string, type: "cnpj" | "nome"};
-try{
-  const email = await searchUser(valor, type);
-  console.log("Email encontrado:", email);
-    return reply.code(200).send({ message: 'Servidor rodando com sucesso!', reply: email });
-}catch (error) {
-  console.error("Erro ao buscar usuário:", error);
-  return reply.code(500).send({ message: 'Erro ao buscar usuário', error: error });
-}
-
+  const { valor, type } = request.query as { valor: string; type: 'cnpj' | 'nome' }
+  try {
+    const email = await searchUser(valor, type)
+    console.log('Email encontrado:', email)
+    return reply
+      .code(200)
+      .send({ message: 'Servidor rodando com sucesso!', reply: email })
+  } catch (error) {
+    console.error('Erro ao buscar usuário:', error)
+    return reply.code(500).send({ message: 'Erro ao buscar usuário', error: error })
+  }
 })
