@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import Sidebar from '../../components/Sidebar/sidebar.tsx';
 import type { UserProfile } from '../../components/Sidebar/sidebar';
-import { SendResetPassword, ConfirmResetPassword, ConfirmOTP } from '../../lib/supabase/auth.ts';
+import { SendResetPassword, ConfirmResetPassword, ConfirmOTP, SignIn } from '../../lib/supabase/auth.ts';
 
 import Logo from '../../assets/image/logo-front.webp';
 import FundoHeader from '../../assets/image/background/firstcard.webp';
@@ -143,10 +143,16 @@ export const Login = () => {
         setShowModalResend(true);
     };
 
-    const handleSubmitLogin = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmitLogin = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setFeedback('');
-
+        try{
+            await SignIn(formData.loginIdentificador, formData.senha);
+            window.location.href = '/';
+        }catch(error){
+            setFeedback('Erro ao fazer login. Verifique suas credenciais.');
+            console.error('Erro ao fazer login:', error);
+        }
         /*
          * Integração futura:
          * enviar tipoLogin, loginIdentificador e senha ao backend.
