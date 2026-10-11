@@ -1,11 +1,14 @@
 import {
   useEffect,
   useState,
+  useRef,
   type ChangeEvent,
   type FormEvent,
   type KeyboardEvent,
 } from "react";
 import { Link } from "react-router-dom";
+
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
@@ -40,6 +43,8 @@ const TEMPO_REENVIO = 60;
 
 export const Login = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captcha = useRef<HCaptcha | null>(null);
 
   // Será substituído pelos dados da sessão quando a autenticação for integrada.
   const currentUser: UserProfile | null = null;
@@ -161,12 +166,19 @@ export const Login = () => {
   const handleSubmitLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFeedback("");
+    if (!captchaToken) {
+      setFeedback("Por favor, complete o captcha.");
+      return;
+    }
     try {
-      await SignIn(formData.loginIdentificador, formData.senha);
+      await SignIn(formData.loginIdentificador, formData.senha, captchaToken);
       window.location.href = "/";
     } catch (error) {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");
       console.error("Erro ao fazer login:", error);
+    } finally {
+      captcha.current?.resetCaptcha();
+      setCaptchaToken(null);
     }
     /*
      * Integração futura:
@@ -451,6 +463,17 @@ export const Login = () => {
                   >
                     Esqueci minha senha
                   </button>
+                </div>
+
+                <div className="captcha-container">
+                  <HCaptcha
+                    ref={captcha}
+                    sitekey="09964b22-6cc4-4da0-97c8-b32c887ed4aa"
+                    onVerify={(token) => {
+                      setCaptchaToken(token);
+                    }}
+                    onExpire={() => setCaptchaToken(null)}
+                  />
                 </div>
 
                 <button type="submit" className="btn-action-login">
