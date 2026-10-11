@@ -104,16 +104,18 @@ export const Cadastrar = () => {
       setFormError("Informe o CNPJ da empresa.");
       return;
     }
-    try{
-        const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${formData.cnpj.replace(/[^a-zA-Z0-9]/g, "")}`);
-        if (!response.ok) {
-            setFormError("Ocorreu um erro ao buscar o CNPJ.");
-            throw new Error("Erro ao buscar CNPJ");
+    if (tipoCadastro === "empresa"){
+        try{
+            const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${formData.cnpj.replace(/[^a-zA-Z0-9]/g, "")}`);
+            if (!response.ok) {
+                setFormError("Ocorreu um erro ao buscar o CNPJ.");
+                throw new Error("Erro ao buscar CNPJ");
+            }
+        } catch (error) {
+            console.error("Erro ao buscar CNPJ:", error);
+            setFormError("Ocorreu um erro ao buscar o CNPJ. Verifique se o CNPJ é válido e tente novamente.");
+            return;
         }
-    } catch (error) {
-        console.error("Erro ao buscar CNPJ:", error);
-        setFormError("Ocorreu um erro ao buscar o CNPJ. Verifique se o CNPJ é válido e tente novamente.");
-        return;
     }
 
     /* método de criar um novo usuário */
