@@ -10,7 +10,7 @@ const envSchema = z.object({
 })
 
 const envSchemaWithSupabase = envSchema.extend({
-  SUPABASE_URL: z.string().url('A SUPABASE_URL precisa ser uma URL válida'),
+  VITE_SUPABASE_URL: z.string().url('A SUPABASE_URL precisa ser uma URL válida'),
   VITE_SUPABASE_PUBLISHABLE_KEY: z
     .string()
     .min(1, 'A SUPABASE_PUBLISHABLE_KEY é obrigatória'),
