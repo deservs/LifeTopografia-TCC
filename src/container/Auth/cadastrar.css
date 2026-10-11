@@ -437,6 +437,12 @@
   outline-offset: 3px;
 }
 
+.captcha-container{
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
 .btn-add-user-icon {
   width: 24px;
   height: 24px;

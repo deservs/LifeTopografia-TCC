@@ -6,6 +6,7 @@ export async function SignUp(
   password: string,
   nome: string,
   cnpj: string | null = null,
+  captchaToken: string,
 ) {
   if (
     cnpj === "" ||
@@ -24,6 +25,7 @@ export async function SignUp(
         nome_ou_razao: nome,
         cnpj: cnpj,
       },
+      captchaToken: captchaToken,
     },
   });
 
