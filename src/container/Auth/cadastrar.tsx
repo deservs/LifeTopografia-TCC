@@ -127,7 +127,7 @@ export const Cadastrar = () => {
         return;
       }
     }
-    
+
     /* método de criar um novo usuário */
     SignUp(
       formData.email,

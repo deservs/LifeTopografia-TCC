@@ -33,21 +33,25 @@ export async function SignUp(
     throw new Error(error.message);
   }
 
-  console.log("Usuário registrado com sucesso:", data);
   return data;
 }
 
 /* função que irá fazer login de um usuário existente */
-export async function SignIn(valor: string, password: string, captchaToken: string, loginType: "email" | "cnpj" | "nome") {
+export async function SignIn(
+  valor: string,
+  password: string,
+  captchaToken: string,
+  loginType: "email" | "cnpj" | "nome",
+) {
   let email = null;
-  const parametros = new URLSearchParams({valor: valor, type: loginType});
-  if (loginType !== "email"){
-     const resposta = await fetch(`/api/login?${parametros}`, {
+  const parametros = new URLSearchParams({ valor: valor, type: loginType });
+  if (loginType !== "email") {
+    const resposta = await fetch(`/api/login?${parametros}`, {
       method: "GET",
     });
     email = await resposta.json();
     email = email.reply[0].email;
-  }else{
+  } else {
     email = valor;
   }
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -62,7 +66,6 @@ export async function SignIn(valor: string, password: string, captchaToken: stri
     throw new Error(error.message);
   }
 
-  console.log("Usuário logado com sucesso:", data);
   return data;
 }
 
@@ -77,11 +80,10 @@ export async function SignOut() {
 
 /* função que irá enviar um código para o email do usuário */
 export async function SendResetPassword(email: string): Promise<boolean> {
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
   if (error) {
     throw new Error(error.message);
   }
-  console.log("Email de redefinição de senha enviado com sucesso:", data);
   return true;
 }
 
@@ -95,7 +97,6 @@ export async function ConfirmOTP(accessToken: string, email: string) {
   if (error) {
     throw new Error(error.message);
   }
-  console.log("Email confirmado com sucesso:", data);
   return data;
 }
 
@@ -107,7 +108,6 @@ export async function ConfirmResetPassword(newPassword: string) {
   if (error) {
     throw new Error(error.message);
   }
-  console.log("Senha redefinida com sucesso:", data);
   return data;
 }
 

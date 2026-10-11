@@ -39,11 +39,7 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
    * Busca os dados do usuário autenticado.
    */
   useEffect(() => {
-    SerchDataUser()
-      .then(setPerfil)
-      .catch((error) => {
-        console.error("Erro ao buscar dados do usuário:", error);
-      });
+    SerchDataUser().then(setPerfil);
   }, []);
   const userData = perfil ?? user;
   /**
