@@ -15,9 +15,9 @@
 
   background-color: #ffffff;
 
-    overflow-x: hidden;
-    position: relative;
-    backdrop-filter: brightness(0);
+  overflow-x: hidden;
+  position: relative;
+  backdrop-filter: brightness(0);
 }
 
 /* =========================================================

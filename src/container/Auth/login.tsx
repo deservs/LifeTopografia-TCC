@@ -22,10 +22,7 @@ import FundoHeader from "../../assets/image/background/firstcard.webp";
 import "./login.css";
 
 type EtapaFluxo =
-  | "login"
-  | "esqueci_email"
-  | "esqueci_codigo"
-  | "esqueci_nova_senha";
+  "login" | "esqueci_email" | "esqueci_codigo" | "esqueci_nova_senha";
 
 type TipoLogin = "pessoa" | "empresa";
 
