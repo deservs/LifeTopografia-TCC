@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "start:server": "node server/dist/server.js",
     "format:client": "prettier --write src",
-    "format:server": "biome format --write server/src",
+    "format:server": "cd server && biome format --write src",
     "format": "npm run format:client && npm run format:server"
   },
   "dependencies": {
