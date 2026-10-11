@@ -12,12 +12,13 @@
     "preview": "vite preview",
     "start:server": "node server/dist/server.js",
     "format:client": "prettier --write src",
-    "format:server": "biome format --write server/src",
+    "format:server": "cd server && biome format --write src",
     "format": "npm run format:client && npm run format:server"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@fastify/multipart": "^10.1.0",
+    "@hcaptcha/react-hcaptcha": "^2.2.0",
     "@paddleocr/paddleocr-js": "^0.4.2",
     "@supabase/supabase-js": "^2.117.3",
     "dotenv": "^17.4.2",

@@ -1,6 +1,7 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent, useRef } from "react";
 import { Link } from "react-router-dom";
 
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
@@ -23,6 +24,8 @@ interface FormData {
 }
 
 export const Cadastrar = () => {
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captcha = useRef<HCaptcha | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -89,6 +92,10 @@ export const Cadastrar = () => {
     event.preventDefault();
     setFormError("");
 
+    if (!captchaToken) {
+      setFormError("Por favor, complete o captcha.");
+      return;
+    }
     if (formData.email !== formData.confirmarEmail) {
       setFormError("Os emails informados não são iguais.");
       return;
@@ -120,9 +127,15 @@ export const Cadastrar = () => {
         return;
       }
     }
-
+    
     /* método de criar um novo usuário */
-    SignUp(formData.email, formData.senha, formData.nome, formData.cnpj)
+    SignUp(
+      formData.email,
+      formData.senha,
+      formData.nome,
+      formData.cnpj,
+      captchaToken,
+    )
       .then(() => {
         window.location.href = "/login";
       })
@@ -131,6 +144,10 @@ export const Cadastrar = () => {
         setFormError(
           "Ocorreu um erro ao cadastrar. Tente novamente mais tarde.",
         );
+      })
+      .finally(() => {
+        captcha.current?.resetCaptcha();
+        setCaptchaToken(null);
       });
   };
 
@@ -397,6 +414,17 @@ export const Cadastrar = () => {
                 {formError}
               </p>
             )}
+
+            <div className="captcha-container">
+              <HCaptcha
+                ref={captcha}
+                sitekey="09964b22-6cc4-4da0-97c8-b32c887ed4aa"
+                onVerify={(token) => {
+                  setCaptchaToken(token);
+                }}
+                onExpire={() => setCaptchaToken(null)}
+              />
+            </div>
 
             <button type="submit" className="btn-action-cadastrar">
               <svg
