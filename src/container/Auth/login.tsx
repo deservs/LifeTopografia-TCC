@@ -9,6 +9,7 @@ import Logo from '../../assets/image/logo-front.webp';
 import FundoHeader from '../../assets/image/background/firstcard.webp';
 
 import './login.css';
+import ca from 'zod/v4/locales/ca.cjs';
 
 type EtapaFluxo =
     | 'login'
@@ -131,10 +132,16 @@ export const Login = () => {
         previousInput?.focus();
     };
 
-    const handleReenviarCodigo = () => {
+    const handleReenviarCodigo = async() => {
         setTimer(TEMPO_REENVIO);
         setFeedback('');
 
+        try{
+            await SendResetPassword(formData.emailRecuperacao);
+        }catch(error){
+            setFeedback('Erro ao reenviar o código. Tente novamente.');
+            return;
+        }
         /*
          * Integração futura:
          * somente abrir o modal depois que o backend confirmar
