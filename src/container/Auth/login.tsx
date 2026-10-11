@@ -170,8 +170,11 @@ export const Login = () => {
       setFeedback("Por favor, complete o captcha.");
       return;
     }
+    const indentificador = formData.loginIdentificador.trim();
+    const cnpjRegex = formData.loginIdentificador.replace(/[./-]/g,"").toUpperCase();
+    const formaDeLogin = tipoLogin === "pessoa" ? indentificador.includes("@") ? "email" : "nome" : /^[A-Z0-9]{12}[0-9]{2}$/.test(cnpjRegex) ? "cnpj" : "nome";
     try {
-      await SignIn(formData.loginIdentificador, formData.senha, captchaToken);
+      await SignIn(formData.loginIdentificador, formData.senha, captchaToken, formaDeLogin);
       window.location.href = "/";
     } catch (error) {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");

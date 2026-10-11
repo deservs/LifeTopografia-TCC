@@ -38,7 +38,18 @@ export async function SignUp(
 }
 
 /* função que irá fazer login de um usuário existente */
-export async function SignIn(email: string, password: string, captchaToken: string) {
+export async function SignIn(valor: string, password: string, captchaToken: string, loginType: "email" | "cnpj" | "nome") {
+  let email = null;
+  const parametros = new URLSearchParams({valor: valor, type: loginType});
+  if (loginType !== "email"){
+     const resposta = await fetch(`/api/login?${parametros}`, {
+      method: "GET",
+    });
+    email = await resposta.json();
+    email = email.reply[0].email;
+  }else{
+    email = valor;
+  }
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email,
     password: password,
@@ -53,6 +64,15 @@ export async function SignIn(email: string, password: string, captchaToken: stri
 
   console.log("Usuário logado com sucesso:", data);
   return data;
+}
+
+/* função que irá fazer logout de um usuário autenticado */
+export async function SignOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    throw new Error(error.message);
+  }
+  console.log("Usuário deslogado com sucesso.");
 }
 
 /* função que irá enviar um código para o email do usuário */
