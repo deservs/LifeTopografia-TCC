@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+
+import { SerchDataUser } from '../../lib/supabase/auth';
 
 import './sidebar.css';
 import LogoIcon from '../../assets/image/logo-front.webp';
@@ -28,10 +30,19 @@ interface SidebarProps {
     user?: UserProfile | null;
 }
 
+
 export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const previousFocusedElementRef = useRef<HTMLElement | null>(null);
-
+    const [perfil, setPerfil] = useState<UserProfile | null>(null);
+    
+    /**
+     * Busca os dados do usuário autenticado.
+    */
+       useEffect(() => {
+           SerchDataUser().then(setPerfil).catch((error) => { console.error('Erro ao buscar dados do usuário:', error); });
+        }, []);
+        const userData = perfil ?? user;
     /**
      * Controla o teclado enquanto o drawer está aberto.
      *
@@ -154,13 +165,13 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
                      * o componente pai estiver conectado ao backend.
                      */}
                     <div className="sidebar-profile">
-                        {user ? (
+                        {userData ? (
                             <div className="user-box">
                                 <div className="avatar-container">
-                                    {user.avatarUrl ? (
+                                    {userData.avatarUrl ? (
                                         <img
-                                            src={user.avatarUrl}
-                                            alt={`Foto de perfil de ${user.name}`}
+                                            src={userData.avatarUrl}
+                                            alt={`Foto de perfil de ${userData.name}`}
                                             className="avatar-img"
                                         />
                                     ) : (
@@ -168,7 +179,7 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
                                             className="avatar-placeholder"
                                             aria-hidden="true"
                                         >
-                                            {user.name
+                                            {userData.name
                                                 .charAt(0)
                                                 .toUpperCase()}
                                         </div>
@@ -177,11 +188,11 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
 
                                 <div className="profile-details">
                                     <h2 className="user-name">
-                                        {user.name}
+                                        {userData.name}
                                     </h2>
 
                                     <span className="user-role">
-                                        {user.role}
+                                        {userData.role}
                                     </span>
 
                                     <Link
@@ -189,7 +200,7 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
                                         className="account-link"
                                         onClick={onClose}
                                     >
-                                        Acesse sua conta
+                                        Acessar perfil
                                     </Link>
                                 </div>
                             </div>
