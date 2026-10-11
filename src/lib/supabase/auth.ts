@@ -38,10 +38,13 @@ export async function SignUp(
 }
 
 /* função que irá fazer login de um usuário existente */
-export async function SignIn(email: string, password: string) {
+export async function SignIn(email: string, password: string, captchaToken: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email,
     password: password,
+    options: {
+      captchaToken: captchaToken,
+    },
   });
 
   if (error) {

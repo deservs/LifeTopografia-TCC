@@ -414,6 +414,12 @@
   outline-offset: 3px;
 }
 
+.captcha-container{
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
 .btn-back-login {
   align-self: center;
 
