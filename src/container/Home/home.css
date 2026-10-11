@@ -3,17 +3,16 @@
    ========================================================= */
 
 #initial-card {
-    position: relative;
+  position: relative;
 
-    width: 100%;
-    height: 100vh;
-    height: 100dvh;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
 
-    overflow: hidden;
+  overflow: hidden;
 
-    background-color: #000;
+  background-color: #000;
 }
-
 
 /* =========================================================
    CAMADA DE CONTEÚDO
@@ -27,456 +26,436 @@
  * disponível for pequena.
  */
 #superposition {
-    position: absolute;
-    inset: 0;
+  position: absolute;
+  inset: 0;
 
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 
-    z-index: 2;
+  z-index: 2;
 
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 
-    background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.35);
 
-    overflow-x: hidden;
-    overflow-y: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
-
 
 /* =========================================================
    CONTEÚDO PRINCIPAL
    ========================================================= */
 
 #main-content {
-    width: 100%;
-    min-height: 100%;
+  width: 100%;
+  min-height: 100%;
 
-    padding: 15px 5vw 40px;
+  padding: 15px 5vw 40px;
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-    margin: 0 auto;
+  margin: 0 auto;
 }
-
 
 /* =========================================================
    CARROSSEL DE FUNDO
    ========================================================= */
 
 #init-carrossel {
-    position: absolute;
-    inset: 0;
+  position: absolute;
+  inset: 0;
 
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 
-    z-index: 1;
+  z-index: 1;
 
-    pointer-events: none;
+  pointer-events: none;
 }
 
 #init-carrossel .swiper-slide {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 
-    overflow: hidden;
+  overflow: hidden;
 }
 
 #init-carrossel img {
-    display: block;
+  display: block;
 
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 
-    object-fit: cover;
+  object-fit: cover;
 
-    /*
+  /*
      * O desfoque reduz a quantidade de detalhes do fundo
      * e mantém o texto em primeiro plano mais legível.
      *
      * O scale evita que o blur exponha as bordas da imagem.
      */
-    filter: blur(2px) brightness(0.89);
-    transform: scale(1.05);
+  filter: blur(2px) brightness(0.89);
+  transform: scale(1.05);
 }
-
 
 /* =========================================================
    MENU HAMBÚRGUER
    ========================================================= */
 
 #barra-lateral {
-    position: relative;
-    z-index: 3;
+  position: relative;
+  z-index: 3;
 
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 
-    width: 100%;
+  width: 100%;
 
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .btn-menu {
-    position: relative;
+  position: relative;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 
-    width: 44px;
-    height: 44px;
+  width: 44px;
+  height: 44px;
 
-    padding: 8px;
+  padding: 8px;
 
-    background: none;
-    border: none;
+  background: none;
+  border: none;
 
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .btn-menu span {
-    display: block;
+  display: block;
 
-    width: 100%;
-    height: 4px;
+  width: 100%;
+  height: 4px;
 
-    background-color: #ffffff;
+  background-color: #ffffff;
 
-    border-radius: 4px;
+  border-radius: 4px;
 
-    transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .btn-menu:hover span {
-    background-color: #00a2ff;
+  background-color: #00a2ff;
 }
 
 .btn-menu:focus-visible {
-    outline: 2px solid #00a2ff;
-    outline-offset: 3px;
+  outline: 2px solid #00a2ff;
+  outline-offset: 3px;
 
-    border-radius: 4px;
+  border-radius: 4px;
 }
-
 
 /* =========================================================
    LOGOTIPO
    ========================================================= */
 
 #logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    width: 100%;
+  width: 100%;
 }
 
 #logo img {
-    width: auto;
+  width: auto;
 
-    height: clamp(80px, 8vh, 140px);
+  height: clamp(80px, 8vh, 140px);
 
-    filter: drop-shadow(
-        0 2px 8px rgba(0, 0, 0, 0.8)
-    );
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
 }
-
 
 /* =========================================================
    TÍTULO PRINCIPAL
    ========================================================= */
 
 #text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
-    width: 100%;
+  width: 100%;
 
-    margin-top: 10px;
+  margin-top: 10px;
 
-    color: #ffffff;
+  color: #ffffff;
 
-    text-align: center;
+  text-align: center;
 }
 
 #text h1 {
-    margin: 0;
+  margin: 0;
 
-    color: #ffffff;
+  color: #ffffff;
 
-    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-    font-weight: 700;
-    line-height: 1.2;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.2;
 
-    text-shadow:
-        0 2px 10px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
 
 #text .highlight {
-    color: #007bff;
+  color: #007bff;
 }
-
 
 /* =========================================================
    DIVISÓRIAS
    ========================================================= */
 
 .divider-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    width: 100%;
-    max-width: 1100px;
+  width: 100%;
+  max-width: 1100px;
 
-    margin: 15px 0;
+  margin: 15px 0;
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .divider-container .line {
-    flex: 1;
+  flex: 1;
 
-    height: 2px;
+  height: 2px;
 
-    background-color: #007bff;
+  background-color: #007bff;
 
-    box-shadow:
-        0 0 6px rgba(0, 123, 255, 0.8);
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.8);
 }
 
 .divider-container .rhombus {
-    flex-shrink: 0;
+  flex-shrink: 0;
 
-    width: 10px;
-    height: 10px;
+  width: 10px;
+  height: 10px;
 
-    margin: 0 10px;
+  margin: 0 10px;
 
-    background-color: #00ff00;
+  background-color: #00ff00;
 
-    transform: rotate(45deg);
+  transform: rotate(45deg);
 
-    box-shadow:
-        0 0 8px rgba(0, 255, 0, 0.8);
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
 }
-
 
 /* =========================================================
    DESCRIÇÃO
    ========================================================= */
 
 .home-description {
-    width: 100%;
-    max-width: 1000px;
+  width: 100%;
+  max-width: 1000px;
 
-    margin: 0;
+  margin: 0;
 
-    color: #ffffff;
+  color: #ffffff;
 
-    font-size: clamp(1.2rem, 1.8vw, 1.4rem);
-    font-weight: 400;
-    line-height: 1.5;
+  font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+  font-weight: 400;
+  line-height: 1.5;
 
-    text-align: center;
+  text-align: center;
 
-    text-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
-
 
 /* =========================================================
    BOTÃO DE SOLICITAÇÃO
    ========================================================= */
 
 #btn-solicite {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    width: 100%;
+  width: 100%;
 
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 #btn-solicite a {
-    display: inline-block;
+  display: inline-block;
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 
-    padding: 14px 32px;
+  padding: 14px 32px;
 
-    background-color: rgba(0, 110, 255, 0.35);
+  background-color: rgba(0, 110, 255, 0.35);
 
-    border: 2px solid #00a2ff;
-    border-radius: 50px;
+  border: 2px solid #00a2ff;
+  border-radius: 50px;
 
-    color: #ffffff;
+  color: #ffffff;
 
-    font-size: clamp(1.1rem, 1.2vw, 1.15rem);
-    font-weight: 700;
-    letter-spacing: 1px;
+  font-size: clamp(1.1rem, 1.2vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: 1px;
 
-    text-align: center;
-    text-decoration: none;
+  text-align: center;
+  text-decoration: none;
 
-    cursor: pointer;
+  cursor: pointer;
 
-    backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 
-    transition:
-        background-color 0.3s ease,
-        box-shadow 0.3s ease,
-        transform 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
 }
 
 #btn-solicite a:hover {
-    background-color: rgba(0, 162, 255, 0.85);
+  background-color: rgba(0, 162, 255, 0.85);
 
-    box-shadow:
-        0 0 20px rgba(0, 162, 255, 0.7);
+  box-shadow: 0 0 20px rgba(0, 162, 255, 0.7);
 
-    transform: translateY(-2px);
+  transform: translateY(-2px);
 }
 
 #btn-solicite a:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 #btn-solicite a:focus-visible {
-    outline: 2px solid #ffffff;
-    outline-offset: 4px;
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
 }
-
 
 /* =========================================================
    DESKTOP
    ========================================================= */
 
 @media screen and (min-width: 1024px) {
-    #main-content {
-        padding-top: 3vh;
-    }
+  #main-content {
+    padding-top: 3vh;
+  }
 
-    .divider-container {
-        margin: 20px 0;
-    }
+  .divider-container {
+    margin: 20px 0;
+  }
 
-    #btn-solicite {
-        margin-top: 25px;
-    }
+  #btn-solicite {
+    margin-top: 25px;
+  }
 }
-
 
 /* =========================================================
    MOBILE
    ========================================================= */
 
 @media screen and (max-width: 768px) {
-    #main-content {
-        padding: 20px 20px 40px;
-    }
+  #main-content {
+    padding: 20px 20px 40px;
+  }
 
-    #logo img {
-        height: clamp(80px, 14vw, 110px);
-    }
+  #logo img {
+    height: clamp(80px, 14vw, 110px);
+  }
 
-    #text {
-        margin-top: 20px;
-    }
+  #text {
+    margin-top: 20px;
+  }
 
-    #text h1 {
-        font-size: clamp(1.8rem, 9vw, 2.3rem);
-    }
+  #text h1 {
+    font-size: clamp(1.8rem, 9vw, 2.3rem);
+  }
 
-    .home-description {
-        margin: 10px 0;
+  .home-description {
+    margin: 10px 0;
 
-        font-size: clamp(1.05rem, 5vw, 1.35rem);
-        line-height: 1.5;
-    }
+    font-size: clamp(1.05rem, 5vw, 1.35rem);
+    line-height: 1.5;
+  }
 
-    .divider-container {
-        margin: 22px 0;
-    }
+  .divider-container {
+    margin: 22px 0;
+  }
 
-    .divider-container .rhombus {
-        width: 12px;
-        height: 12px;
-    }
+  .divider-container .rhombus {
+    width: 12px;
+    height: 12px;
+  }
 
-    #btn-solicite {
-        margin-top: 25px;
-    }
+  #btn-solicite {
+    margin-top: 25px;
+  }
 
-    #btn-solicite a {
-        width: 100%;
-        max-width: 340px;
+  #btn-solicite a {
+    width: 100%;
+    max-width: 340px;
 
-        padding: 16px 28px;
+    padding: 16px 28px;
 
-        font-size: 1.15rem;
-    }
+    font-size: 1.15rem;
+  }
 }
-
 
 /* =========================================================
    TELAS MUITO PEQUENAS
    ========================================================= */
 
 @media screen and (max-width: 380px) {
-    #main-content {
-        padding-right: 16px;
-        padding-left: 16px;
-    }
+  #main-content {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
 
-    #text h1 {
-        font-size: 1.7rem;
-    }
+  #text h1 {
+    font-size: 1.7rem;
+  }
 
-    .home-description {
-        font-size: 1rem;
-    }
+  .home-description {
+    font-size: 1rem;
+  }
 
-    .divider-container {
-        margin: 16px 0;
-    }
+  .divider-container {
+    margin: 16px 0;
+  }
 
-    #btn-solicite a {
-        padding: 14px 20px;
+  #btn-solicite a {
+    padding: 14px 20px;
 
-        font-size: 1rem;
-    }
+    font-size: 1rem;
+  }
 }
-
 
 /* =========================================================
    REDUÇÃO DE MOVIMENTO
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-    .btn-menu span,
-    #btn-solicite a {
-        transition: none;
-    }
+  .btn-menu span,
+  #btn-solicite a {
+    transition: none;
+  }
 
-    #init-carrossel img {
-        transform: none;
-        filter: brightness(0.89);
-    }
+  #init-carrossel img {
+    transform: none;
+    filter: brightness(0.89);
+  }
 }

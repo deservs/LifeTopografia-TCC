@@ -43,7 +43,7 @@ export async function PdfpageToImage(
   let loadingTask: ReturnType<typeof pdfjsLib.getDocument> | null = null;
   let canvas: HTMLCanvasElement | null = null;
   let page: pdfjsLib.PDFPageProxy | null = null;
-  try { 
+  try {
     // Carrega a estrutura na memória
     loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
     const pdfDoc = await loadingTask.promise;
@@ -79,8 +79,8 @@ export async function PdfpageToImage(
     if (page) page.cleanup();
     if (loadingTask) await loadingTask.destroy();
     if (canvas) {
-    canvas.width = 0;
-    canvas.height = 0;
+      canvas.width = 0;
+      canvas.height = 0;
     }
   }
 }

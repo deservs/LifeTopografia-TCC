@@ -148,9 +148,9 @@ export default function Home() {
                     prefersReducedMotion
                         ? false
                         : {
-                              delay: 8000,
-                              disableOnInteraction: false,
-                          }
+                            delay: 8000,
+                            disableOnInteraction: false,
+                        }
                 }
                 aria-hidden="true"
             >
