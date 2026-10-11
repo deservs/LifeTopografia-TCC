@@ -4,423 +4,414 @@
    ========================================================= */
 
 #overlay-sidebar {
-    position: fixed;
-    inset: 0;
+  position: fixed;
+  inset: 0;
 
-    background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.6);
 
-    /* Fica acima da página e abaixo do drawer. */
-    z-index: 998;
+  /* Fica acima da página e abaixo do drawer. */
+  z-index: 998;
 
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 
-    transition:
-        opacity 0.3s ease,
-        visibility 0s linear 0.3s;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0.3s;
 }
 
 #overlay-sidebar.open {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transition-delay: 0s;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }
-
 
 /* =========================================================
    PAINEL DA SIDEBAR
    ========================================================= */
 
 #menu-drawer {
-    position: fixed;
-    top: 0;
-    left: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
 
-    width: 85vw;
-    max-width: 340px;
+  width: 85vw;
+  max-width: 340px;
 
-    /*
+  /*
      * 100vh funciona como fallback.
      * 100dvh acompanha melhor a viewport dinâmica em celulares.
      */
-    height: 100vh;
-    height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
 
-    box-sizing: border-box;
+  box-sizing: border-box;
 
-    padding: 24px 20px;
+  padding: 24px 20px;
 
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 
-    background-color: rgba(11, 19, 43, 0.96);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(11, 19, 43, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 
-    color: #ffffff;
+  color: #ffffff;
 
-    z-index: 999;
+  z-index: 999;
 
-    /*
+  /*
      * O transform anima a entrada sem alterar o layout da página.
      * visibility também impede foco em links quando o drawer está fechado.
      */
-    transform: translateX(-100%);
-    visibility: hidden;
+  transform: translateX(-100%);
+  visibility: hidden;
 
-    transition:
-        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        visibility 0s linear 0.3s;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 0.3s;
 
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
 
-    /* O conteúdo interno controla sua própria rolagem. */
-    overflow: hidden;
+  /* O conteúdo interno controla sua própria rolagem. */
+  overflow: hidden;
 }
 
 #menu-drawer.open {
-    transform: translateX(0);
-    visibility: visible;
-    transition-delay: 0s;
+  transform: translateX(0);
+  visibility: visible;
+  transition-delay: 0s;
 }
-
 
 /* =========================================================
    CABEÇALHO
    ========================================================= */
 
 .sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    width: 100%;
-    margin-bottom: 24px;
+  width: 100%;
+  margin-bottom: 24px;
 
-    /* Evita compressão quando o conteúdo interno cresce. */
-    flex-shrink: 0;
+  /* Evita compressão quando o conteúdo interno cresce. */
+  flex-shrink: 0;
 }
 
 .btn-close-sidebar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    width: 44px;
-    height: 44px;
-    padding: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
 
-    background: none;
-    border: none;
+  background: none;
+  border: none;
 
-    color: #ffffff;
+  color: #ffffff;
 
-    font-size: 2.2rem;
-    font-weight: 300;
-    line-height: 1;
+  font-size: 2.2rem;
+  font-weight: 300;
+  line-height: 1;
 
-    cursor: pointer;
+  cursor: pointer;
 
-    transition: color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .btn-close-sidebar:hover {
-    color: #00a2ff;
+  color: #00a2ff;
 }
 
 .btn-close-sidebar:focus-visible {
-    outline: 2px solid #00a2ff;
-    outline-offset: 3px;
-    border-radius: 4px;
+  outline: 2px solid #00a2ff;
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .sidebar-logo-icon {
-    width: auto;
-    height: 40px;
+  width: auto;
+  height: 40px;
 }
-
 
 /* =========================================================
    CONTEÚDO INTERNO
    ========================================================= */
 
 #conteudo-sidebar {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 
-    /* Permite rolagem sem mover o painel fixo. */
-    min-height: 0;
-    overflow-y: auto;
+  /* Permite rolagem sem mover o painel fixo. */
+  min-height: 0;
+  overflow-y: auto;
 
-    padding-right: 4px;
+  padding-right: 4px;
 }
 
 #conteudo-sidebar::-webkit-scrollbar {
-    width: 4px;
+  width: 4px;
 }
 
 #conteudo-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
 }
-
 
 /* =========================================================
    PERFIL
    ========================================================= */
 
 .sidebar-profile {
-    padding: 4px 0;
+  padding: 4px 0;
 }
 
 .user-box {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .avatar-img,
 .avatar-placeholder,
 .avatar-icon svg {
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .avatar-img {
-    object-fit: cover;
+  object-fit: cover;
 }
 
 .avatar-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    background-color: #007bff;
-    color: #ffffff;
+  background-color: #007bff;
+  color: #ffffff;
 
-    font-size: 1.5rem;
-    font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .avatar-icon svg {
-    fill: #e0e0e0;
+  fill: #e0e0e0;
 }
 
 .profile-details {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
 }
 
 .profile-details h2,
 .user-name {
-    margin: 0 0 4px;
+  margin: 0 0 4px;
 
-    color: #ffffff;
+  color: #ffffff;
 
-    font-size: 1.25rem;
-    font-weight: 700;
-    line-height: 1.2;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
 
-    /* Nomes longos não devem estourar o drawer. */
-    overflow-wrap: anywhere;
+  /* Nomes longos não devem estourar o drawer. */
+  overflow-wrap: anywhere;
 }
 
 .user-role {
-    margin-bottom: 4px;
+  margin-bottom: 4px;
 
-    color: #a0a0a0;
+  color: #a0a0a0;
 
-    font-size: 0.8rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .auth-btn,
 .account-link {
-    display: block;
+  display: block;
 
-    margin-top: 3px;
+  margin-top: 3px;
 
-    color: #00a2ff;
+  color: #00a2ff;
 
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
 
-    text-decoration: none;
+  text-decoration: none;
 
-    transition:
-        opacity 0.2s ease,
-        color 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    color 0.2s ease;
 }
 
 .auth-btn:hover,
 .account-link:hover {
-    color: #33b4ff;
-    text-decoration: underline;
-    opacity: 0.85;
+  color: #33b4ff;
+  text-decoration: underline;
+  opacity: 0.85;
 }
 
 .auth-btn:focus-visible,
 .account-link:focus-visible {
-    outline: 2px solid #00a2ff;
-    outline-offset: 3px;
-    border-radius: 2px;
+  outline: 2px solid #00a2ff;
+  outline-offset: 3px;
+  border-radius: 2px;
 }
-
 
 /* =========================================================
    DIVISÓRIAS
    ========================================================= */
 
 .sidebar-divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    width: 100%;
-    margin: 24px 0;
+  width: 100%;
+  margin: 24px 0;
 }
 
 .sidebar-divider .line {
-    flex: 1;
-    height: 1px;
-    background-color: #ffffff;
-    opacity: 0.25;
+  flex: 1;
+  height: 1px;
+  background-color: #ffffff;
+  opacity: 0.25;
 }
 
 .sidebar-divider .rhombus {
-    width: 6px;
-    height: 6px;
+  width: 6px;
+  height: 6px;
 
-    flex-shrink: 0;
-    margin: 0 10px;
+  flex-shrink: 0;
+  margin: 0 10px;
 
-    background-color: #ffffff;
-    opacity: 0.6;
+  background-color: #ffffff;
+  opacity: 0.6;
 
-    transform: rotate(45deg);
+  transform: rotate(45deg);
 }
-
 
 /* =========================================================
    NAVEGAÇÃO
    ========================================================= */
 
 .sidebar-nav {
-    margin: 12px 0 20px;
+  margin: 12px 0 20px;
 }
 
 .sidebar-nav ul {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .sidebar-nav a {
-    display: inline-block;
+  display: inline-block;
 
-    color: #ffffff;
+  color: #ffffff;
 
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: 1.2px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
 
-    text-decoration: none;
-    text-transform: uppercase;
+  text-decoration: none;
+  text-transform: uppercase;
 
-    transition:
-        color 0.2s ease,
-        transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .sidebar-nav a:hover {
-    color: #00a2ff;
-    transform: translateX(4px);
+  color: #00a2ff;
+  transform: translateX(4px);
 }
 
 .sidebar-nav a:focus-visible {
-    outline: 2px solid #00a2ff;
-    outline-offset: 4px;
-    border-radius: 2px;
+  outline: 2px solid #00a2ff;
+  outline-offset: 4px;
+  border-radius: 2px;
 }
-
 
 /* =========================================================
    RODAPÉ DA SIDEBAR
    ========================================================= */
 
 .sidebar-footer {
-    margin-top: auto;
-    padding-top: 8px;
-    padding-bottom: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .sidebar-footer h4 {
-    margin: 0 0 10px;
+  margin: 0 0 10px;
 
-    color: #ffffff;
+  color: #ffffff;
 
-    font-size: 1.15rem;
-    font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 700;
 }
 
 .sidebar-footer p {
-    margin: 0;
+  margin: 0;
 
-    color: #e0e0e0;
+  color: #e0e0e0;
 
-    font-size: 0.98rem;
-    line-height: 1.55;
+  font-size: 0.98rem;
+  line-height: 1.55;
 }
-
 
 /* =========================================================
    TELAS PEQUENAS
    ========================================================= */
 
 @media screen and (max-width: 380px) {
-    #menu-drawer {
-        width: 90vw;
-        padding: 20px 16px;
-    }
+  #menu-drawer {
+    width: 90vw;
+    padding: 20px 16px;
+  }
 
-    .sidebar-nav ul {
-        gap: 18px;
-    }
+  .sidebar-nav ul {
+    gap: 18px;
+  }
 
-    .sidebar-nav a {
-        font-size: 1.1rem;
-    }
+  .sidebar-nav a {
+    font-size: 1.1rem;
+  }
 
-    .sidebar-footer p {
-        font-size: 0.9rem;
-    }
+  .sidebar-footer p {
+    font-size: 0.9rem;
+  }
 }
-
 
 /* =========================================================
    REDUÇÃO DE MOVIMENTO
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-    #overlay-sidebar,
-    #menu-drawer,
-    .btn-close-sidebar,
-    .auth-btn,
-    .account-link,
-    .sidebar-nav a {
-        transition: none;
-    }
+  #overlay-sidebar,
+  #menu-drawer,
+  .btn-close-sidebar,
+  .auth-btn,
+  .account-link,
+  .sidebar-nav a {
+    transition: none;
+  }
 }

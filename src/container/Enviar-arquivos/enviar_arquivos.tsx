@@ -1,5 +1,5 @@
-import useOcrPipeline from '../../hook/useOcrPipeline';
-import type { ChangeEvent } from 'react';
+import useOcrPipeline from "../../hook/useOcrPipeline";
+import type { ChangeEvent } from "react";
 
 export default function Teste() {
   // Chamada inicial para configurar o hook
@@ -20,8 +20,10 @@ export default function Teste() {
 
       console.timeEnd("Tempo de Renderização do Canvas");
 
-      console.log("2. Dados da imagem extraídos do PDF:", ocrPipeline.executarTarefa(file));
-
+      console.log(
+        "2. Dados da imagem extraídos do PDF:",
+        ocrPipeline.executarTarefa(file),
+      );
     } catch (error) {
       console.error("ERRO NO TESTE DO PDF:", error);
     }

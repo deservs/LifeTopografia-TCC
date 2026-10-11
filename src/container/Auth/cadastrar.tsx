@@ -44,24 +44,23 @@ export const Cadastrar = () => {
     const { name, value } = event.target;
 
     if (name === "cnpj") {
-      let numericValue = event.target.value; 
-      
+      let numericValue = event.target.value;
+
       numericValue = value.replace(/[^a-zA-Z0-9]/g, "");
 
       // Limita a 14 dígitos
-      numericValue = numericValue.substring(0, 14); 
+      numericValue = numericValue.substring(0, 14);
 
       numericValue = numericValue
-      .replace(/(\w{2})(\w)/, "$1.$2") // Coloca ponto entre o segundo e o terceiro dígito
-      .replace(/(\w{3})(\w)/, "$1.$2") // Coloca ponto entre o quinto e o sexto dígito
-      .replace(/(\w{3})(\w)/, "$1/$2") // Coloca barra entre o oitavo e o nono dígito
-      .replace(/(\w{4})(\w)/, "$1-$2"); // Coloca hífen entre o décimo segundo e décimo terceiro dígito
+        .replace(/(\w{2})(\w)/, "$1.$2") // Coloca ponto entre o segundo e o terceiro dígito
+        .replace(/(\w{3})(\w)/, "$1.$2") // Coloca ponto entre o quinto e o sexto dígito
+        .replace(/(\w{3})(\w)/, "$1/$2") // Coloca barra entre o oitavo e o nono dígito
+        .replace(/(\w{4})(\w)/, "$1-$2"); // Coloca hífen entre o décimo segundo e décimo terceiro dígito
 
       setFormData((previousData) => ({
         ...previousData,
         [name]: numericValue,
       }));
-
     } else {
       setFormData((previousData) => ({
         ...previousData,
@@ -104,18 +103,22 @@ export const Cadastrar = () => {
       setFormError("Informe o CNPJ da empresa.");
       return;
     }
-    if (tipoCadastro === "empresa"){
-        try{
-            const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${formData.cnpj.replace(/[^a-zA-Z0-9]/g, "")}`);
-            if (!response.ok) {
-                setFormError("Ocorreu um erro ao buscar o CNPJ.");
-                throw new Error("Erro ao buscar CNPJ");
-            }
-        } catch (error) {
-            console.error("Erro ao buscar CNPJ:", error);
-            setFormError("Ocorreu um erro ao buscar o CNPJ. Verifique se o CNPJ é válido e tente novamente.");
-            return;
+    if (tipoCadastro === "empresa") {
+      try {
+        const response = await fetch(
+          `https://brasilapi.com.br/api/cnpj/v1/${formData.cnpj.replace(/[^a-zA-Z0-9]/g, "")}`,
+        );
+        if (!response.ok) {
+          setFormError("Ocorreu um erro ao buscar o CNPJ.");
+          throw new Error("Erro ao buscar CNPJ");
         }
+      } catch (error) {
+        console.error("Erro ao buscar CNPJ:", error);
+        setFormError(
+          "Ocorreu um erro ao buscar o CNPJ. Verifique se o CNPJ é válido e tente novamente.",
+        );
+        return;
+      }
     }
 
     /* método de criar um novo usuário */

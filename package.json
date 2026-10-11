@@ -11,7 +11,9 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "start:server": "node server/dist/server.js",
-    "format:server": "biome format --write server/src"
+    "format:client": "prettier --write src",
+    "format:server": "biome format --write server/src",
+    "format": "npm run format:client && npm run format:server"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
@@ -39,6 +41,7 @@
     "@vitejs/plugin-react": "^6.0.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "oxlint": "^1.71.0",
+    "prettier": "^3.9.10",
     "tsx": "^4.23.1",
     "typescript": "6.0.3",
     "vite": "^8.1.1"

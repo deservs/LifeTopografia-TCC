@@ -109,7 +109,7 @@ export async function SerchDataUser() {
 
   return {
     name: perfil.nome_ou_razao,
-    role: perfil.tipo_perfil === 'EMPRESA' ? 'Empresa' : 'Pessoa física',
+    role: perfil.tipo_perfil === "EMPRESA" ? "Empresa" : "Pessoa física",
     avatarUrl: perfil.foto_url,
   };
 }
