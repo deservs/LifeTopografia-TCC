@@ -1,62 +1,57 @@
 # LifeTopografia — TCC
 
-O LifeTopografia é um site em desenvolvimento para apoiar o atendimento de uma empresa de topografia. O visitante poderá conhecer a LifeTopografia e suas áreas de atuação. O cliente poderá conversar com a empresa, enviar documentos como a matrícula de um imóvel em PDF, realizar o pagamento e avaliar o serviço.
+O LifeTopografia é um site em desenvolvimento para apresentar uma empresa de topografia e apoiar seu atendimento. A proposta é permitir que o cliente converse com a empresa, envie documentos como a matrícula de um imóvel em PDF, pague pelo serviço e avalie o atendimento. A leitura do PDF deverá ajudar a localizar medidas e outras informações topográficas.
 
-A leitura da matrícula também deverá ajudar a empresa a localizar as informações necessárias no documento, como medidas, azimutes e coordenadas. Essa análise é uma parte do projeto, não o produto inteiro.
+Essas etapas descrevem o objetivo do TCC. Elas ainda não formam um fluxo completo na aplicação.
 
-## Experiência planejada
+## Estado atual
 
-1. O visitante conhece a empresa e os serviços oferecidos pelo site.
-2. O cliente cria uma conta e inicia uma conversa com a LifeTopografia.
-3. Na conversa, envia a matrícula do imóvel em PDF para a empresa analisar.
-4. O sistema auxilia na leitura do documento, inclusive quando ele contém páginas digitalizadas.
-5. Cliente e empresa conversam sobre o atendimento. O cliente poderá pagar pelo serviço e, depois, avaliá-lo.
+| Parte | O que funciona ou existe hoje | Limite atual |
+| --- | --- | --- |
+| Site | Páginas inicial, serviços, cadastro e login em React e TypeScript. Há uma página de erro para rotas desconhecidas. | Algumas páginas e links do menu ainda não têm rota. |
+| Cadastro | Formulário integrado ao Supabase Auth, com hCaptcha. O cadastro de empresa consulta o CNPJ na BrasilAPI antes de enviar os dados. | A resposta do cadastro ainda não distingue todos os casos, como um e-mail já existente com confirmação ativada. |
+| Login | O formulário envia e-mail ou CNPJ e senha para `POST /api/login` no servidor Fastify. O servidor consulta o perfil quando recebe um CNPJ e usa o Supabase Auth para autenticar. O frontend tenta guardar a sessão retornada. | O tratamento das respostas sem sessão precisa ser corrigido. A opção de login por nome ainda não foi implementada. |
+| Recuperação de senha | Solicitação de e-mail, verificação do código e definição da nova senha usam o Supabase Auth. | O fluxo ainda precisa de testes completos e de ajustes nas mensagens. |
+| Sessão e Sidebar | O cliente Supabase mantém a sessão no navegador. Na abertura do aplicativo, os dados do perfil são consultados e disponibilizados à Sidebar por contexto React. | O contexto não acompanha automaticamente mudanças de autenticação enquanto a página continua aberta. |
+| PDF e OCR | A rota `/teste` recebe um PDF, renderiza a primeira página com PDF.js e executa PaddleOCR no navegador. | O texto aparece apenas no console. Ainda não há leitura de todas as páginas, aproveitamento do texto já presente no PDF nem extração das informações topográficas. |
+| Atendimento | Existem pastas e arquivos iniciais para chat, perfil, e-mail e AutoCAD. | Chat, envio de arquivos ao atendimento, pagamento e avaliação ainda não estão integrados. |
 
-Esse é o objetivo do TCC. As etapas acima ainda não formam um fluxo completo na aplicação atual.
+## Rotas atuais
 
-## O que existe hoje
+| Rota | Resultado atual |
+| --- | --- |
+| `/` | Página inicial. |
+| `/servicos` | Serviços. |
+| `/cadastrar` | Cadastro. Um usuário com sessão é redirecionado para a página inicial. |
+| `/login` | Login e recuperação de senha. Um usuário com sessão é redirecionado para a página inicial. |
+| `/teste` | Teste de OCR com a primeira página de um PDF. |
+| `/perfil` | **Atenção:** no momento, essa rota executa logout; a página de perfil ainda não está pronta. |
+| Outras rotas | Página inicial com o aviso de erro 404. |
 
-- Interface em React e TypeScript, com páginas inicial, cadastro, login, serviços e teste de PDF.
-- Cadastro de usuário integrado ao Supabase Auth.
-- Envio de email, verificação de código e alteração de senha no fluxo de recuperação de acesso.
-- Um teste de OCR na rota `/teste`: o usuário escolhe um PDF, a primeira página é convertida em imagem e enviada ao PaddleOCR no navegador. O texto reconhecido é mostrado no console do navegador.
-- Estrutura inicial de servidor em Fastify, ainda sem rotas de negócio registradas.
-
-O projeto ainda não oferece o fluxo completo de atendimento, chat, pagamento e avaliação. A leitura de PDF também está em teste: processa apenas a primeira página e não apresenta o texto extraído na interface.
+O menu contém links como `/sobre`, `/faq` e `/contato`, mas essas rotas ainda não foram registradas em `src/App.tsx`.
 
 ## Como o teste de PDF funciona
 
-1. O usuário abre `/teste` e seleciona um PDF.
-2. `src/utils/pdfConvert.ts` usa o PDF.js para transformar a primeira página em imagem.
-3. `src/hook/useOcrPipeline.ts` carrega os modelos locais do PaddleOCR e reconhece o texto da imagem em um worker (uma tarefa separada da interface).
-4. O resultado aparece no console do navegador. Ao terminar, o motor de OCR é descartado para liberar recursos.
+1. Em `/teste`, o usuário escolhe um PDF.
+2. `src/utils/pdfConvert.ts` usa PDF.js para renderizar a primeira página em uma imagem.
+3. `src/hook/useOcrPipeline.ts` carrega os modelos locais do PaddleOCR e reconhece o texto em um worker.
+4. O texto é escrito no console do navegador. Ao terminar, o motor de OCR é descartado para liberar recursos.
 
-Os modelos de OCR estão em `public/models/ocr/`, e os arquivos usados pelo ONNX Runtime estão em `public/wasm/`. O processamento ocorre no navegador do usuário.
+Os modelos estão em `public/models/ocr/`, e os arquivos usados pelo ONNX Runtime estão em `public/wasm/`. O OCR ocorre no navegador do usuário.
 
-## Cadastro, sessão e menu lateral
+## Organização das pastas
 
-`src/lib/supabase/supabaseClient.ts` cria a conexão com o Supabase. A biblioteca está configurada para guardar a sessão no navegador e renovar automaticamente a credencial de acesso quando necessário. `src/lib/supabase/auth.ts` reúne as chamadas de cadastro, login e recuperação de senha.
-
-A `Sidebar` recebe a propriedade `user`:
-
-- Se `user` tiver os dados de uma pessoa, mostra nome, foto quando disponível e acesso à conta.
-- Se `user` for `null`, mostra os botões **CADASTRAR** e **ENTRAR**.
-
-**Estado atual:** as páginas ainda passam `null` para a `Sidebar`, então ela mostra sempre a versão de visitante. A função de login com senha existe em `auth.ts`, mas o formulário da página de login ainda não a chama. As rotas também ainda não verificam a sessão antes de abrir páginas. A `Sidebar` deve exibir o estado do usuário; a consulta à sessão precisa fornecer esses dados às páginas.
-
-## Estrutura principal
-
-| Caminho | Papel |
+| Caminho | Responsabilidade |
 | --- | --- |
-| `src/container/` | Páginas da interface. |
-| `src/components/` | Partes reutilizáveis da interface, como a `Sidebar`. |
-| `src/lib/supabase/` | Cliente do Supabase e funções de autenticação. |
-| `src/hook/` | Lógica de OCR usada pela página de teste. |
-| `src/utils/` | Funções auxiliares, incluindo a conversão de PDF. |
-| `public/` | Arquivos públicos, modelos de OCR e WASM. |
-| `server/src/` | Estrutura inicial do servidor Fastify. |
-| `supabase/config.toml` | Arquivo reservado para configuração local do Supabase; atualmente contém apenas um comentário. |
-| `vercel.json` | Configuração de publicação do frontend e do serviço backend na Vercel. |
+| `src/container/` | Telas do site, como Home, Login e Serviços. |
+| `src/components/` | Elementos reutilizáveis, como Sidebar e aviso 404. |
+| `src/lib/supabase/` | Cliente Supabase e funções de autenticação. |
+| `src/hook/` | Estado e lógica reutilizável do OCR e dos dados iniciais do usuário. |
+| `src/utils/` | Funções auxiliares, como a conversão de PDF. |
+| `server/src/` | Servidor Fastify, configuração e módulos do backend. |
+| `public/` | Arquivos servidos diretamente, incluindo modelos de OCR e WASM. |
+| `supabase/config.toml` | Arquivo reservado para configuração local do Supabase; ainda contém apenas um comentário. |
+| `vercel.json` | Configuração dos serviços frontend e backend e do encaminhamento das rotas na Vercel. |
 
 ## Executar localmente
 
@@ -67,28 +62,31 @@ npm install
 npm run dev
 ```
 
-Para iniciar o servidor separadamente:
+Em outro terminal, inicie o servidor:
 
 ```bash
 npm run dev:server
 ```
 
-O frontend lê `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` do arquivo `.env` na raiz. O servidor lê `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` e `SUPABASE_JWKS_URL` do mesmo ambiente; `NODE_ENV`, `PORT`, `DATABASE_URL` e `JWT_SECRET` também estão previstos na sua configuração. Consulte `src/lib/env.ts` e `server/src/config/env.ts` para ver a validação dessas variáveis. O arquivo `.env` está ignorado pelo Git e não deve conter chaves reais em commits.
+O Vite usa normalmente a porta `5173`, e o servidor usa a porta `3001` por padrão. O login atual chama `http://localhost:3001/api/login`, portanto precisa do servidor local em execução.
 
-Para conferir a compilação:
+O frontend exige `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. O servidor exige essas mesmas variáveis e `SUPABASE_SECRET_KEY`. As configurações do servidor também aceitam `NODE_ENV`, `PORT`, `DATABASE_URL` e `JWT_SECRET`; as duas últimas são opcionais no esquema atual. Consulte `src/lib/env.ts` e `server/src/config/env.ts`. Guarde os valores no ambiente local ou nas configurações do serviço de hospedagem; não publique a chave secreta no frontend nem no Git.
+
+Para conferir o código:
 
 ```bash
+npm run lint
 npm run build
 npm run build:server
 ```
 
-## Próximas etapas
+## Pendências prioritárias
 
-- Completar as páginas que apresentam a LifeTopografia e suas áreas de atuação.
-- Conectar o formulário de login à função de autenticação e refletir a sessão na `Sidebar`.
-- Definir quais páginas exigem login e proteger também as operações e dados no servidor/Supabase.
-- Criar o chat entre cliente e empresa, incluindo o envio da matrícula em PDF.
-- Ler todas as páginas do PDF e aproveitar o texto já existente antes de recorrer ao OCR em páginas digitalizadas.
-- Mostrar o texto extraído na interface e identificar nele as informações topográficas necessárias.
-- Integrar o pagamento do serviço e permitir que o cliente avalie o atendimento.
-- Implementar as rotas de negócio do servidor conforme as funcionalidades forem desenvolvidas.
+1. Fazer o backend devolver um erro HTTP coerente quando as credenciais forem inválidas ou o CNPJ não for encontrado. No frontend, interromper sempre o login quando não houver sessão, inclusive no build de produção.
+2. Separar a página de perfil da ação de logout: hoje o link **Acessar perfil** abre `/perfil`, que encerra a sessão.
+3. Definir como tratar o login por nome ou retirar essa opção até existir uma busca própria. Padronizar o formato do CNPJ no cadastro e na consulta.
+4. Atualizar o contexto do usuário quando a sessão mudar e definir quais páginas exigem autenticação. A proteção dos dados também deve existir no servidor e nas políticas do Supabase.
+5. Ler o texto incorporado ao PDF antes de usar OCR, percorrer as páginas necessárias e apresentar o resultado na interface.
+6. Integrar chat, envio de arquivos, pagamento e avaliação ao fluxo de atendimento.
+
+O esquema da tabela `perfis`, os triggers e as políticas de acesso do banco não estão versionados neste repositório. Por isso, este README descreve o código disponível, sem afirmar que regras como unicidade de e-mail/CNPJ ou RLS já estejam configuradas no Supabase.

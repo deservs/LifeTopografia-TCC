@@ -22,7 +22,7 @@ const _env = envSchemaWithSupabase.safeParse(process.env)
 
 // 3. Se a validação falhar, lança um erro claro no console e para a aplicação
 if (_env.success === false) {
-  console.error('❌ Variáveis de ambiente inválidas ou ausentes:')
+  console.error('Variáveis de ambiente inválidas ou ausentes:')
   console.error(JSON.stringify(_env.error.format(), null, 2))
 
   throw new Error('Variáveis de ambiente inválidas.')

@@ -183,12 +183,16 @@ export const Login = () => {
           ? "cnpj"
           : "nome";
     try {
-      await SignIn(
+      const resultado = await SignIn(
         formData.loginIdentificador,
         formData.senha,
         captchaToken,
         formaDeLogin,
       );
+      if (!resultado.data?.user) {
+        setFeedback("Credenciais inválidas. Tente novamente.");
+        throw new Error("Credenciais inválidas");
+      }
       window.location.href = "/";
     } catch (error) {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");

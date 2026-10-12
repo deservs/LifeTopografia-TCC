@@ -7,7 +7,7 @@ import {
   ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 
-import { searchUser } from './modules/login/userSearch.js'
+import { Login } from './modules/login/userSingin.js'
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -26,14 +26,22 @@ app.register(fastifyMultipart, {
   },
 })
 
-app.get('/api/login', async (request, reply) => {
-  const { valor, type } = request.query as { valor: string; type: 'cnpj' | 'nome' }
+app.post('/api/login', async (request, reply) => {
+  const { valor, type, password, captchaToken } = request.body as {
+    valor: string
+    type: 'cnpj' | 'email'
+    password: string
+    captchaToken: string
+  }
   try {
-    const email = await searchUser(valor, type)
-    console.log('Email encontrado:', email)
-    return reply
-      .code(200)
-      .send({ message: 'Servidor rodando com sucesso!', reply: email })
+    const logar = await Login(valor, type, password, captchaToken)
+    if (!logar) {
+      return reply
+        .code(401)
+        .send({ message: 'Falha no login. Verifique suas credenciais.' })
+    } else {
+      return reply.code(200).send({ data: logar })
+    }
   } catch (error) {
     console.error('Erro ao buscar usuário:', error)
     return reply.code(500).send({ message: 'Erro ao buscar usuário', error: error })
