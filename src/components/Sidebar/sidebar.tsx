@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useContext } from "react";
 import { Link } from "react-router-dom";
 
-import { SerchDataUser } from "../../lib/supabase/auth";
+import { UserContext } from "../../App";
 
 import "./sidebar.css";
 import LogoIcon from "../../assets/image/logo-front.webp";
@@ -33,14 +33,12 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusedElementRef = useRef<HTMLElement | null>(null);
-  const [perfil, setPerfil] = useState<UserProfile | null>(null);
 
   /**
    * Busca os dados do usuário autenticado.
    */
-  useEffect(() => {
-    SerchDataUser().then(setPerfil);
-  }, []);
+  const perfil = useContext(UserContext);
+
   const userData = perfil ?? user;
   /**
    * Controla o teclado enquanto o drawer está aberto.
