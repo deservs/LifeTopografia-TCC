@@ -181,8 +181,8 @@
 .avatar-img,
 .avatar-placeholder,
 .avatar-icon svg {
-  width: 58px;
-  height: 58px;
+  width: 64px;
+  height: auto;
   border-radius: 50%;
   flex-shrink: 0;
 }

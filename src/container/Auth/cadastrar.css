@@ -301,16 +301,21 @@
   justify-content: center;
 
   color: #ffffff;
-
-  background-color: #00c853;
-
   border: 1px solid #ffffff;
   border-radius: 50%;
 
   font-size: 0.6rem;
   font-weight: bold;
+  line-height: 1;
 }
 
+.relative-badge .check-badge.is-valid {
+  background-color: #00c853;
+}
+
+.relative-badge .check-badge.is-invalid {
+  background-color: #e53935;
+}
 /* =========================================================
    CAMPOS DE TEXTO
    ========================================================= */
@@ -362,6 +367,46 @@
   border-color: #0b50bd;
 
   box-shadow: 0 0 3px rgba(11, 80, 189, 0.5);
+}
+
+/* =========================================================
+   REQUISITOS DA SENHA
+   ========================================================= */
+
+.password-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin: 8px 0 0;
+  padding: 0;
+
+  list-style: none;
+
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.password-requirements li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.password-requirements li span {
+  width: 16px;
+  flex-shrink: 0;
+
+  font-weight: 700;
+  text-align: center;
+}
+
+.password-requirements .is-valid {
+  color: #16803c;
+}
+
+.password-requirements .is-invalid {
+  color: #d32f2f;
 }
 
 /* =========================================================
