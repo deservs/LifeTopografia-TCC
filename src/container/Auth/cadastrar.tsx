@@ -43,6 +43,33 @@ export const Cadastrar = () => {
     cnpj: "",
   });
 
+  const senhaRequisitos = [
+    {
+      id: "comprimento",
+      texto: "Pelo menos 8 caracteres",
+      valido: formData.senha.length >= 8,
+    },
+    {
+      id: "letra",
+      texto: "Pelo menos uma letra",
+      valido: /\p{L}/u.test(formData.senha),
+    },
+    {
+      id: "numero",
+      texto: "Pelo menos um número",
+      valido: /\p{N}/u.test(formData.senha),
+    },
+    {
+      id: "simbolo",
+      texto: "Pelo menos um símbolo (!@#$...)",
+      valido: /[^\p{L}\p{N}\s]/u.test(formData.senha),
+    },
+  ];
+
+  const senhaValida = senhaRequisitos.every(
+    (requisito) => requisito.valido
+  );
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
@@ -98,6 +125,12 @@ export const Cadastrar = () => {
     }
     if (formData.email !== formData.confirmarEmail) {
       setFormError("Os emails informados não são iguais.");
+      return;
+    }
+    if (!senhaValida) {
+      setFormError(
+        "A senha deve ter pelo menos 8 caracteres, uma letra, um número e um símbolo."
+      );
       return;
     }
 
@@ -224,9 +257,8 @@ export const Cadastrar = () => {
 
             <button
               type="button"
-              className={`tab-btn ${
-                tipoCadastro === "empresa" ? "active" : ""
-              }`}
+              className={`tab-btn ${tipoCadastro === "empresa" ? "active" : ""
+                }`}
               onClick={() => handleTipoCadastroChange("empresa")}
               aria-pressed={tipoCadastro === "empresa"}
             >
@@ -305,9 +337,17 @@ export const Cadastrar = () => {
                   />
                 </svg>
 
-                <span className="check-badge" aria-hidden="true">
-                  ✓
-                </span>
+                {formData.confirmarEmail.length > 0 && (
+                  <span
+                    className={`check-badge ${formData.email === formData.confirmarEmail
+                      ? "is-valid"
+                      : "is-invalid"
+                      }`}
+                    aria-hidden="true"
+                  >
+                    {formData.email === formData.confirmarEmail ? "✓" : "✕"}
+                  </span>
+                )}
               </div>
 
               <div className="input-field-wrapper">
@@ -347,6 +387,22 @@ export const Cadastrar = () => {
                   autoComplete="new-password"
                   required
                 />
+                {formData.senha.length > 0 && (
+                  <ul className="password-requirements">
+                    {senhaRequisitos.map((requisito) => (
+                      <li
+                        key={requisito.id}
+                        className={requisito.valido ? "is-valid" : "is-invalid"}
+                      >
+                        <span aria-hidden="true">
+                          {requisito.valido ? "✓" : "✕"}
+                        </span>
+
+                        {requisito.texto}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
 
@@ -359,9 +415,17 @@ export const Cadastrar = () => {
                   />
                 </svg>
 
-                <span className="check-badge" aria-hidden="true">
-                  ✓
-                </span>
+                {formData.confirmarSenha.length > 0 && (
+                  <span
+                    className={`check-badge ${formData.senha === formData.confirmarSenha
+                      ? "is-valid"
+                      : "is-invalid"
+                      }`}
+                    aria-hidden="true"
+                  >
+                    {formData.senha === formData.confirmarSenha ? "✓" : "✕"}
+                  </span>
+                )}
               </div>
 
               <div className="input-field-wrapper">
