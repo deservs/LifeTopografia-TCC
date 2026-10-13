@@ -256,8 +256,23 @@
   width: 100%;
 
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 10px;
+}
+
+.input-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-group.align-start {
+  align-items: flex-start;
+}
+
+.form-group.align-start .input-icon-box {
+  margin-top: 12px;
 }
 
 /* =========================================================
@@ -674,3 +689,4 @@
     animation: none;
   }
 }
+

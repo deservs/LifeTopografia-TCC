@@ -5,6 +5,7 @@ import {
   type ChangeEvent,
   type FormEvent,
   type KeyboardEvent,
+  type ClipboardEvent,
 } from "react";
 import { Link } from "react-router-dom";
 
@@ -143,6 +144,32 @@ export const Login = () => {
 
     previousInput?.focus();
   };
+  const handleDigitPaste = (event: ClipboardEvent<HTMLInputElement>) => {
+    event.preventDefault();
+
+    const pastedDigits = event.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, CODIGO_LENGTH);
+
+    if (!pastedDigits) return;
+
+    const newDigits = Array(CODIGO_LENGTH).fill("");
+
+    pastedDigits.split("").forEach((digit, index) => {
+      newDigits[index] = digit;
+    });
+
+    setFormData((previousData) => ({
+      ...previousData,
+      codigoDigits: newDigits,
+    }));
+
+    setFeedback("");
+
+    const nextIndex = Math.min(pastedDigits.length, CODIGO_LENGTH - 1);
+    document.getElementById(`digit-${nextIndex}`)?.focus();
+  };
 
   const handleReenviarCodigo = async () => {
     setTimer(TEMPO_REENVIO);
@@ -170,21 +197,31 @@ export const Login = () => {
       setFeedback("Por favor, complete o captcha.");
       return;
     }
-    const indentificador = formData.loginIdentificador.trim();
-    const cnpjRegex = formData.loginIdentificador
+    const identificador = formData.loginIdentificador.trim();
+    const cnpjNormalizado = identificador
       .replace(/[./-]/g, "")
       .toUpperCase();
-    const formaDeLogin =
-      tipoLogin === "pessoa"
-        ? indentificador.includes("@")
-          ? "email"
-          : "nome"
-        : /^[A-Z0-9]{12}[0-9]{2}$/.test(cnpjRegex)
-          ? "cnpj"
-          : "nome";
+
+    const formaDeLogin = tipoLogin === "pessoa" ? "email" : "cnpj";
+
+    if (
+      tipoLogin === "pessoa" &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identificador)
+    ) {
+      setFeedback("Informe um e-mail válido.");
+      return;
+    }
+
+    if (
+      tipoLogin === "empresa" &&
+      !/^[A-Z0-9]{12}[0-9]{2}$/.test(cnpjNormalizado)
+    ) {
+      setFeedback("Informe um CNPJ válido com 14 caracteres.");
+      return;
+    }
     try {
       const resultado = await SignIn(
-        formData.loginIdentificador,
+        tipoLogin === "empresa" ? cnpjNormalizado : identificador,
         formData.senha,
         captchaToken,
         formaDeLogin,
@@ -241,7 +278,7 @@ export const Login = () => {
     const codigoCompleto = formData.codigoDigits.join("");
 
     if (codigoCompleto.length !== CODIGO_LENGTH) {
-      setFeedback("Informe os 6 dígitos do código.");
+      setFeedback(`Informe os ${CODIGO_LENGTH} dígitos do código.`);
       return;
     }
 
@@ -359,9 +396,8 @@ export const Login = () => {
               <div className="tabs-header">
                 <button
                   type="button"
-                  className={`tab-btn ${
-                    tipoLogin === "pessoa" ? "active" : ""
-                  }`}
+                  className={`tab-btn ${tipoLogin === "pessoa" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setTipoLogin("pessoa");
                     setFeedback("");
@@ -388,9 +424,8 @@ export const Login = () => {
 
                 <button
                   type="button"
-                  className={`tab-btn ${
-                    tipoLogin === "empresa" ? "active" : ""
-                  }`}
+                  className={`tab-btn ${tipoLogin === "empresa" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setTipoLogin("empresa");
                     setFeedback("");
@@ -425,13 +460,12 @@ export const Login = () => {
 
                   <div className="input-field-wrapper">
                     <label htmlFor="loginIdentificador">
-                      {tipoLogin === "pessoa"
-                        ? "Email ou usuário:"
-                        : "Nome ou CNPJ:"}
+                      {tipoLogin === "pessoa" ? "E-mail:" : "CNPJ:"}
                     </label>
 
                     <input
-                      type="text"
+                      type={tipoLogin === "pessoa" ? "email" : "text"}
+                      inputMode={tipoLogin === "empresa" ? "numeric" : "email"}
                       id="loginIdentificador"
                       name="loginIdentificador"
                       value={formData.loginIdentificador}
@@ -608,6 +642,7 @@ export const Login = () => {
                       handleDigitChange(index, event.target.value)
                     }
                     onKeyDown={(event) => handleDigitKeyDown(index, event)}
+                    onPaste={handleDigitPaste}
                     className="digit-box"
                     aria-label={`Dígito ${index + 1} de ${CODIGO_LENGTH}`}
                     autoComplete={index === 0 ? "one-time-code" : "off"}

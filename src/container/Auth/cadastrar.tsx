@@ -376,7 +376,7 @@ export const Cadastrar = () => {
               </div>
             </div>
 
-            <div className="form-group">
+            <div className="form-group align-start">
               <div className="input-icon-box">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
@@ -398,6 +398,7 @@ export const Cadastrar = () => {
                   autoComplete="new-password"
                   required
                 />
+
                 {formData.senha.length > 0 && (
                   <ul className="password-requirements">
                     {senhaRequisitos.map((requisito) => (
