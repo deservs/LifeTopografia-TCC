@@ -140,7 +140,7 @@ export const Cadastrar = () => {
     }
     if (!senhaValida) {
       setFormError(
-        "A senha deve ter pelo menos 8 caracteres, uma letra, um número e um símbolo."
+        "A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula, um número e um símbolo."
       );
       return;
     }
