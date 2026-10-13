@@ -1,6 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent, useRef } from "react";
 import { Link } from "react-router-dom";
 
+import { z } from "zod";
+
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
@@ -50,9 +52,14 @@ export const Cadastrar = () => {
       valido: formData.senha.length >= 8,
     },
     {
-      id: "letra",
-      texto: "Pelo menos uma letra",
-      valido: /\p{L}/u.test(formData.senha),
+      id: "letra minuscula",
+      texto: "Pelo menos uma letra minúscula",
+      valido: /[a-z]/.test(formData.senha),
+    },
+    {
+      id: "letra maiuscula",
+      texto: "Pelo menos uma letra maiúscula",
+      valido: /[A-Z]/.test(formData.senha),
     },
     {
       id: "numero",
@@ -127,9 +134,13 @@ export const Cadastrar = () => {
       setFormError("Os emails informados não são iguais.");
       return;
     }
+    if (!z.string().email().safeParse(formData.email).success) {
+      setFormError("O email informado não é válido.");
+      return;
+    }
     if (!senhaValida) {
       setFormError(
-        "A senha deve ter pelo menos 8 caracteres, uma letra, um número e um símbolo."
+        "A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula, um número e um símbolo."
       );
       return;
     }
