@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+
 export interface UserProfile {
   name: string;
   role: string;
@@ -47,17 +48,26 @@ export async function SignIn(
   captchaToken: string,
   loginType: "email" | "cnpj" | "nome",
 ) {
-  const resposta = await fetch("/api/login", {
+  const resposta = await fetch("http://localhost:3001/api/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ valor, type: loginType, captchaToken, password }),
+    body: JSON.stringify({
+      valor,
+      type: loginType,
+      captchaToken,
+      password,
+    }),
   });
   const login = await resposta.json();
+  if (!resposta.ok) {
+    throw new Error(
+      login.message ?? "Erro ao fazer login. Verifique suas credenciais.",
+    );
+  }
   if (!login.data.data?.session) {
     console.error("Falha no login. Verifique suas credenciais.");
-
     throw new Error(
       login.data.error?.message ?? login.message ?? "Erro ao fazer login",
     );
@@ -81,6 +91,7 @@ export async function SignOut() {
   if (error) {
     throw new Error(error.message);
   }
+  localStorage.removeItem("userProfile");
   console.log("Usuário deslogado com sucesso.");
 }
 
@@ -144,40 +155,63 @@ export async function ConfirmResetPassword(newPassword: string) {
 }
 
 /*Busca os dados do usuário autenticado.*/
-export async function SerchDataUser(): Promise<UserProfile | null> {
-  try {
+export async function SerchDataUser() {
+  if (localStorage.getItem("userProfile")) {
     const { data, error } = await supabase.auth.getSession();
     if (error) {
       throw new Error(error.message);
     }
     if (!data.session) {
+      localStorage.removeItem("userProfile");
       return null;
     }
-    /* consulta o ip do usuário autenticado */
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError) {
-      throw new Error(userError.message);
+    const dadosUsuario = JSON.parse(
+      localStorage.getItem("userProfile") || "{}",
+    );
+    if (dadosUsuario.id !== data.session.user.id) {
+      localStorage.removeItem("userProfile");
+      await SaveUserData(data.session.user.id);
+      localStorage.getItem("userProfile");
     }
-    /* consulta os dados do perfil do usuário */
-    const { data: perfil, error: errorPerfil } = await supabase
-      .from("perfis")
-      .select("nome_ou_razao, tipo_perfil, foto_url")
-      .eq("id", user?.id)
-      .single();
-    if (errorPerfil) {
-      throw new Error(errorPerfil.message);
+    return localStorage.getItem("userProfile"); // Retorna os dados do usuário do localStorage, se disponíveis
+  } else {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        throw new Error(error.message);
+      }
+      if (!data.session) {
+        return null;
+      }
+      await SaveUserData(data.session.user.id);
+      return localStorage.getItem("userProfile");
+    } catch (error) {
+      console.error("Erro ao buscar dados do usuário:", error);
+      throw error;
     }
+  }
+}
 
-    return {
-      name: perfil.nome_ou_razao,
-      role: perfil.tipo_perfil === "EMPRESA" ? "Empresa" : "Pessoa física",
-      avatarUrl: perfil.foto_url,
-    };
-  } catch (error) {
-    console.error("Erro ao buscar dados do usuário:", error);
-    throw error;
+async function SaveUserData(user: string) {
+  if (localStorage.getItem("userProfile")) {
+    return; // Se os dados do usuário já estiverem no localStorage, não faz nada
+  } else {
+    try {
+      const { data, error } = await supabase
+        .from("perfis")
+        .select("id, nome_ou_razao, tipo_perfil, foto_url")
+        .eq("id", user)
+        .single();
+      if (error) {
+        throw new Error(error.message);
+      }
+      if (!data) {
+        throw new Error("Usuário não encontrado.");
+      }
+      localStorage.setItem("userProfile", JSON.stringify(data));
+    } catch (error) {
+      console.error("Erro ao salvar dados do usuário:", error);
+      throw error;
+    }
   }
 }

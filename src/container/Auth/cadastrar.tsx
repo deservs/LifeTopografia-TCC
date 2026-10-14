@@ -73,9 +73,7 @@ export const Cadastrar = () => {
     },
   ];
 
-  const senhaValida = senhaRequisitos.every(
-    (requisito) => requisito.valido
-  );
+  const senhaValida = senhaRequisitos.every((requisito) => requisito.valido);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -140,7 +138,7 @@ export const Cadastrar = () => {
     }
     if (!senhaValida) {
       setFormError(
-        "A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula, um número e um símbolo."
+        "A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula, um número e um símbolo.",
       );
       return;
     }
@@ -268,8 +266,9 @@ export const Cadastrar = () => {
 
             <button
               type="button"
-              className={`tab-btn ${tipoCadastro === "empresa" ? "active" : ""
-                }`}
+              className={`tab-btn ${
+                tipoCadastro === "empresa" ? "active" : ""
+              }`}
               onClick={() => handleTipoCadastroChange("empresa")}
               aria-pressed={tipoCadastro === "empresa"}
             >
@@ -350,10 +349,11 @@ export const Cadastrar = () => {
 
                 {formData.confirmarEmail.length > 0 && (
                   <span
-                    className={`check-badge ${formData.email === formData.confirmarEmail
-                      ? "is-valid"
-                      : "is-invalid"
-                      }`}
+                    className={`check-badge ${
+                      formData.email === formData.confirmarEmail
+                        ? "is-valid"
+                        : "is-invalid"
+                    }`}
                     aria-hidden="true"
                   >
                     {formData.email === formData.confirmarEmail ? "✓" : "✕"}
@@ -428,10 +428,11 @@ export const Cadastrar = () => {
 
                 {formData.confirmarSenha.length > 0 && (
                   <span
-                    className={`check-badge ${formData.senha === formData.confirmarSenha
-                      ? "is-valid"
-                      : "is-invalid"
-                      }`}
+                    className={`check-badge ${
+                      formData.senha === formData.confirmarSenha
+                        ? "is-valid"
+                        : "is-invalid"
+                    }`}
                     aria-hidden="true"
                   >
                     {formData.senha === formData.confirmarSenha ? "✓" : "✕"}
