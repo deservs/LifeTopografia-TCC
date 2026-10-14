@@ -1,7 +1,7 @@
-import { useEffect, useRef, useContext } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { UserContext } from "../../App";
+import { SerchDataUser } from "../../lib/supabase/auth";
 
 import "./sidebar.css";
 import LogoIcon from "../../assets/image/logo-front.webp";
@@ -33,11 +33,30 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusedElementRef = useRef<HTMLElement | null>(null);
+  const [perfil, setPerfil] = useState<UserProfile | null>(null);
 
   /**
    * Busca os dados do usuário autenticado.
    */
-  const perfil = useContext(UserContext);
+  useEffect(() => {
+    SerchDataUser()
+      .then((response) => {
+        if (!response) {
+          setPerfil(null);
+          return;
+        }
+        const userProfile = JSON.parse(response);
+        setPerfil({
+          name: userProfile.nome_ou_razao,
+          role: userProfile.tipo_perfil,
+          avatarUrl: userProfile.foto_url,
+        });
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar dados do usuário:", error);
+        setPerfil(null);
+      });
+  }, []);
 
   const userData = perfil ?? user;
   /**

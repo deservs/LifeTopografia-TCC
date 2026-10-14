@@ -35,7 +35,7 @@ app.post('/api/login', async (request, reply) => {
   }
   try {
     const logar = await Login(valor, type, password, captchaToken)
-    if (!logar) {
+    if (!logar || Array.isArray(logar) || !logar.data?.session || logar.error) {
       return reply
         .code(401)
         .send({ message: 'Falha no login. Verifique suas credenciais.' })

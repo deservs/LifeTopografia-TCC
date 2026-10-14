@@ -238,13 +238,6 @@ export const Login = () => {
       captcha.current?.resetCaptcha();
       setCaptchaToken(null);
     }
-    /*
-     * Integração futura:
-     * enviar tipoLogin, loginIdentificador e senha ao backend.
-     *
-     * O frontend não deve redirecionar ou considerar o login
-     * concluído antes da resposta de autenticação.
-     */
   };
 
   const handleSubmitRecoveryEmail = async (
