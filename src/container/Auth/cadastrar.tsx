@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { z } from "zod";
 
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
@@ -27,9 +27,10 @@ interface FormData {
 
 export const Cadastrar = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captcha = useRef<HCaptcha | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formError, setFormError] = useState("");
+
+  const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
 
   // Mantido como ponto de integração para a autenticação futura.
   const currentUser: UserProfile | null = null;
@@ -188,8 +189,8 @@ export const Cadastrar = () => {
         );
       })
       .finally(() => {
-        captcha.current?.resetCaptcha();
         setCaptchaToken(null);
+        captcha.current?.reset();
       });
   };
 
@@ -493,10 +494,10 @@ export const Cadastrar = () => {
             )}
 
             <div className="captcha-container">
-              <HCaptcha
+              <Turnstile
                 ref={captcha}
-                sitekey="09964b22-6cc4-4da0-97c8-b32c887ed4aa"
-                onVerify={(token) => {
+                siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                onSuccess={(token) => {
                   setCaptchaToken(token);
                 }}
                 onExpire={() => setCaptchaToken(null)}

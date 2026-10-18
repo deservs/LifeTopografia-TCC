@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
@@ -45,10 +45,9 @@ const TEMPO_REENVIO = 60;
 export const Login = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captcha = useRef<HCaptcha | null>(null);
-
   // Será substituído pelos dados da sessão quando a autenticação for integrada.
   const currentUser: UserProfile | null = null;
+  const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
 
   const [etapa, setEtapa] = useState<EtapaFluxo>("login");
   const [tipoLogin, setTipoLogin] = useState<TipoLogin>("pessoa");
@@ -192,15 +191,14 @@ export const Login = () => {
 
   const handleSubmitLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    captcha.current?.reset();
     setFeedback("");
     if (!captchaToken) {
       setFeedback("Por favor, complete o captcha.");
       return;
     }
     const identificador = formData.loginIdentificador.trim();
-    const cnpjNormalizado = identificador
-      .replace(/[./-]/g, "")
-      .toUpperCase();
+    const cnpjNormalizado = identificador.replace(/[./-]/g, "").toUpperCase();
 
     const formaDeLogin = tipoLogin === "pessoa" ? "email" : "cnpj";
 
@@ -235,7 +233,6 @@ export const Login = () => {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");
       console.error("Erro ao fazer login:", error);
     } finally {
-      captcha.current?.resetCaptcha();
       setCaptchaToken(null);
     }
   };
@@ -389,8 +386,9 @@ export const Login = () => {
               <div className="tabs-header">
                 <button
                   type="button"
-                  className={`tab-btn ${tipoLogin === "pessoa" ? "active" : ""
-                    }`}
+                  className={`tab-btn ${
+                    tipoLogin === "pessoa" ? "active" : ""
+                  }`}
                   onClick={() => {
                     setTipoLogin("pessoa");
                     setFeedback("");
@@ -417,8 +415,9 @@ export const Login = () => {
 
                 <button
                   type="button"
-                  className={`tab-btn ${tipoLogin === "empresa" ? "active" : ""
-                    }`}
+                  className={`tab-btn ${
+                    tipoLogin === "empresa" ? "active" : ""
+                  }`}
                   onClick={() => {
                     setTipoLogin("empresa");
                     setFeedback("");
@@ -514,10 +513,10 @@ export const Login = () => {
                 </div>
 
                 <div className="captcha-container">
-                  <HCaptcha
+                  <Turnstile
                     ref={captcha}
-                    sitekey="09964b22-6cc4-4da0-97c8-b32c887ed4aa"
-                    onVerify={(token) => {
+                    siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                    onSuccess={(token) => {
                       setCaptchaToken(token);
                     }}
                     onExpire={() => setCaptchaToken(null)}
@@ -566,7 +565,6 @@ export const Login = () => {
                     />
                   </svg>
                 </div>
-
                 <div className="input-field-wrapper">
                   <label htmlFor="emailRecuperacao">Insira o Email:</label>
 
@@ -580,6 +578,16 @@ export const Login = () => {
                     required
                   />
                 </div>
+              </div>
+              <div className="captcha-container">
+                <Turnstile
+                  ref={captcha}
+                  siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                  onSuccess={(token) => {
+                    setCaptchaToken(token);
+                  }}
+                  onExpire={() => setCaptchaToken(null)}
+                />
               </div>
 
               {feedback && (

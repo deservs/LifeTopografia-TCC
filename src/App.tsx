@@ -11,13 +11,15 @@ import CheckSession from "./container/Auth/checar";
 
 import Services from "./container/Services/services";
 import Teste from "./container/Enviar-arquivos/enviar_arquivos";
-import Erro404 from "./components/pop-up/erro404";
+import Erro404 from "./components/Pop-Up/Error/erro404";
+import Pagamento from "./components/Pop-Up/Payment/pagamento";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/pagamento" element={<Pagamento />} />
         <Route
           path="/cadastrar"
           element={
