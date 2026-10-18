@@ -1,9 +1,9 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent, useRef } from "react";
 import { Link } from "react-router-dom";
 
 import { z } from "zod";
 
-import { Turnstile} from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
@@ -29,6 +29,8 @@ export const Cadastrar = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formError, setFormError] = useState("");
+
+  const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
 
   // Mantido como ponto de integração para a autenticação futura.
   const currentUser: UserProfile | null = null;
@@ -188,6 +190,7 @@ export const Cadastrar = () => {
       })
       .finally(() => {
         setCaptchaToken(null);
+        captcha.current?.reset();
       });
   };
 
@@ -492,6 +495,7 @@ export const Cadastrar = () => {
 
             <div className="captcha-container">
               <Turnstile
+                ref={captcha}
                 siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                 onSuccess={(token) => {
                   setCaptchaToken(token);

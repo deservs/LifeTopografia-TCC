@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 
 import Sidebar from "../../components/Sidebar/sidebar";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
-import Footer from "../../components/footer/footer";
+import Footer from "../../components/Footer/footer";
 
 import Logo from "../../assets/image/logo-front.webp";
 import Obra from "../../assets/image/obra.webp";

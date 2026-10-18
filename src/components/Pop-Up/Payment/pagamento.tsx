@@ -1,4 +1,4 @@
-import './pagamento.css';
+import "./pagamento.css";
 /* import SumUp from '@sumup/sdk' */
 
 export default function Pagamento() {
