@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { z } from "zod";
 
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
@@ -27,7 +27,6 @@ interface FormData {
 
 export const Cadastrar = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captcha = useRef<HCaptcha | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -188,7 +187,6 @@ export const Cadastrar = () => {
         );
       })
       .finally(() => {
-        captcha.current?.resetCaptcha();
         setCaptchaToken(null);
       });
   };
@@ -493,10 +491,9 @@ export const Cadastrar = () => {
             )}
 
             <div className="captcha-container">
-              <HCaptcha
-                ref={captcha}
-                sitekey="09964b22-6cc4-4da0-97c8-b32c887ed4aa"
-                onVerify={(token) => {
+              <Turnstile
+                siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                onSuccess={(token) => {
                   setCaptchaToken(token);
                 }}
                 onExpire={() => setCaptchaToken(null)}

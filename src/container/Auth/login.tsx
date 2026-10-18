@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
@@ -45,8 +45,6 @@ const TEMPO_REENVIO = 60;
 export const Login = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captcha = useRef<HCaptcha | null>(null);
-
   // Será substituído pelos dados da sessão quando a autenticação for integrada.
   const currentUser: UserProfile | null = null;
 
@@ -235,7 +233,6 @@ export const Login = () => {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");
       console.error("Erro ao fazer login:", error);
     } finally {
-      captcha.current?.resetCaptcha();
       setCaptchaToken(null);
     }
   };
@@ -514,10 +511,9 @@ export const Login = () => {
                 </div>
 
                 <div className="captcha-container">
-                  <HCaptcha
-                    ref={captcha}
-                    sitekey="09964b22-6cc4-4da0-97c8-b32c887ed4aa"
-                    onVerify={(token) => {
+                  <Turnstile
+                    siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                    onSuccess={(token) => {
                       setCaptchaToken(token);
                     }}
                     onExpire={() => setCaptchaToken(null)}

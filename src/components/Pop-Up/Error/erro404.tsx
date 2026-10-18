@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../../assets/image/logo-front.webp";
+import logo from "../../../assets/image/logo-front.webp";
 
 import "./erro404.css";
 
