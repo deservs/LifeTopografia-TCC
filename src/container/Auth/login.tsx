@@ -566,7 +566,6 @@ export const Login = () => {
                   </svg>
                 </div>
                 <div className="input-field-wrapper">
-
                   <label htmlFor="emailRecuperacao">Insira o Email:</label>
 
                   <input
@@ -580,16 +579,16 @@ export const Login = () => {
                   />
                 </div>
               </div>
-                  <div className="captcha-container">
-                  <Turnstile
-                    ref={captcha}
-                    siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
-                    onSuccess={(token) => {
-                      setCaptchaToken(token);
-                    }}
-                    onExpire={() => setCaptchaToken(null)}
-                  />
-                </div>
+              <div className="captcha-container">
+                <Turnstile
+                  ref={captcha}
+                  siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                  onSuccess={(token) => {
+                    setCaptchaToken(token);
+                  }}
+                  onExpire={() => setCaptchaToken(null)}
+                />
+              </div>
 
               {feedback && (
                 <p className="form-feedback error" role="alert">
