@@ -1,7 +1,6 @@
 import {
   useEffect,
   useState,
-  useRef,
   type ChangeEvent,
   type FormEvent,
   type KeyboardEvent,

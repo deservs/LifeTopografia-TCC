@@ -1,9 +1,9 @@
-import { useState, type ChangeEvent, type FormEvent, useRef } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 
 import { z } from "zod";
 
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { Turnstile} from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
