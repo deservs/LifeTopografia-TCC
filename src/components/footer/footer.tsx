@@ -1,5 +1,5 @@
 import Logo from "../../assets/image/logo-front.webp";
-import "./footer.css"; 
+import "./footer.css";
 
 export const Footer = () => {
   return (
