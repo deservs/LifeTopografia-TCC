@@ -45,6 +45,7 @@ const TEMPO_REENVIO = 60;
 export const Login = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [inviCaptcha, setInviCaptcha] = useState(false);
   // Será substituído pelos dados da sessão quando a autenticação for integrada.
   const currentUser: UserProfile | null = null;
   const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
@@ -170,16 +171,24 @@ export const Login = () => {
     document.getElementById(`digit-${nextIndex}`)?.focus();
   };
 
-  const handleReenviarCodigo = async () => {
-    setTimer(TEMPO_REENVIO);
+  const handleReenviarCodigo = async (token: string) => {
     setFeedback("");
 
+    if (!token) {
+      setFeedback("Ocorreu um erro, por favor tente novamente.");
+      return;
+    }
     try {
-      await SendResetPassword(formData.emailRecuperacao);
+      await SendResetPassword(formData.emailRecuperacao, token);
+      setInviCaptcha(false);
+      setTimer(TEMPO_REENVIO);
     } catch (error) {
       console.error("Erro ao reenviar código:", error);
       setFeedback("Erro ao reenviar o código. Tente novamente.");
+      setInviCaptcha(false);
       return;
+    } finally {
+      setCaptchaToken(null);
     }
     /*
      * Integração futura:
@@ -191,7 +200,6 @@ export const Login = () => {
 
   const handleSubmitLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    captcha.current?.reset();
     setFeedback("");
     if (!captchaToken) {
       setFeedback("Por favor, complete o captcha.");
@@ -234,6 +242,7 @@ export const Login = () => {
       console.error("Erro ao fazer login:", error);
     } finally {
       setCaptchaToken(null);
+      captcha.current?.reset();
     }
   };
 
@@ -248,15 +257,25 @@ export const Login = () => {
      * Na integração definitiva, esta transição deve ocorrer somente
      * após o serviço de recuperação aceitar a solicitação.
      */
+
+    if (!captchaToken) {
+      setFeedback("Por favor, complete o captcha.");
+      return;
+    }
+
     try {
-      await SendResetPassword(formData.emailRecuperacao);
+      await SendResetPassword(formData.emailRecuperacao, captchaToken);
       setEtapa("esqueci_codigo");
+      setTimer(TEMPO_REENVIO);
     } catch (error) {
       console.error("Erro ao enviar solicitação de recuperação:", error);
       setFeedback(
         "Erro ao enviar solicitação de recuperação. Verifique o email informado.",
       );
       return;
+    } finally {
+      setCaptchaToken(null);
+      captcha.current?.reset();
     }
   };
 
@@ -651,7 +670,6 @@ export const Login = () => {
                   />
                 ))}
               </div>
-
               {feedback && (
                 <p className="form-feedback error" role="alert">
                   {feedback}
@@ -669,7 +687,7 @@ export const Login = () => {
                 ) : (
                   <button
                     type="button"
-                    onClick={handleReenviarCodigo}
+                    onClick={() => setInviCaptcha(true)}
                     className="btn-resend"
                   >
                     Reenviar
@@ -767,6 +785,35 @@ export const Login = () => {
           )}
         </div>
       </main>
+
+      {inviCaptcha && (
+        <div
+          className="modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-resend-title"
+          style={{ zIndex: 1000 }}
+        >
+          <div
+            className="modal-card animation-fade-in"
+            style={{ padding: "20px 0", background: "transparent"}}
+          >
+            <Turnstile
+              ref={captcha}
+              siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+              onSuccess={(token) => {
+                setCaptchaToken(token);
+                void handleReenviarCodigo(token);
+              }}
+              onError={() => {
+                setFeedback("Erro ao validar o captcha. Tente novamente.");
+                setInviCaptcha(false);
+              }}
+              onExpire={() => setCaptchaToken(null)}
+            />
+          </div>
+        </div>
+      )}
 
       {showModalResend && (
         <div
