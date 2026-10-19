@@ -122,8 +122,13 @@ export async function UpdateUser() {
 }
 
 /* função que irá enviar um código para o email do usuário */
-export async function SendResetPassword(email: string): Promise<boolean> {
-  const { error } = await supabase.auth.resetPasswordForEmail(email);
+export async function SendResetPassword(
+  email: string,
+  captchaToken: string,
+): Promise<boolean> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    captchaToken: captchaToken,
+  });
   if (error) {
     throw new Error(error.message);
   }
