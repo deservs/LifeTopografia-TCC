@@ -86,8 +86,8 @@ export async function SignIn(
 }
 
 /* função que irá fazer logout de um usuário autenticado */
-export async function SignOut() {
-  const { error } = await supabase.auth.signOut();
+export async function SignOut(escopo: "global" | "local") {
+  const { error } = await supabase.auth.signOut({ scope: escopo });
   if (error) {
     throw new Error(error.message);
   }
