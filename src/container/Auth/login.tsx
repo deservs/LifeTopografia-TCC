@@ -51,7 +51,7 @@ export const Login = () => {
   const currentUser: UserProfile | null = null;
   const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
 
-  const [etapa, setEtapa] = useState<EtapaFluxo>("esqueci_nova_senha");
+  const [etapa, setEtapa] = useState<EtapaFluxo>("login");
   const [tipoLogin, setTipoLogin] = useState<TipoLogin>("pessoa");
   const [logoutFail, setLogoutFail] = useState(false);
   const [clickedButton, setClickedButton] = useState(false);
