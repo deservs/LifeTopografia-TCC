@@ -18,6 +18,7 @@ import {
   ConfirmResetPassword,
   ConfirmOTP,
   SignIn,
+  SignOut,
 } from "../../lib/supabase/auth.ts";
 
 import Logo from "../../assets/image/logo-front.webp";
@@ -50,8 +51,10 @@ export const Login = () => {
   const currentUser: UserProfile | null = null;
   const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
 
-  const [etapa, setEtapa] = useState<EtapaFluxo>("login");
+  const [etapa, setEtapa] = useState<EtapaFluxo>("esqueci_nova_senha");
   const [tipoLogin, setTipoLogin] = useState<TipoLogin>("pessoa");
+  const [logoutFail, setLogoutFail] = useState(false);
+  const [clickedButton, setClickedButton] = useState(false);
 
   const [showModalResend, setShowModalResend] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -191,7 +194,7 @@ export const Login = () => {
       setCaptchaToken(null);
     }
     /*
-     * Integração futura:
+     * Integração:
      * somente abrir o modal depois que o backend confirmar
      * o envio do novo código.
      */
@@ -294,6 +297,7 @@ export const Login = () => {
     setFeedback("");
     try {
       await ConfirmOTP(codigoCompleto, formData.emailRecuperacao);
+      setClickedButton(false);
       setEtapa("esqueci_nova_senha");
     } catch (error) {
       console.error("Erro ao confirmar o código:", error);
@@ -303,7 +307,7 @@ export const Login = () => {
       return;
     }
     /*
-     * Integração futura:
+     * Integração:
      * o backend deverá validar o código e fornecer a autorização
      * necessária para permitir a troca da senha.
      */
@@ -325,7 +329,7 @@ export const Login = () => {
     setFeedback("");
 
     /*
-     * Integração futura:
+     * Integração:
      * enviar novaSenha + autorização/token recebido na etapa
      * anterior ao backend.
      *
@@ -333,18 +337,38 @@ export const Login = () => {
      * ainda não existe confirmação de sucesso da operação.
      */
     try {
+      setClickedButton(true);
       await ConfirmResetPassword(formData.novaSenha);
-      setEtapa("login");
     } catch (error) {
       console.error("Erro ao confirmar a nova senha:", error);
+      setClickedButton(false);
       setFeedback("Erro ao confirmar a nova senha. Tente novamente.");
       return;
+    }
+    try {
+      await SignOut("global");
+      setEtapa("login");
+    } catch (error) {
+      setLogoutFail(true);
+      console.error("Erro ao deslogar o usuário:", error);
+    }
+  };
+
+  const handleTryLogout = async () => {
+    try {
+      await SignOut("global");
+      setLogoutFail(false);
+      setEtapa("login");
+    } catch (error) {
+      setLogoutFail(true);
+      console.error("Erro ao deslogar o usuário:", error);
     }
   };
 
   const voltarParaLogin = () => {
     setEtapa("login");
     setFeedback("");
+    setLogoutFail(false);
     setShowModalResend(false);
   };
 
@@ -705,84 +729,107 @@ export const Login = () => {
             </form>
           )}
 
-          {etapa === "esqueci_nova_senha" && (
-            <form
-              onSubmit={handleSubmitNewPassword}
-              className="login-form animation-fade-in"
-            >
-              <div className="form-group">
-                <div className="input-icon-box">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      fill="currentColor"
-                      d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-                    />
-                  </svg>
-                </div>
-
-                <div className="input-field-wrapper">
-                  <label htmlFor="novaSenha">Nova Senha:</label>
-
-                  <input
-                    type="password"
-                    id="novaSenha"
-                    name="novaSenha"
-                    value={formData.novaSenha}
-                    onChange={handleChange}
-                    autoComplete="new-password"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <div className="input-icon-box relative-badge">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      fill="currentColor"
-                      d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-                    />
-                  </svg>
-
-                  <span className="check-badge" aria-hidden="true">
-                    ✓
-                  </span>
-                </div>
-
-                <div className="input-field-wrapper">
-                  <label htmlFor="confirmarNovaSenha">Confirmar Senha:</label>
-
-                  <input
-                    type="password"
-                    id="confirmarNovaSenha"
-                    name="confirmarNovaSenha"
-                    value={formData.confirmarNovaSenha}
-                    onChange={handleChange}
-                    autoComplete="new-password"
-                    required
-                  />
-                </div>
-              </div>
-
-              {feedback && (
-                <p className="form-feedback error" role="alert">
-                  {feedback}
-                </p>
-              )}
-
-              <button type="submit" className="btn-action-login">
-                <span>ALTERAR SENHA</span>
-              </button>
-
-              <button
-                type="button"
-                className="btn-back-login"
-                onClick={voltarParaLogin}
+          {etapa === "esqueci_nova_senha" &&
+            (!logoutFail ? (
+              <form
+                onSubmit={handleSubmitNewPassword}
+                className="login-form animation-fade-in"
               >
-                Voltar ao Login
-              </button>
-            </form>
-          )}
+                <div className="form-group">
+                  <div className="input-icon-box">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        fill="currentColor"
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="input-field-wrapper">
+                    <label htmlFor="novaSenha">Nova Senha:</label>
+
+                    <input
+                      type="password"
+                      id="novaSenha"
+                      name="novaSenha"
+                      value={formData.novaSenha}
+                      onChange={handleChange}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <div className="input-icon-box relative-badge">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        fill="currentColor"
+                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                      />
+                    </svg>
+
+                    <span className="check-badge" aria-hidden="true">
+                      ✓
+                    </span>
+                  </div>
+
+                  <div className="input-field-wrapper">
+                    <label htmlFor="confirmarNovaSenha">Confirmar Senha:</label>
+
+                    <input
+                      type="password"
+                      id="confirmarNovaSenha"
+                      name="confirmarNovaSenha"
+                      value={formData.confirmarNovaSenha}
+                      onChange={handleChange}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {feedback && (
+                  <p className="form-feedback error" role="alert">
+                    {feedback}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn-action-login"
+                  disabled={clickedButton}
+                >
+                  <span>ALTERAR SENHA</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-back-login"
+                  disabled={clickedButton}
+                  onClick={async () => {
+                    try {
+                      await SignOut("local");
+                      setEtapa("login");
+                    } catch (error) {
+                      console.error("Erro ao deslogar o usuário:", error);
+                      setFeedback(
+                        "Erro ao tentar voltar ao login. Tente novamente.",
+                      );
+                    }
+                  }}
+                >
+                  Cancelar Tudo
+                </button>
+              </form>
+            ) : (
+              <div className="login-form animation-fade-in">
+                <p>Não foi possível deslogar, tente novamente.</p>
+                <button className="btn-action-login" onClick={handleTryLogout}>
+                  Tentar Novamente
+                </button>
+              </div>
+            ))}
         </div>
       </main>
 
@@ -796,7 +843,7 @@ export const Login = () => {
         >
           <div
             className="modal-card animation-fade-in"
-            style={{ padding: "20px 0", background: "transparent"}}
+            style={{ padding: "20px 0", background: "transparent" }}
           >
             <Turnstile
               ref={captcha}

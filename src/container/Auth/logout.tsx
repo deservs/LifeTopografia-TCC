@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 export default function Logout() {
   useEffect(() => {
-    SignOut()
+    SignOut("local")
       .then(() => {
         window.location.href = "/";
       })
