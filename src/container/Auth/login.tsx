@@ -118,35 +118,51 @@ export const Login = () => {
   };
 
   const handleDigitKeyDown = (
-    index: number,
-    event: KeyboardEvent<HTMLInputElement>,
-  ) => {
-    if (
-      event.key !== "Backspace" ||
-      formData.codigoDigits[index] ||
-      index === 0
-    ) {
-      return;
-    }
-
+  index: number,
+  event: KeyboardEvent<HTMLInputElement>,
+) => {
+  if (event.key === "ArrowLeft") {
     event.preventDefault();
 
-    setFormData((previousData) => {
-      const newDigits = [...previousData.codigoDigits];
-      newDigits[index - 1] = "";
+    const previousIndex = Math.max(0, index - 1);
+    document.getElementById(`digit-${previousIndex}`)?.focus();
+    return;
+  }
 
-      return {
-        ...previousData,
-        codigoDigits: newDigits,
-      };
-    });
+  if (event.key === "ArrowRight") {
+    event.preventDefault();
 
-    const previousInput = document.getElementById(
-      `digit-${index - 1}`,
-    ) as HTMLInputElement | null;
+    const nextIndex = Math.min(CODIGO_LENGTH - 1, index + 1);
+    document.getElementById(`digit-${nextIndex}`)?.focus();
+    return;
+  }
 
-    previousInput?.focus();
-  };
+  if (
+    event.key !== "Backspace" ||
+    formData.codigoDigits[index] ||
+    index === 0
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+
+  setFormData((previousData) => {
+    const newDigits = [...previousData.codigoDigits];
+    newDigits[index - 1] = "";
+
+    return {
+      ...previousData,
+      codigoDigits: newDigits,
+    };
+  });
+
+  const previousInput = document.getElementById(
+    `digit-${index - 1}`,
+  ) as HTMLInputElement | null;
+
+  previousInput?.focus();
+};
   const handleDigitPaste = (event: ClipboardEvent<HTMLInputElement>) => {
     event.preventDefault();
 

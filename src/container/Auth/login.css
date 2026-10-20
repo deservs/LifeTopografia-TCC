@@ -587,17 +587,21 @@
 
 .digits-container {
   width: 100%;
+  min-width: 0;
 
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: clamp(3px, 1.5vw, 6px);
 
   margin-bottom: 20px;
 }
 
 .digit-box {
-  width: 44px;
+  box-sizing: border-box;
+
+  width: 0;
   height: 48px;
+  min-width: 0;
   max-width: 48px;
 
   flex: 1 1 0;
@@ -613,7 +617,7 @@
   text-align: center;
 
   font-family: inherit;
-  font-size: 1.4rem;
+  font-size: clamp(1rem, 5vw, 1.4rem);
   font-weight: 800;
 
   outline: none;
@@ -831,12 +835,12 @@
   }
 
   .digits-container {
-    gap: 4px;
+    gap: 3px;
   }
 
   .digit-box {
     height: 44px;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
 }
 
