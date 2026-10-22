@@ -495,6 +495,10 @@ export const Cadastrar = () => {
 
             <div className="captcha-container">
               <Turnstile
+                options={{
+                  size: "flexible",
+                  theme: "light",
+                }}
                 ref={captcha}
                 siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                 onSuccess={(token) => {

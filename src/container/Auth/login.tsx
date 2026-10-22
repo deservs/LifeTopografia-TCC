@@ -573,6 +573,10 @@ export const Login = () => {
 
                 <div className="captcha-container">
                   <Turnstile
+                    options={{
+                      size: "flexible",
+                      theme: "light",
+                    }}
                     ref={captcha}
                     siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                     onSuccess={(token) => {
@@ -640,6 +644,10 @@ export const Login = () => {
               </div>
               <div className="captcha-container">
                 <Turnstile
+                  options={{
+                    size: "flexible",
+                    theme: "light",
+                  }}
                   ref={captcha}
                   siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                   onSuccess={(token) => {
@@ -862,6 +870,10 @@ export const Login = () => {
             style={{ padding: "20px 0", background: "transparent" }}
           >
             <Turnstile
+              options={{
+                size: "normal",
+                theme: "light",
+              }}
               ref={captcha}
               siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
               onSuccess={(token) => {
