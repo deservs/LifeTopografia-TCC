@@ -7,6 +7,7 @@ import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
+import PasswordInput from "../../components/PasswordInput/passwordInput";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
 
 import Logo from "../../assets/image/logo-front.webp";
@@ -390,8 +391,7 @@ export const Cadastrar = () => {
               <div className="input-field-wrapper">
                 <label htmlFor="senha">Senha:</label>
 
-                <input
-                  type="password"
+                <PasswordInput
                   id="senha"
                   name="senha"
                   value={formData.senha}
@@ -445,9 +445,9 @@ export const Cadastrar = () => {
               <div className="input-field-wrapper">
                 <label htmlFor="confirmarSenha">Confirmar Senha:</label>
 
-                <input
-                  type="password"
+                <PasswordInput
                   id="confirmarSenha"
+                  visibilityLabel="confirmação de senha"
                   name="confirmarSenha"
                   value={formData.confirmarSenha}
                   onChange={handleChange}

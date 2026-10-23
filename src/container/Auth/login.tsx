@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
+import PasswordInput from "../../components/PasswordInput/passwordInput";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
 import {
   SendResetPassword,
@@ -540,8 +541,7 @@ export const Login = () => {
                   <div className="input-field-wrapper">
                     <label htmlFor="senha">Senha:</label>
 
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="senha"
                       name="senha"
                       value={formData.senha}
@@ -772,9 +772,9 @@ export const Login = () => {
                   <div className="input-field-wrapper">
                     <label htmlFor="novaSenha">Nova Senha:</label>
 
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="novaSenha"
+                      visibilityLabel="nova senha"
                       name="novaSenha"
                       value={formData.novaSenha}
                       onChange={handleChange}
@@ -801,9 +801,9 @@ export const Login = () => {
                   <div className="input-field-wrapper">
                     <label htmlFor="confirmarNovaSenha">Confirmar Senha:</label>
 
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="confirmarNovaSenha"
+                      visibilityLabel="confirmação da nova senha"
                       name="confirmarNovaSenha"
                       value={formData.confirmarNovaSenha}
                       onChange={handleChange}

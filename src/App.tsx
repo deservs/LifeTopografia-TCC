@@ -6,6 +6,7 @@ import Home from "./container/Home/home";
 
 import Cadastrar from "./container/Auth/cadastrar";
 import Login from "./container/Auth/login";
+import Logout from "./container/Auth/logout";
 import CheckSession from "./container/Auth/checar";
 
 import Services from "./container/Services/services";
@@ -41,6 +42,7 @@ function App() {
         <Route path="/servicos" element={<Services />} />
         <Route path="/teste" element={<Teste />} />
         <Route path="/perfil" element={<Profile />} />
+        <Route path="/logout" element={<Logout />} />
         <Route
           path="*"
           element={
