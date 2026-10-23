@@ -58,7 +58,7 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
       });
   }, []);
 
-  const userData = perfil ?? user;
+  const userData = user ?? perfil;
   /**
    * Controla o teclado enquanto o drawer está aberto.
    *

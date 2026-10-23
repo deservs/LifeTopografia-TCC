@@ -6,10 +6,10 @@ import Home from "./container/Home/home";
 
 import Cadastrar from "./container/Auth/cadastrar";
 import Login from "./container/Auth/login";
-import Logout from "./container/Auth/logout";
 import CheckSession from "./container/Auth/checar";
 
 import Services from "./container/Services/services";
+import Profile from "./container/Profile/profile";
 import Teste from "./container/Enviar-arquivos/enviar_arquivos";
 import Erro404 from "./components/Pop-Up/Error/erro404";
 import Pagamento from "./components/Pop-Up/Payment/pagamento";
@@ -40,7 +40,7 @@ function App() {
         />
         <Route path="/servicos" element={<Services />} />
         <Route path="/teste" element={<Teste />} />
-        <Route path="/perfil" element={<Logout />} />
+        <Route path="/perfil" element={<Profile />} />
         <Route
           path="*"
           element={
