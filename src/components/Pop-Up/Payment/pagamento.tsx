@@ -1,14 +1,51 @@
 import "./pagamento.css";
-/* import SumUp from '@sumup/sdk' */
+import { useEffect, useState } from "react";
 
-export default function Pagamento() {
+declare global {
+  interface Window {
+    SumUpCard: any;
+  }
+}
+
+export default function Pagamento(/* {idPedido, valorPedido}: {idPedido: string, valorPedido: number} */) {
+  const [checkoutID, setCheckoutID] = useState<string | null>("2ceffb63-cbbe-4227-87cf-0409dd191a98");
+
+ /*  useEffect(() => {
+    async function fetchCheckoutID() {
+      try {
+        const response = await fetch("/api/sumup/checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            idPedido,
+            valorPedido,
+          }),
+        });
+        const data = await response.json();
+        setCheckoutID(data.checkoutID);
+      } catch (error) {
+        console.error("Error fetching checkout ID:", error);
+      }
+    }
+    fetchCheckoutID();
+  }, [idPedido, valorPedido]); */
+
+  useEffect(() => {
+    if (checkoutID && window.SumUpCard) {
+      window.SumUpCard.mount({
+        checkoutId: checkoutID,
+        onResponse: function (type: string, body: any ){
+          if (type === "success") {
+            console.log("Payment successful:", body);
+          }
+        }
+      })
+    }
+  }, [checkoutID]);
+
   return (
-    <div className="popup">
-      <div className="popup-content">
-        <h2>Pagamento</h2>
-        <p>O pagamento foi realizado com sucesso!</p>
-        <button onClick={() => window.location.reload()}>Fechar</button>
-      </div>
-    </div>
+    <div id="sumup-card"></div>
   );
 }

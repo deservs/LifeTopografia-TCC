@@ -1,31 +1,23 @@
 {
-  "services": {
-    "frontend": {
-      "root": ".",
-      "rewrites": [
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
         {
-          "source": "/(.*)",
-          "destination": "index.html"
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://gateway.sumup.com https://challenges.cloudflare.com; connect-src 'self' https://api.sumup.com https://gateway.sumup.com https://*.supabase.co; frame-src 'self' https://gateway.sumup.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://static.sumup.com https://*.supabase.co;"
         }
       ]
-    },
-    "backend": {
-      "entrypoint": "src/server.ts",
-      "root": "server/"
     }
-  },
+  ],
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": {
-        "service": "backend"
-      }
+      "source": "/api/(.*)",
+      "destination": "/api/server.ts"
     },
     {
       "source": "/(.*)",
-      "destination": {
-        "service": "frontend"
-      }
+      "destination": "/index.html"
     }
   ]
 }
