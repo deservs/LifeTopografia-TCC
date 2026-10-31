@@ -8,7 +8,8 @@ declare global {
 }
 
 export default function Pagamento(/* {idPedido, valorPedido}: {idPedido: string, valorPedido: number} */) {
-  const [checkoutID, setCheckoutID] = useState<string | null>("2ceffb63-cbbe-4227-87cf-0409dd191a98");
+  /* const [checkoutID, setCheckoutID] = useState<string | null>("2ceffb63-cbbe-4227-87cf-0409dd191a98"); */
+  const checkoutID = "2ceffb63-cbbe-4227-87cf-0409dd191a98"; // Replace with your actual checkout ID
 
  /*  useEffect(() => {
     async function fetchCheckoutID() {

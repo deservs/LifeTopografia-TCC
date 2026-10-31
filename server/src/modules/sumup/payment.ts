@@ -1,4 +1,4 @@
-import SumUp from "@sumup/sdk";
+/* import SumUp from "@sumup/sdk";
 
 const client = new SumUp({ apiKey: "sup_sk_your_api_key" });
 const checkout = await client.checkouts.create({
@@ -9,4 +9,4 @@ const checkout = await client.checkouts.create({
   hosted_checkout: { enabled: true },
 });
 
-console.log(checkout.hosted_checkout_url);
+console.log(checkout.hosted_checkout_url); */
