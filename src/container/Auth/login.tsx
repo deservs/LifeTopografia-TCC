@@ -7,7 +7,7 @@ import {
   type KeyboardEvent,
   type ClipboardEvent,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
@@ -45,12 +45,16 @@ const CODIGO_LENGTH = 8;
 const TEMPO_REENVIO = 60;
 
 export const Login = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [inviCaptcha, setInviCaptcha] = useState(false);
-  // Será substituído pelos dados da sessão quando a autenticação for integrada.
   const currentUser: UserProfile | null = null;
-  const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
+
+  // Refs separadas para cada Turnstile
+  const captchaLoginRef = useRef<TurnstileInstance | null>(null);
+  const captchaEmailRef = useRef<TurnstileInstance | null>(null);
+  const captchaInviRef = useRef<TurnstileInstance | null>(null);
 
   const [etapa, setEtapa] = useState<EtapaFluxo>("login");
   const [tipoLogin, setTipoLogin] = useState<TipoLogin>("pessoa");
@@ -238,11 +242,8 @@ export const Login = () => {
       return;
     }
 
-    if (
-      tipoLogin === "empresa" &&
-      !/^[A-Z0-9]{12}[0-9]{2}$/.test(cnpjNormalizado)
-    ) {
-      setFeedback("Informe um CNPJ válido com 14 caracteres.");
+    if (tipoLogin === "empresa" && !/^\d{14}$/.test(cnpjNormalizado)) {
+      setFeedback("Informe um CNPJ válido com 14 números.");
       return;
     }
     try {
@@ -256,13 +257,13 @@ export const Login = () => {
         setFeedback("Credenciais inválidas. Tente novamente.");
         throw new Error("Credenciais inválidas");
       }
-      window.location.href = "/";
+      navigate("/", { replace: true });
     } catch (error) {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");
       console.error("Erro ao fazer login:", error);
     } finally {
       setCaptchaToken(null);
-      captcha.current?.reset();
+      captchaLoginRef.current?.reset();
     }
   };
 
@@ -295,7 +296,7 @@ export const Login = () => {
       return;
     } finally {
       setCaptchaToken(null);
-      captcha.current?.reset();
+      captchaEmailRef.current?.reset();
     }
   };
 
@@ -577,7 +578,7 @@ export const Login = () => {
                       size: "flexible",
                       theme: "light",
                     }}
-                    ref={captcha}
+                    ref={captchaLoginRef}
                     siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                     onSuccess={(token) => {
                       setCaptchaToken(token);
@@ -648,7 +649,7 @@ export const Login = () => {
                     size: "flexible",
                     theme: "light",
                   }}
-                  ref={captcha}
+                  ref={captchaEmailRef}
                   siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                   onSuccess={(token) => {
                     setCaptchaToken(token);
@@ -874,7 +875,7 @@ export const Login = () => {
                 size: "normal",
                 theme: "light",
               }}
-              ref={captcha}
+              ref={captchaInviRef}
               siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
               onSuccess={(token) => {
                 setCaptchaToken(token);

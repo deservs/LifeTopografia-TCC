@@ -81,9 +81,12 @@ export const Cadastrar = () => {
     const { name, value } = event.target;
 
     if (name === "cnpj") {
-      let numericValue = event.target.value;
-
-      numericValue = value.replace(/[^a-zA-Z0-9]/g, "");
+      let numericValue = value.replace(/\D/g, "").substring(0, 14);
+      numericValue = numericValue
+        .replace(/^(\d{2})(\d)/, "$1.$2")
+        .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1/$2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
 
       // Limita a 14 dígitos
       numericValue = numericValue.substring(0, 14);
