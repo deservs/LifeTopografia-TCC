@@ -234,57 +234,54 @@ function ServiceCard({ service }: { service: ServiceCardData }) {
             : "ver informações adicionais"
         }`}
       >
-        <span className="service-card__inner">
-          {/* Frente: estado inicial, sem filtro azul */}
-          <span className="service-card__face service-card__front">
-            <span className="service-card__image">
-              <img src={service.image} alt="" />
+        {/* Lado Esquerdo (Texto alternativo exibido quando a imagem desliza para a direita) */}
+        <div className="service-card__side service-card__side--left">
+          <div className="service-card__content">
+            <span className="service-card__title">{service.title}</span>
+            <span className="service-card__description">
+              {service.alternateDescription}
             </span>
-
-            <span className="service-card__content">
-              <span className="service-card__title">{service.title}</span>
-
-              <span className="service-card__description">
-                {service.description}
-              </span>
-            </span>
-
-            <span className="service-card__arrow" aria-hidden="true">
-              →
-            </span>
+          </div>
+          <span
+            className="service-card__arrow service-card__arrow--left"
+            aria-hidden="true"
+          >
+            ←
           </span>
+        </div>
 
-          {/* Verso: estado alternativo, imagem à direita e azulada */}
-          <span className="service-card__face service-card__back">
-            <span className="service-card__image">
-              <img src={service.image} alt="" />
-
-              <span
-                className="service-card__image-overlay"
-                aria-hidden="true"
-              />
-
-              <img
-                className="service-card__brand-icon"
-                src={LogoIcon}
-                alt=""
-                aria-hidden="true"
-              />
+        {/* Lado Direito (Texto inicial exibido quando a imagem está na esquerda) */}
+        <div className="service-card__side service-card__side--right">
+          <div className="service-card__content">
+            <span className="service-card__title">{service.title}</span>
+            <span className="service-card__description">
+              {service.description}
             </span>
-
-            <span className="service-card__content">
-              <span className="service-card__title">{service.title}</span>
-
-              <span className="service-card__description">
-                {service.alternateDescription}
-              </span>
-            </span>
-
-            <span className="service-card__arrow" aria-hidden="true">
-              ←
-            </span>
+          </div>
+          <span
+            className="service-card__arrow service-card__arrow--right"
+            aria-hidden="true"
+          >
+            →
           </span>
-        </span>
+        </div>
+
+        {/* Imagem Deslizante (passa por cima dos textos e altera suavemente o aspecto) */}
+        <div className="service-card__slider" aria-hidden="true">
+          <img
+            src={service.image}
+            alt=""
+            className="service-card__slider-img"
+            draggable={false}
+          />
+          <div className="service-card__image-overlay" />
+          <img
+            className="service-card__brand-icon"
+            src={LogoIcon}
+            alt=""
+            draggable={false}
+          />
+        </div>
       </button>
     </div>
   );
