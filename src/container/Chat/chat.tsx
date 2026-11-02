@@ -1,24 +1,30 @@
 import { useState, useRef, useEffect } from "react";
 import Sidebar from "../../components/Sidebar/sidebar";
 import LogoIcon from "../../assets/image/logo-front.webp";
+import { SerchDataUser } from "../../lib/supabase/auth";
 import "./chat.css";
+
+interface UserProfile {
+  name: string;
+  role: string;
+  avatarUrl?: string;
+}
 
 interface Message {
   id: string;
   sender: "client" | "admin";
-  type: "text" | "file-pdf" | "file-dxf" | "sumup-proposal" | "sumup-success" | "dxf-validation" | "feedback" | "rating-box";
+  type: "text" | "file-pdf" | "file-dxf" | "sumup-proposal" | "sumup-success";
   content?: string;
   fileName?: string;
   amount?: string;
-  status?: string;
 }
 
-interface ChatItem {
+interface ChatConversation {
   id: string;
-  name: string;
-  avatar: string;
+  interlocutorName: string;
+  interlocutorAvatar?: string;
   lastMessage: string;
-  time: string;
+  updatedAt: string;
   statusText?: string;
   statusType?: "green" | "red" | "default";
   messages: Message[];
@@ -26,84 +32,62 @@ interface ChatItem {
 
 export default function Chat() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  
+  // TODO: Substituir por chamada à API do backend para buscar conversas reais do usuário autenticado.
+  const [conversations, setConversations] = useState<ChatConversation[]>([]);
+  
   const [inputText, setInputText] = useState("");
   const [showBudgetModal, setShowBudgetModal] = useState(false);
-  const [budgetAmount, setBudgetAmount] = useState("10.000,00");
+  const [budgetAmount, setBudgetAmount] = useState("");
   const [showActionMenu, setShowActionMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mock de conversas baseado no design (chat1.png)
-  const [chats, setChats] = useState<ChatItem[]>([
-    {
-      id: "1",
-      name: "Felipe Carlos",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
-      lastMessage: "projetoTeste.pdf",
-      time: "Ontem",
-      messages: [
-        { id: "m1", sender: "client", type: "text", content: "Boa tarde, gostaria de fazer a topografia da minha casa" },
-        { id: "m2", sender: "admin", type: "text", content: "Certo, poderia mandar um pdf do seu terreno para que eu possa dar uma olhada?" },
-        { id: "m3", sender: "client", type: "file-pdf", fileName: "ArquivosProjeto.pdf" },
-        { id: "m4", sender: "admin", type: "sumup-proposal", amount: "10.000,00" },
-        { id: "m5", sender: "client", type: "sumup-success", amount: "10.000,00" }
-      ]
-    },
-    {
-      id: "2",
-      name: "Nilton Santos",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
-      lastMessage: "pagamento do pro...",
-      time: "Hoje",
-      messages: []
-    },
-    {
-      id: "3",
-      name: "Gian Carlos",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
-      lastMessage: "pagamento realizado",
-      time: "12/09",
-      messages: []
-    },
-    {
-      id: "4",
-      name: "Lazaro Silva",
-      avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150",
-      lastMessage: "Projeto finalizado",
-      time: "25/11/2024",
-      statusText: "Projeto finalizado",
-      statusType: "green",
-      messages: []
-    },
-    {
-      id: "5",
-      name: "Pablo da Silva",
-      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150",
-      lastMessage: "Valor muito alto",
-      time: "25/10/2024",
-      statusText: "Valor muito alto",
-      statusType: "red",
-      messages: []
-    }
-  ]);
+  // Autenticação e vínculo com a conta atual do site
+  useEffect(() => {
+    SerchDataUser()
+      .then((response) => {
+        if (!response) {
+          setUserProfile(null);
+          return;
+        }
+        const profileData = JSON.parse(response);
+        setUserProfile({
+          name: profileData.nome_ou_razao,
+          role: profileData.tipo_perfil,
+          avatarUrl: profileData.foto_url,
+        });
+      })
+      .catch((error) => {
+        console.error("Erro ao validar sessão do usuário:", error);
+        setUserProfile(null);
+      });
+  }, []);
 
-  const currentChat = chats.find((c) => c.id === activeChatId);
+  // TODO: Buscar mensagens e chats do backend quando o usuário estiver autenticado
+  useEffect(() => {
+    if (userProfile) {
+      // Exemplo de integração futura: fetchConversationsByUserId()
+    }
+  }, [userProfile]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [currentChat?.messages]);
+  }, [activeChatId]);
 
   const handleSendMessage = () => {
     if (!inputText.trim() || !activeChatId) return;
 
+    // TODO: Enviar mensagem para o backend via API/WebSocket
     const newMessage: Message = {
       id: Date.now().toString(),
-      sender: "admin",
+      sender: "admin", // ou o perfil logado atual
       type: "text",
-      content: inputText
+      content: inputText,
     };
 
-    setChats((prev) =>
+    setConversations((prev) =>
       prev.map((chat) =>
         chat.id === activeChatId
           ? { ...chat, messages: [...chat.messages, newMessage], lastMessage: inputText }
@@ -114,12 +98,12 @@ export default function Chat() {
     setShowActionMenu(false);
   };
 
+  const currentChat = conversations.find((c) => c.id === activeChatId);
+
   return (
     <div className="chat-page">
-      {/* Sidebar do sistema */}
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} user={userProfile} />
 
-      {/* Topbar padrão */}
       <header className="chat-topbar">
         <button
           type="button"
@@ -137,12 +121,13 @@ export default function Chat() {
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
       <main className="chat-main-content">
         <div className="chat-title-container">
           <div className="brand-header-box">
             <div className="brand-icon-wrapper">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+              </svg>
             </div>
             <h1 className="chat-main-title">Life Topografia</h1>
           </div>
@@ -154,29 +139,39 @@ export default function Chat() {
         </div>
 
         {!activeChatId ? (
-          /* TELA 1: LISTAGEM DE CONVERSAS */
+          /* LISTAGEM DE CONVERSAS VINDAS DO BACKEND */
           <div className="chat-list-card">
-            {chats.map((chat) => (
-              <div
-                key={chat.id}
-                className="chat-list-item"
-                onClick={() => setActiveChatId(chat.id)}
-              >
-                <img src={chat.avatar} alt={chat.name} className="chat-item-avatar" />
-                <div className="chat-item-info">
-                  <div className="chat-item-header-row">
-                    <span className="chat-item-name">{chat.name}</span>
-                    <span className={`chat-item-time ${chat.statusType || ""}`}>
-                      {chat.statusText || chat.time}
-                    </span>
+            {conversations.length === 0 ? (
+              <p className="no-chats-text">Nenhuma conversa encontrada ou aguardando integração com o backend.</p>
+            ) : (
+              conversations.map((chat) => (
+                <div
+                  key={chat.id}
+                  className="chat-list-item"
+                  onClick={() => setActiveChatId(chat.id)}
+                >
+                  {chat.interlocutorAvatar ? (
+                    <img src={chat.interlocutorAvatar} alt={chat.interlocutorName} className="chat-item-avatar" />
+                  ) : (
+                    <div className="chat-item-avatar-placeholder">
+                      {chat.interlocutorName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="chat-item-info">
+                    <div className="chat-item-header-row">
+                      <span className="chat-item-name">{chat.interlocutorName}</span>
+                      <span className={`chat-item-time ${chat.statusType || ""}`}>
+                        {chat.statusText || chat.updatedAt}
+                      </span>
+                    </div>
+                    <p className="chat-item-last-msg">{chat.lastMessage}</p>
                   </div>
-                  <p className="chat-item-last-msg">{chat.lastMessage}</p>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         ) : (
-          /* TELA DO CHAT ATIVO (MODAL / JANELA) */
+          /* JANELA DO CHAT ATIVO */
           <div className="chat-window-card animation-fade-in">
             <div className="chat-window-header">
               <button
@@ -188,8 +183,14 @@ export default function Chat() {
                 ✕
               </button>
               <div className="chat-header-profile">
-                <img src={currentChat?.avatar} alt={currentChat?.name} />
-                <span>{currentChat?.name}</span>
+                {currentChat?.interlocutorAvatar ? (
+                  <img src={currentChat.interlocutorAvatar} alt={currentChat.interlocutorName} />
+                ) : (
+                  <div className="chat-header-avatar-placeholder">
+                    {currentChat?.interlocutorName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span>{currentChat?.interlocutorName}</span>
               </div>
             </div>
 
@@ -199,45 +200,25 @@ export default function Chat() {
                   key={msg.id}
                   className={`chat-message-row ${msg.sender === "admin" ? "admin" : "client"}`}
                 >
-                  {msg.sender === "admin" && (
-                    <div className="msg-avatar-admin">
-                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                    </div>
-                  )}
-
                   <div className={`message-bubble ${msg.sender}`}>
                     {msg.type === "text" && <p>{msg.content}</p>}
-                    {msg.type === "file-pdf" && (
-                      <div className="file-bubble-content">
-                        <div className="file-preview-mock"></div>
-                        <span className="file-name-label">{msg.fileName}</span>
-                      </div>
-                    )}
+                    {/* TODO: Renderização de PDF, DXF e Orçamentos processados pelo Back-end */}
                     {msg.type === "sumup-proposal" && (
                       <div className="sumup-card">
                         <div className="sumup-brand">sumup®</div>
                         <p className="sumup-title">Proposta de Orçamento</p>
                         <p className="sumup-value">R$ {msg.amount}</p>
+                        {/* TODO: Botão integrado à API de Pagamento do Backend */}
                         <button type="button" className="sumup-btn-confirm">Confirmar</button>
                       </div>
                     )}
-                    {msg.type === "sumup-success" && (
-                      <div className="sumup-card success">
-                        <div className="sumup-brand">sumup®</div>
-                        <p className="sumup-success-text">Pagamento de R$ {msg.amount} realizado com sucesso</p>
-                      </div>
-                    )}
                   </div>
-
-                  {msg.sender === "client" && (
-                    <img src={currentChat?.avatar} alt="User" className="msg-avatar-client" />
-                  )}
                 </div>
               ))}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* MENU DE AÇÕES RÁPIDAS (Orçamento / Arquivos) */}
+            {/* AÇÕES RÁPIDAS (Orçamento / Arquivos processados pelo Back) */}
             {showActionMenu && (
               <div className="chat-quick-actions-card animation-fade-in">
                 <button
@@ -251,7 +232,14 @@ export default function Chat() {
                   <span className="action-icon-circle">$</span>
                   <span>Realizar orçamento</span>
                 </button>
-                <button type="button" className="quick-action-btn" onClick={() => setShowActionMenu(false)}>
+                <button
+                  type="button"
+                  className="quick-action-btn"
+                  onClick={() => {
+                    setShowActionMenu(false);
+                    // TODO: Acionar seletor de arquivos PDF/DXF para upload via backend
+                  }}
+                >
                   <span className="action-icon-circle">📁</span>
                   <span>Enviar arquivos</span>
                 </button>
@@ -270,6 +258,7 @@ export default function Chat() {
                       type="text"
                       value={budgetAmount}
                       onChange={(e) => setBudgetAmount(e.target.value)}
+                      placeholder="0,00"
                     />
                   </div>
                   <button
@@ -277,18 +266,7 @@ export default function Chat() {
                     className="btn-send-budget"
                     onClick={() => {
                       setShowBudgetModal(false);
-                      // Adiciona proposta ao chat
-                      const propMsg: Message = {
-                        id: Date.now().toString(),
-                        sender: "admin",
-                        type: "sumup-proposal",
-                        amount: budgetAmount
-                      };
-                      setChats((prev) =>
-                        prev.map((c) =>
-                          c.id === activeChatId ? { ...c, messages: [...c.messages, propMsg] } : c
-                        )
-                      );
+                      // TODO: Enviar valor do orçamento para o backend gerar a cobrança/proposta
                     }}
                   >
                     Enviar Orçamento
@@ -297,7 +275,6 @@ export default function Chat() {
               </div>
             )}
 
-            {/* INPUT DE MENSAGEM */}
             <div className="chat-input-bar">
               <input
                 type="text"
@@ -310,7 +287,7 @@ export default function Chat() {
                 type="button"
                 className="btn-attach"
                 onClick={() => setShowActionMenu(!showActionMenu)}
-                aria-label="Anexar arquivo ou orçamento"
+                aria-label="Anexar arquivo"
               >
                 🔗
               </button>

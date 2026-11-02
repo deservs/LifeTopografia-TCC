@@ -256,7 +256,7 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
               </li>
 
               <li>
-                <Link to="/contato" onClick={onClose}>
+                <Link to="/chat" onClick={onClose}>
                   CONTATO
                 </Link>
               </li>
