@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/sidebar";
 import LogoIcon from "../../assets/image/logo-front.webp";
 import "./chat.css";
@@ -26,7 +25,6 @@ interface ChatItem {
 }
 
 export default function Chat() {
-  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [inputText, setInputText] = useState("");
