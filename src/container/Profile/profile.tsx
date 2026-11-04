@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
+import PasswordInput from "../../components/PasswordInput/passwordInput";
 import { SerchDataUser } from "../../lib/supabase/auth";
 import { supabase } from "../../lib/supabase/supabaseClient";
 import Logo from "../../assets/image/logo-front.webp";
@@ -25,6 +26,16 @@ export type MemberAction =
   | { type: "status"; member: CompanyMember; status: CompanyMember["status"] }
   | { type: "remove"; member: CompanyMember };
 
+type ConfirmationAction = MemberAction | { type: "delete_account" };
+
+export interface AccountDeletionRequest {
+  profileId: string;
+  password: string;
+  confirmationText: string;
+  acknowledged: boolean;
+  companyAcknowledged: boolean;
+}
+
 /**
  * Contrato de integração do frontend. A confirmação deve validar a senha da
  * conta responsável e executar a operação no servidor; false indica senha
@@ -41,6 +52,16 @@ export interface ProfileServices {
     password: string,
   ) => Promise<boolean>;
   changePassword?: (password: string) => Promise<void>;
+  /**
+   * O servidor deve revalidar a senha, a identidade e a autorização do responsável,
+   * conferir vínculos/pendências e aplicar a exclusão de forma atômica. As confirmações
+   * do navegador não concedem permissão. Excluir uma empresa não exclui as contas
+   * pessoais de seus membros. Só retornar deleted após excluir a conta e invalidar
+   * suas sessões, incluindo a sessão local; nunca usar credenciais administrativas no frontend.
+   */
+  deleteAccount?: (
+    request: AccountDeletionRequest,
+  ) => Promise<"deleted" | "invalid_password" | "forbidden" | "blocked">;
 }
 
 interface ProfileProps {
@@ -115,6 +136,7 @@ export default function Profile({
   initialMembers = [],
   services,
 }: ProfileProps = {}) {
+  const navigateTo = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(
     initialProfile ?? null,
   );
@@ -129,7 +151,11 @@ export default function Profile({
   const [membersLoaded, setMembersLoaded] = useState(false);
   const [membersLoading, setMembersLoading] = useState(false);
   const [member, setMember] = useState<CompanyMember | null>(null);
-  const [action, setAction] = useState<MemberAction | null>(null);
+  const [action, setAction] = useState<ConfirmationAction | null>(null);
+  const [deletionText, setDeletionText] = useState("");
+  const [deletionAcknowledged, setDeletionAcknowledged] = useState(false);
+  const [companyDeletionAcknowledged, setCompanyDeletionAcknowledged] =
+    useState(false);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [invalidPassword, setInvalidPassword] = useState(false);
@@ -190,6 +216,12 @@ export default function Profile({
     const dialog = dialogRef.current;
     const previouslyFocused = document.activeElement;
     dialog?.showModal();
+    if (action.type === "delete_account") {
+      dialog
+        ?.querySelector<HTMLButtonElement>("#profile-delete-cancel")
+        ?.focus({ preventScroll: true });
+      if (dialog) dialog.scrollTop = 0;
+    }
     return () => {
       dialog?.close();
       if (
@@ -307,7 +339,14 @@ export default function Profile({
     }
   }
 
-  function requestAction(requested: MemberAction) {
+  function resetDeletionConfirmation() {
+    setDeletionText("");
+    setDeletionAcknowledged(false);
+    setCompanyDeletionAcknowledged(false);
+  }
+
+  function requestAction(requested: ConfirmationAction) {
+    resetDeletionConfirmation();
     setPassword("");
     setPasswordError("");
     setInvalidPassword(false);
@@ -320,11 +359,16 @@ export default function Profile({
     setPassword("");
     setPasswordError("");
     setInvalidPassword(false);
+    resetDeletionConfirmation();
   }
 
   async function confirmAction(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!profile || !action || submittingRef.current) return;
+    if (action.type === "delete_account") {
+      await deleteAccount();
+      return;
+    }
     if (!services?.confirmMemberAction) {
       setPasswordError(
         "Não foi possível confirmar a senha. Serviço indisponível.",
@@ -377,6 +421,56 @@ export default function Profile({
     }
   }
 
+  async function deleteAccount() {
+    if (!profile || submittingRef.current || !canDeleteAccount) return;
+    if (!services?.deleteAccount) {
+      setPasswordError(
+        "A exclusão de conta ainda não está disponível. Nenhuma conta foi excluída.",
+      );
+      setPassword("");
+      return;
+    }
+    submittingRef.current = true;
+    setBusy(true);
+    setPasswordError("");
+    setInvalidPassword(false);
+    try {
+      const result = await services.deleteAccount({
+        profileId: profile.id,
+        password,
+        confirmationText: deletionText.trim(),
+        acknowledged: deletionAcknowledged,
+        companyAcknowledged: companyDeletionAcknowledged,
+      });
+      if (result === "invalid_password") {
+        setInvalidPassword(true);
+        setPasswordError("Senha incorreta. Sua conta não foi excluída.");
+      } else if (result === "forbidden") {
+        setPasswordError(
+          "Você não tem autorização para excluir esta conta. Procure o responsável pela empresa.",
+        );
+      } else if (result === "blocked") {
+        setPasswordError(
+          "Existem vínculos ou pendências que impedem a exclusão. Resolva-os com o atendimento antes de tentar novamente.",
+        );
+      } else if (result === "deleted") {
+        window.location.replace("/");
+      } else {
+        setPasswordError(
+          "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
+        );
+      }
+    } catch {
+      setPasswordError(
+        "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
+      );
+    } finally {
+      setPassword("");
+      submittingRef.current = false;
+      setBusy(false);
+    }
+  }
+
   async function changePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submittingRef.current) return;
@@ -406,6 +500,16 @@ export default function Profile({
   }
 
   const company = !!profile && isCompany(profile.role);
+  const deletingAccount = action?.type === "delete_account";
+  const confirmationPerson = deletingAccount ? profile : action?.member;
+  const deletionPhrase = company
+    ? `EXCLUIR EMPRESA ${profile?.name ?? ""}`
+    : "EXCLUIR MINHA CONTA";
+  const canDeleteAccount =
+    deletionAcknowledged &&
+    (!company || companyDeletionAcknowledged) &&
+    deletionText.trim() === deletionPhrase &&
+    password.length > 0;
   const existingMember = members.some((item) => item.id === member?.id);
   const title =
     view === "members"
@@ -595,7 +699,43 @@ export default function Profile({
                   >
                     {busy ? "SALVANDO…" : "SALVAR"}
                   </button>
+                  <div className="profile-signout-area">
+                    <button
+                      className="profile-remove-button profile-signout-button"
+                      type="button"
+                      disabled={busy}
+                      onClick={() => navigateTo("/logout")}
+                    >
+                      Sair da conta
+                    </button>
+                  </div>
                 </form>
+              )}
+
+              {view === "profile" && (
+                <section
+                  className="profile-delete-area"
+                  aria-labelledby="profile-delete-area-title"
+                >
+                  <h2 id="profile-delete-area-title">
+                    Exclusão permanente {company ? "da empresa" : "da conta"}
+                  </h2>
+                  <p>
+                    {company
+                      ? "Esta ação exclui a conta da empresa e encerra o acesso dos membros a ela."
+                      : "Esta ação exclui sua conta permanentemente e encerra seu acesso aos recursos vinculados a ela."}
+                  </p>
+                  <button
+                    className="profile-primary-button profile-danger-button"
+                    type="button"
+                    disabled={busy}
+                    onClick={() => requestAction({ type: "delete_account" })}
+                  >
+                    {company
+                      ? "Excluir conta da empresa"
+                      : "Excluir minha conta"}
+                  </button>
+                </section>
               )}
 
               {company && view === "members" && (
@@ -772,14 +912,11 @@ export default function Profile({
                   className="profile-card profile-form"
                   onSubmit={changePassword}
                 >
-                  <label
-                    className="profile-field"
-                    htmlFor="profile-new-password"
-                  >
-                    Nova senha:
-                    <input
+                  <div className="profile-field">
+                    <label htmlFor="profile-new-password">Nova senha:</label>
+                    <PasswordInput
                       id="profile-new-password"
-                      type="password"
+                      visibilityLabel="nova senha"
                       autoComplete="new-password"
                       minLength={8}
                       pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9\s]).{8,}"
@@ -789,19 +926,18 @@ export default function Profile({
                       disabled={busy}
                       onChange={(event) => setNewPassword(event.target.value)}
                     />
-                  </label>
+                  </div>
                   <p className="profile-password-hint">
                     Use ao menos 8 caracteres, uma letra maiúscula, uma
                     minúscula, um número e um símbolo.
                   </p>
-                  <label
-                    className="profile-field"
-                    htmlFor="profile-repeat-password"
-                  >
-                    Confirmar senha:
-                    <input
+                  <div className="profile-field">
+                    <label htmlFor="profile-repeat-password">
+                      Confirmar senha:
+                    </label>
+                    <PasswordInput
                       id="profile-repeat-password"
-                      type="password"
+                      visibilityLabel="confirmação de senha"
                       autoComplete="new-password"
                       value={repeatPassword}
                       required
@@ -810,7 +946,7 @@ export default function Profile({
                         setRepeatPassword(event.target.value)
                       }
                     />
-                  </label>
+                  </div>
                   {feedbackNode}
                   <button
                     className="profile-primary-button"
@@ -827,9 +963,9 @@ export default function Profile({
         <Footer />
       </div>
 
-      {action && (
+      {action && confirmationPerson && (
         <dialog
-          className="profile-dialog"
+          className={`profile-dialog${deletingAccount ? " profile-delete-dialog" : ""}`}
           ref={dialogRef}
           aria-labelledby="profile-confirm-title"
           aria-describedby="profile-confirm-description"
@@ -847,22 +983,40 @@ export default function Profile({
           >
             X
           </button>
-          <h2 id="profile-confirm-title" className="profile-sr-only">
-            {action.type === "remove"
-              ? "Confirmar remoção de membro"
-              : "Confirmar alteração de status"}
+          <h2
+            id="profile-confirm-title"
+            className={
+              deletingAccount ? "profile-delete-title" : "profile-sr-only"
+            }
+          >
+            {deletingAccount
+              ? company
+                ? "Excluir conta da empresa"
+                : "Excluir minha conta"
+              : action.type === "remove"
+                ? "Confirmar remoção de membro"
+                : "Confirmar alteração de status"}
           </h2>
           <div className="profile-identity">
-            <Avatar {...action.member} />
-            <p>{action.member.name}</p>
+            <Avatar {...confirmationPerson} />
+            <p>{confirmationPerson.name}</p>
           </div>
           <p
             id="profile-confirm-description"
             className="profile-confirm-description"
           >
-            Insira a senha para{" "}
-            {action.type === "remove" ? (
+            {action.type === "delete_account" ? (
               <>
+                <strong>
+                  Esta exclusão é permanente e não pode ser desfeita.
+                </strong>{" "}
+                {company
+                  ? "O acesso de todos os membros à conta da empresa será encerrado. As contas pessoais dos membros não serão excluídas. Revise os membros, arquivos e atendimentos vinculados antes de continuar."
+                  : "Você perderá o acesso à sua conta e aos recursos vinculados a ela."}
+              </>
+            ) : action.type === "remove" ? (
+              <>
+                Insira a senha para{" "}
                 <span className="profile-danger-text">remover</span> o perfil de{" "}
                 <span className="profile-accent-text">
                   {action.member.name}
@@ -871,7 +1025,7 @@ export default function Profile({
               </>
             ) : (
               <>
-                alterar o status de{" "}
+                Insira a senha para alterar o status de{" "}
                 <span className={`profile-status--${action.member.status}`}>
                   {action.member.status}
                 </span>{" "}
@@ -884,18 +1038,88 @@ export default function Profile({
             )}
           </p>
           <form className="profile-confirm-form" onSubmit={confirmAction}>
+            {deletingAccount && (
+              <div className="profile-delete-confirmations">
+                <label className="profile-delete-check">
+                  <input
+                    type="checkbox"
+                    required
+                    disabled={busy}
+                    checked={deletionAcknowledged}
+                    onChange={(event) =>
+                      setDeletionAcknowledged(event.target.checked)
+                    }
+                  />
+                  <span>
+                    Entendo que a exclusão é permanente e que perderei o acesso
+                    a esta conta.
+                  </span>
+                </label>
+                {company && (
+                  <label className="profile-delete-check">
+                    <input
+                      type="checkbox"
+                      required
+                      disabled={busy}
+                      checked={companyDeletionAcknowledged}
+                      onChange={(event) =>
+                        setCompanyDeletionAcknowledged(event.target.checked)
+                      }
+                    />
+                    <span>
+                      Sou o responsável autorizado pela empresa e estou ciente
+                      do impacto sobre o acesso dos membros.
+                    </span>
+                  </label>
+                )}
+                <label className="profile-field" htmlFor="profile-delete-text">
+                  <span>Para confirmar, digite exatamente:</span>
+                  <strong className="profile-delete-phrase">
+                    {deletionPhrase}
+                  </strong>
+                  <input
+                    id="profile-delete-text"
+                    autoComplete="off"
+                    spellCheck={false}
+                    required
+                    disabled={busy}
+                    value={deletionText}
+                    aria-describedby="profile-delete-text-hint"
+                    onChange={(event) => setDeletionText(event.target.value)}
+                  />
+                </label>
+                <p
+                  id="profile-delete-text-hint"
+                  className="profile-delete-hint"
+                >
+                  {company
+                    ? "Inclua o nome da empresa conforme exibido acima."
+                    : "Respeite as letras maiúsculas da confirmação."}
+                </p>
+              </div>
+            )}
             <label
-              className="profile-sr-only"
+              className={
+                deletingAccount
+                  ? "profile-delete-password-label"
+                  : "profile-sr-only"
+              }
               htmlFor="profile-confirm-password"
             >
-              Senha da conta responsável
+              {deletingAccount && !company
+                ? "Sua senha atual"
+                : "Senha da conta responsável"}
             </label>
-            <input
+            <PasswordInput
               id="profile-confirm-password"
-              type="password"
+              visibilityLabel={
+                deletingAccount && !company
+                  ? "sua senha atual"
+                  : "senha da conta responsável"
+              }
               placeholder="Senha:"
               autoComplete="current-password"
-              autoFocus
+              autoFocus={!deletingAccount}
               required
               value={password}
               disabled={busy}
@@ -919,12 +1143,31 @@ export default function Profile({
               </p>
             )}
             <button
-              className="profile-primary-button"
+              className={`profile-primary-button${deletingAccount ? " profile-danger-button" : ""}`}
               type="submit"
-              disabled={busy}
+              disabled={busy || (deletingAccount && !canDeleteAccount)}
             >
-              {busy ? "CONFIRMANDO…" : "CONFIRMAR"}
+              {busy
+                ? deletingAccount
+                  ? "EXCLUINDO…"
+                  : "CONFIRMANDO…"
+                : deletingAccount
+                  ? company
+                    ? "EXCLUIR EMPRESA PERMANENTEMENTE"
+                    : "EXCLUIR CONTA PERMANENTEMENTE"
+                  : "CONFIRMAR"}
             </button>
+            {deletingAccount && (
+              <button
+                id="profile-delete-cancel"
+                className="profile-delete-cancel"
+                type="button"
+                disabled={busy}
+                onClick={closeDialog}
+              >
+                Cancelar e manter a conta
+              </button>
+            )}
           </form>
         </dialog>
       )}

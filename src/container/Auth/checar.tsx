@@ -1,9 +1,11 @@
 import { supabase } from "../../lib/supabase/supabaseClient";
-
+import type { Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function CheckSession() {
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -15,13 +17,15 @@ export default function CheckSession() {
     fetchSession();
   }, []);
 
-  if (session) {
+  useEffect(() => {
     if (
-      window.location.pathname === "/login" ||
-      window.location.pathname === "/cadastrar"
+      session &&
+      (window.location.pathname === "/login" ||
+        window.location.pathname === "/cadastrar")
     ) {
-      window.location.href = "/";
+      navigate("/", { replace: true });
     }
-  }
+  }, [session, navigate]);
+
   return null;
 }

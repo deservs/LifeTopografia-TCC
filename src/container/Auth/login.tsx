@@ -7,11 +7,12 @@ import {
   type KeyboardEvent,
   type ClipboardEvent,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
+import PasswordInput from "../../components/PasswordInput/passwordInput";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
 import {
   SendResetPassword,
@@ -44,12 +45,16 @@ const CODIGO_LENGTH = 8;
 const TEMPO_REENVIO = 60;
 
 export const Login = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [inviCaptcha, setInviCaptcha] = useState(false);
-  // Será substituído pelos dados da sessão quando a autenticação for integrada.
   const currentUser: UserProfile | null = null;
-  const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
+
+  // Refs separadas para cada Turnstile
+  const captchaLoginRef = useRef<TurnstileInstance | null>(null);
+  const captchaEmailRef = useRef<TurnstileInstance | null>(null);
+  const captchaInviRef = useRef<TurnstileInstance | null>(null);
 
   const [etapa, setEtapa] = useState<EtapaFluxo>("login");
   const [tipoLogin, setTipoLogin] = useState<TipoLogin>("pessoa");
@@ -118,51 +123,51 @@ export const Login = () => {
   };
 
   const handleDigitKeyDown = (
-  index: number,
-  event: KeyboardEvent<HTMLInputElement>,
-) => {
-  if (event.key === "ArrowLeft") {
+    index: number,
+    event: KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+
+      const previousIndex = Math.max(0, index - 1);
+      document.getElementById(`digit-${previousIndex}`)?.focus();
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+
+      const nextIndex = Math.min(CODIGO_LENGTH - 1, index + 1);
+      document.getElementById(`digit-${nextIndex}`)?.focus();
+      return;
+    }
+
+    if (
+      event.key !== "Backspace" ||
+      formData.codigoDigits[index] ||
+      index === 0
+    ) {
+      return;
+    }
+
     event.preventDefault();
 
-    const previousIndex = Math.max(0, index - 1);
-    document.getElementById(`digit-${previousIndex}`)?.focus();
-    return;
-  }
+    setFormData((previousData) => {
+      const newDigits = [...previousData.codigoDigits];
+      newDigits[index - 1] = "";
 
-  if (event.key === "ArrowRight") {
-    event.preventDefault();
+      return {
+        ...previousData,
+        codigoDigits: newDigits,
+      };
+    });
 
-    const nextIndex = Math.min(CODIGO_LENGTH - 1, index + 1);
-    document.getElementById(`digit-${nextIndex}`)?.focus();
-    return;
-  }
+    const previousInput = document.getElementById(
+      `digit-${index - 1}`,
+    ) as HTMLInputElement | null;
 
-  if (
-    event.key !== "Backspace" ||
-    formData.codigoDigits[index] ||
-    index === 0
-  ) {
-    return;
-  }
-
-  event.preventDefault();
-
-  setFormData((previousData) => {
-    const newDigits = [...previousData.codigoDigits];
-    newDigits[index - 1] = "";
-
-    return {
-      ...previousData,
-      codigoDigits: newDigits,
-    };
-  });
-
-  const previousInput = document.getElementById(
-    `digit-${index - 1}`,
-  ) as HTMLInputElement | null;
-
-  previousInput?.focus();
-};
+    previousInput?.focus();
+  };
   const handleDigitPaste = (event: ClipboardEvent<HTMLInputElement>) => {
     event.preventDefault();
 
@@ -237,11 +242,8 @@ export const Login = () => {
       return;
     }
 
-    if (
-      tipoLogin === "empresa" &&
-      !/^[A-Z0-9]{12}[0-9]{2}$/.test(cnpjNormalizado)
-    ) {
-      setFeedback("Informe um CNPJ válido com 14 caracteres.");
+    if (tipoLogin === "empresa" && !/^\d{14}$/.test(cnpjNormalizado)) {
+      setFeedback("Informe um CNPJ válido com 14 números.");
       return;
     }
     try {
@@ -255,13 +257,13 @@ export const Login = () => {
         setFeedback("Credenciais inválidas. Tente novamente.");
         throw new Error("Credenciais inválidas");
       }
-      window.location.href = "/";
+      navigate("/", { replace: true });
     } catch (error) {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");
       console.error("Erro ao fazer login:", error);
     } finally {
       setCaptchaToken(null);
-      captcha.current?.reset();
+      captchaLoginRef.current?.reset();
     }
   };
 
@@ -294,7 +296,7 @@ export const Login = () => {
       return;
     } finally {
       setCaptchaToken(null);
-      captcha.current?.reset();
+      captchaEmailRef.current?.reset();
     }
   };
 
@@ -540,8 +542,7 @@ export const Login = () => {
                   <div className="input-field-wrapper">
                     <label htmlFor="senha">Senha:</label>
 
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="senha"
                       name="senha"
                       value={formData.senha}
@@ -577,7 +578,7 @@ export const Login = () => {
                       size: "flexible",
                       theme: "light",
                     }}
-                    ref={captcha}
+                    ref={captchaLoginRef}
                     siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                     onSuccess={(token) => {
                       setCaptchaToken(token);
@@ -648,7 +649,7 @@ export const Login = () => {
                     size: "flexible",
                     theme: "light",
                   }}
-                  ref={captcha}
+                  ref={captchaEmailRef}
                   siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                   onSuccess={(token) => {
                     setCaptchaToken(token);
@@ -772,9 +773,9 @@ export const Login = () => {
                   <div className="input-field-wrapper">
                     <label htmlFor="novaSenha">Nova Senha:</label>
 
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="novaSenha"
+                      visibilityLabel="nova senha"
                       name="novaSenha"
                       value={formData.novaSenha}
                       onChange={handleChange}
@@ -801,9 +802,9 @@ export const Login = () => {
                   <div className="input-field-wrapper">
                     <label htmlFor="confirmarNovaSenha">Confirmar Senha:</label>
 
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="confirmarNovaSenha"
+                      visibilityLabel="confirmação da nova senha"
                       name="confirmarNovaSenha"
                       value={formData.confirmarNovaSenha}
                       onChange={handleChange}
@@ -874,7 +875,7 @@ export const Login = () => {
                 size: "normal",
                 theme: "light",
               }}
-              ref={captcha}
+              ref={captchaInviRef}
               siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
               onSuccess={(token) => {
                 setCaptchaToken(token);
