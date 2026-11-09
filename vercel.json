@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://gateway.sumup.com https://challenges.cloudflare.com https://vercel.live; connect-src 'self' https://api.sumup.com https://gateway.sumup.com https://*.supabase.co data: https://vercel.live; frame-src 'self' https://gateway.sumup.com https://challenges.cloudflare.com https://vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://static.sumup.com https://*.supabase.co blob:;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://gateway.sumup.com https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://vercel.live; connect-src 'self' data: https://api.sumup.com https://gateway.sumup.com https://*.supabase.co https://vercel.live https://*.challenges.cloudflare.com https://*.cloudflarecaptcha.com https://dnstest.dev; frame-src 'self' https://gateway.sumup.com https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://static.sumup.com https://*.supabase.co blob:;"
         }
       ]
     }
@@ -13,7 +13,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/server.ts"
+      "destination": "/server/src/server.ts"
     },
     {
       "source": "/(.*)",

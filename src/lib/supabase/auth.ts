@@ -46,7 +46,7 @@ export async function SignIn(
   valor: string,
   password: string,
   captchaToken: string,
-  loginType: "email" | "cnpj" | "nome",
+  loginType: "email" | "cnpj",
 ) {
   const resposta = await fetch("/api/login", {
     method: "POST",
