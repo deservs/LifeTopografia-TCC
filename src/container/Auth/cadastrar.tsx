@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { z } from "zod";
 
@@ -27,6 +27,7 @@ interface FormData {
 }
 
 export const Cadastrar = () => {
+  const navigate = useNavigate();
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formError, setFormError] = useState("");
@@ -157,10 +158,11 @@ export const Cadastrar = () => {
       setFormError("Informe o CNPJ da empresa.");
       return;
     }
+    const cnpjRegex = formData.cnpj.replace(/[^a-zA-Z0-9]/g, "");
     if (tipoCadastro === "empresa") {
       try {
         const response = await fetch(
-          `https://brasilapi.com.br/api/cnpj/v1/${formData.cnpj.replace(/[^a-zA-Z0-9]/g, "")}`,
+          `https://brasilapi.com.br/api/cnpj/v1/${cnpjRegex}`,
         );
         if (!response.ok) {
           setFormError("Ocorreu um erro ao buscar o CNPJ.");
@@ -180,11 +182,11 @@ export const Cadastrar = () => {
       formData.email,
       formData.senha,
       formData.nome,
-      formData.cnpj,
+      cnpjRegex,
       captchaToken,
     )
       .then(() => {
-        window.location.href = "/login";
+        navigate("/login", { replace: true });
       })
       .catch((error) => {
         console.error("Erro ao cadastrar usuário:", error);

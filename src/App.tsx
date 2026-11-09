@@ -13,7 +13,6 @@ import Services from "./container/Services/services";
 import Profile from "./container/Profile/profile";
 import Teste from "./container/Enviar-arquivos/enviar_arquivos";
 import Erro404 from "./components/Pop-Up/Error/erro404";
-import Pagamento from "./components/Pop-Up/Payment/pagamento";
 import Chat from "./container/Chat/chat"; // <- Importe o componente do chat
 
 function App() {
@@ -21,7 +20,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/pagamento" element={<Pagamento />} />
         <Route
           path="/cadastrar"
           element={
@@ -43,7 +41,8 @@ function App() {
         <Route path="/servicos" element={<Services />} />
         <Route path="/teste" element={<Teste />} />
         <Route path="/perfil" element={<Profile />} />
-        <Route path="/chat" element={<Chat />} /> {/* <- Adicione a rota do chat */}
+        <Route path="/chat" element={<Chat />} />{" "}
+        {/* <- Adicione a rota do chat */}
         <Route path="/logout" element={<Logout />} />
         <Route
           path="*"

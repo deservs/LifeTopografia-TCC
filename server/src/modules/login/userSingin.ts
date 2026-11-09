@@ -2,7 +2,7 @@ import { supabase, supabaseAdmin } from '../../Shared/database/banco.js'
 
 export async function Login(
   valor: string,
-  type: 'cnpj' | 'email' | 'nome',
+  type: 'cnpj' | 'email',
   password: string,
   captchaToken: string,
 ) {
