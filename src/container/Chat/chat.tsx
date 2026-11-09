@@ -34,10 +34,10 @@ export default function Chat() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  
+
   // TODO: Substituir por chamada à API do backend para buscar conversas reais do usuário autenticado.
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
-  
+
   const [inputText, setInputText] = useState("");
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [budgetAmount, setBudgetAmount] = useState("");
@@ -90,9 +90,13 @@ export default function Chat() {
     setConversations((prev) =>
       prev.map((chat) =>
         chat.id === activeChatId
-          ? { ...chat, messages: [...chat.messages, newMessage], lastMessage: inputText }
-          : chat
-      )
+          ? {
+              ...chat,
+              messages: [...chat.messages, newMessage],
+              lastMessage: inputText,
+            }
+          : chat,
+      ),
     );
     setInputText("");
     setShowActionMenu(false);
@@ -102,7 +106,11 @@ export default function Chat() {
 
   return (
     <div className="chat-page">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} user={userProfile} />
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        user={userProfile}
+      />
 
       <header className="chat-topbar">
         <button
@@ -142,7 +150,10 @@ export default function Chat() {
           /* LISTAGEM DE CONVERSAS VINDAS DO BACKEND */
           <div className="chat-list-card">
             {conversations.length === 0 ? (
-              <p className="no-chats-text">Nenhuma conversa encontrada ou aguardando integração com o backend.</p>
+              <p className="no-chats-text">
+                Nenhuma conversa encontrada ou aguardando integração com o
+                backend.
+              </p>
             ) : (
               conversations.map((chat) => (
                 <div
@@ -151,7 +162,11 @@ export default function Chat() {
                   onClick={() => setActiveChatId(chat.id)}
                 >
                   {chat.interlocutorAvatar ? (
-                    <img src={chat.interlocutorAvatar} alt={chat.interlocutorName} className="chat-item-avatar" />
+                    <img
+                      src={chat.interlocutorAvatar}
+                      alt={chat.interlocutorName}
+                      className="chat-item-avatar"
+                    />
                   ) : (
                     <div className="chat-item-avatar-placeholder">
                       {chat.interlocutorName.charAt(0).toUpperCase()}
@@ -159,8 +174,12 @@ export default function Chat() {
                   )}
                   <div className="chat-item-info">
                     <div className="chat-item-header-row">
-                      <span className="chat-item-name">{chat.interlocutorName}</span>
-                      <span className={`chat-item-time ${chat.statusType || ""}`}>
+                      <span className="chat-item-name">
+                        {chat.interlocutorName}
+                      </span>
+                      <span
+                        className={`chat-item-time ${chat.statusType || ""}`}
+                      >
                         {chat.statusText || chat.updatedAt}
                       </span>
                     </div>
@@ -184,7 +203,10 @@ export default function Chat() {
               </button>
               <div className="chat-header-profile">
                 {currentChat?.interlocutorAvatar ? (
-                  <img src={currentChat.interlocutorAvatar} alt={currentChat.interlocutorName} />
+                  <img
+                    src={currentChat.interlocutorAvatar}
+                    alt={currentChat.interlocutorName}
+                  />
                 ) : (
                   <div className="chat-header-avatar-placeholder">
                     {currentChat?.interlocutorName.charAt(0).toUpperCase()}
@@ -209,7 +231,9 @@ export default function Chat() {
                         <p className="sumup-title">Proposta de Orçamento</p>
                         <p className="sumup-value">R$ {msg.amount}</p>
                         {/* TODO: Botão integrado à API de Pagamento do Backend */}
-                        <button type="button" className="sumup-btn-confirm">Confirmar</button>
+                        <button type="button" className="sumup-btn-confirm">
+                          Confirmar
+                        </button>
                       </div>
                     )}
                   </div>
@@ -251,7 +275,9 @@ export default function Chat() {
               <div className="chat-modal-overlay">
                 <div className="chat-modal-card">
                   <div className="sumup-brand-modal">sumup®</div>
-                  <p className="modal-instruction">Insira o valor do orçamento:</p>
+                  <p className="modal-instruction">
+                    Insira o valor do orçamento:
+                  </p>
                   <div className="budget-input-wrapper">
                     <span>R$</span>
                     <input
