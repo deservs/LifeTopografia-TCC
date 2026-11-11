@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type FormEvent } from "react";
+import { useState, useRef, useEffect, type FormEvent, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
@@ -52,8 +52,8 @@ export interface ChatThread {
 }
 
 /**
- * Gera um arquivo DXF ASCII (AutoCAD R12/2000 compatível) a partir de coordenadas
- * extraídas do PDF da matrícula/memorial do imóvel.
+ * Gera um DXF ASCII demonstrativo com coordenadas fictícias fixas.
+ * Não extrai dados do PDF nem substitui uma rotina real de conversão.
  */
 function generateCadDxfContent(docName: string): string {
   const polygonPoints = [
@@ -98,7 +98,7 @@ function downloadDxfFile(fileName: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-// Conversa padrão para clientes (canal direto com a Life Topografia)
+// Mensagens fictícias para demonstrar a visualização do cliente.
 const DEFAULT_CLIENT_MESSAGES: ChatMessage[] = [
   {
     id: "msg-init-1",
@@ -147,7 +147,7 @@ const DEFAULT_CLIENT_MESSAGES: ChatMessage[] = [
   },
 ];
 
-// Fila de atendimentos para o Administrador (clientes reais solicitando serviços)
+// Atendimentos fictícios usados para demonstrar a visualização administrativa.
 const INITIAL_ADMIN_THREADS: ChatThread[] = [
   {
     id: "thread-cliente-1",
@@ -157,7 +157,7 @@ const INITIAL_ADMIN_THREADS: ChatThread[] = [
     lastMessageTime: "09:12",
     unreadCount: 1,
     chatStatus: "open",
-    serviceStatus: "not_started",
+    serviceStatus: "in_progress",
     messages: [
       {
         id: "adm-m1",
@@ -254,16 +254,15 @@ export default function Chat() {
   const [clientMessages, setClientMessages] = useState<ChatMessage[]>(
     DEFAULT_CLIENT_MESSAGES,
   );
-  const [clientChatStatus, setClientChatStatus] = useState<ChatStatus>("open");
-
-  const [clientServiceStatus, setClientServiceStatus] =
-    useState<ServiceStatus>("in_progress");
-
   // Controle da avaliação do serviço
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [ratingComment, setRatingComment] = useState("");
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [submittedRating, setSubmittedRating] = useState<{
+    score: number;
+    comment: string;
+  } | null>(null);
   // Estado do chat para Administradores
   const [adminThreads, setAdminThreads] = useState<ChatThread[]>(
     INITIAL_ADMIN_THREADS,
@@ -299,24 +298,13 @@ export default function Chat() {
       try {
         const storedProfileStr = localStorage.getItem("userProfile");
 
-        // Timeout protetivo para evitar que chamadas de rede lentas travem o redirecionamento
-        const timeoutPromise = new Promise<{
-          data: { session: null };
-          error: null;
-        }>((resolve) =>
-          setTimeout(
-            () => resolve({ data: { session: null }, error: null }),
-            1200,
-          ),
-        );
+        // Aguarda a resposta real do Supabase. Um timeout artificial poderia
+        // interpretar uma conexão lenta como ausência de sessão e redirecionar
+        // uma pessoa autenticada para o login.
+        const { data, error } = await supabase.auth.getSession();
 
-        const { data, error } = await Promise.race([
-          supabase.auth.getSession(),
-          timeoutPromise,
-        ]);
-
-        if ((error || !data?.session) && !storedProfileStr) {
-          // Usuário não autenticado: redireciona imediatamente para a tela de login
+        if (error || !data?.session) {
+          // Dados de perfil no localStorage não substituem uma sessão autenticada.
           navigate("/login", { replace: true });
           return;
         }
@@ -330,7 +318,8 @@ export default function Chat() {
           const cached = await SerchDataUser();
           const profileRaw = cached || storedProfileStr;
           if (profileRaw) {
-            const profileData = JSON.parse(profileRaw);
+            const profileData =
+              typeof profileRaw === "string" ? JSON.parse(profileRaw) : profileRaw;
             const userRole = (profileData.tipo_perfil || "").toLowerCase();
             loadedName = profileData.nome_ou_razao || "Cliente";
             loadedAvatar = profileData.foto_url;
@@ -384,7 +373,23 @@ export default function Chat() {
     };
   }, [navigate]);
 
-  // Rolagem suave para o fim das mensagens
+  // Limpa controles temporários ao trocar de perfil ou atendimento para evitar
+  // que uma mensagem, orçamento ou avaliação seja enviada ao cliente errado.
+  useEffect(() => {
+    setShowQuickActions(false);
+    setShowBudgetModal(false);
+    setInputText("");
+    setBudgetTitle("");
+    setBudgetAmount("");
+    setBudgetDescription("");
+    setRating(0);
+    setRatingComment("");
+    setRatingSubmitted(false);
+    setSubmittedRating(null);
+    setShowRatingModal(false);
+  }, [activeRole, activeThreadId]);
+
+  // Rolagem suave para o fim das mensagens.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [clientMessages, adminThreads, activeThreadId, activeRole]);
@@ -404,6 +409,11 @@ export default function Chat() {
 
   // Obter conversa ativa
   const currentAdminThread = adminThreads.find((t) => t.id === activeThreadId);
+  // Os estados de atendimento são vinculados à conversa selecionada, não globais.
+  // A alternância de perfil é apenas uma visualização demonstrativa do frontend.
+  const clientChatStatus = currentAdminThread?.chatStatus ?? "open";
+  const clientServiceStatus = currentAdminThread?.serviceStatus ?? "not_started";
+
   const activeMessages = isAdmin
     ? currentAdminThread?.messages || []
     : clientMessages;
@@ -469,9 +479,10 @@ export default function Chat() {
   };
 
   /**
-   * Envio de arquivo em PDF (matrículas e memoriais)
+   * Registra localmente os metadados do PDF selecionado.
+   * O arquivo não é enviado nem armazenado sem integração de backend.
    */
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const chatIsClosed = isAdmin
       ? currentAdminThread?.chatStatus === "closed"
       : clientChatStatus === "closed";
@@ -536,8 +547,9 @@ export default function Chat() {
   };
 
   /**
-   * CONVERSÃO DE COORDENADAS DO PDF PARA DXF (EXCLUSIVO PARA ADMIN)
-   * Extrai as coordenadas descritas no PDF da matrícula e gera o arquivo CAD DXF.
+   * DEMONSTRAÇÃO DE GERAÇÃO DE DXF (EXCLUSIVO PARA ADMIN)
+   * Usa coordenadas fictícias fixas; não lê nem extrai dados do PDF enviado.
+   * A conversão real depende de integração de processamento no backend.
    */
   const handleConvertPdfToDxf = (msgId: string, pdfName: string) => {
     if (!isAdmin) {
@@ -547,7 +559,7 @@ export default function Chat() {
 
     setConvertingPdfId(msgId);
 
-    // Simula o processamento e extração de vértices UTM/SIRGAS 2000
+    // Simulação visual: as coordenadas abaixo são dados de exemplo, não extraídos do PDF.
     setTimeout(() => {
       const dxfContent = generateCadDxfContent(pdfName);
       const dxfFileName = pdfName.replace(/\.pdf$/i, "_coordenadas.dxf");
@@ -578,7 +590,7 @@ export default function Chat() {
         senderName: "Sistema Life Topografia",
         time: formattedTime,
         type: "system",
-        text: `As coordenadas do arquivo "${pdfName}" foram convertidas com sucesso para o formato AutoCAD DXF (SIRGAS 2000). O arquivo está pronto para download.`,
+        text: `Demonstração concluída para "${pdfName}". Foi gerado um DXF de exemplo com coordenadas fictícias; nenhum dado foi extraído do PDF original.`,
       };
 
       if (activeThreadId) {
@@ -615,7 +627,12 @@ export default function Chat() {
       return;
     }
 
-    if (!budgetTitle.trim() || !budgetAmount.trim() || !activeThreadId) return;
+    if (
+      !budgetTitle.trim() ||
+      !budgetAmount.trim() ||
+      !activeThreadId ||
+      currentAdminThread?.chatStatus === "closed"
+    ) return;
 
     const now = new Date();
     const formattedTime = now.toLocaleTimeString("pt-BR", {
@@ -666,6 +683,14 @@ export default function Chat() {
     budgetId: string,
     decision: "accepted" | "rejected",
   ) => {
+    // A decisão pertence ao cliente e só pode ocorrer enquanto a conversa
+    // estiver aberta e a proposta ainda aguardar resposta.
+    if (isAdmin || clientChatStatus === "closed") return;
+    const targetBudget = clientMessages.find(
+      (message) => message.type === "budget" && message.budget?.id === budgetId,
+    );
+    if (!targetBudget?.budget || targetBudget.budget.status !== "pending") return;
+
     const now = new Date();
     const formattedTime = now.toLocaleTimeString("pt-BR", {
       hour: "2-digit",
@@ -703,34 +728,27 @@ export default function Chat() {
       return [...updated, statusMsg];
     };
 
-    if (isAdmin && activeThreadId) {
-      setAdminThreads((prev) =>
-        prev.map((thread) =>
-          thread.id === activeThreadId
-            ? {
-                ...thread,
-                lastMessageTime: formattedTime,
-                messages: updateBudgetInList(thread.messages),
-              }
-            : thread,
-        ),
-      );
-    } else {
-      setClientMessages((prev) => updateBudgetInList(prev));
-    }
+    setClientMessages((prev) => updateBudgetInList(prev));
   };
   /**
    * Encerra a conversa atual.
    * Não significa que o serviço foi concluído.
    */
   const handleCloseChat = () => {
+    const chatIsAlreadyClosed = isAdmin
+      ? currentAdminThread?.chatStatus === "closed"
+      : clientChatStatus === "closed";
+
+    if (chatIsAlreadyClosed) return;
+
     const confirmed = window.confirm(
-      "Deseja realmente encerrar esta conversa?",
+      "Deseja realmente encerrar esta conversa? O serviço não será marcado como concluído.",
     );
 
     if (!confirmed) return;
 
-    if (isAdmin && currentAdminThread) {
+    if (currentAdminThread) {
+      // Atualiza somente a conversa selecionada, independentemente da visualização.
       setAdminThreads((prev) =>
         prev.map((thread) =>
           thread.id === activeThreadId
@@ -738,21 +756,8 @@ export default function Chat() {
             : thread,
         ),
       );
-    } else {
-      setClientChatStatus("closed");
-      // Sincronização demonstrativa com o atendimento selecionado no perfil admin.
-      if (currentAdminThread) {
-        setAdminThreads((prev) =>
-          prev.map((thread) =>
-            thread.id === activeThreadId
-              ? { ...thread, chatStatus: "closed" }
-              : thread,
-          ),
-        );
-      }
     }
 
-    if (isAdmin) setClientChatStatus("closed");
     setShowQuickActions(false);
   };
 
@@ -762,9 +767,10 @@ export default function Chat() {
    */
   const handleCompleteService = () => {
     if (!isAdmin || !currentAdminThread) return;
+    if (currentAdminThread.serviceStatus === "completed") return;
 
     const confirmed = window.confirm(
-      "Confirma que o serviço deste cliente foi concluído?",
+      "Confirma que o serviço deste cliente foi concluído? Esta ação também encerrará a conversa.",
     );
 
     if (!confirmed) return;
@@ -781,9 +787,8 @@ export default function Chat() {
       ),
     );
 
-    // Sincronização apenas demonstrativa entre os dois perfis locais.
-    setClientServiceStatus("completed");
-    setClientChatStatus("closed");
+    // O perfil de cliente lê o status da mesma conversa selecionada.
+    // Não há persistência nem sincronização entre dispositivos nesta versão.
     setShowQuickActions(false);
   };
 
@@ -794,8 +799,16 @@ export default function Chat() {
   const handleSubmitRating = (e: FormEvent) => {
     e.preventDefault();
 
-    if (rating < 1 || rating > 5) return;
+    if (
+      rating < 1 ||
+      rating > 5 ||
+      clientServiceStatus !== "completed"
+    ) return;
 
+    setSubmittedRating({
+      score: rating,
+      comment: ratingComment.trim(),
+    });
     setRatingSubmitted(true);
     setShowRatingModal(false);
   };
@@ -843,7 +856,7 @@ export default function Chat() {
           <img src={Logo} alt="Life Topografia" />
         </Link>
 
-        {/* Seletor demonstrativo de hierarquia para validação de conta */}
+        {/* Alternância apenas visual para demonstração; não concede permissões reais. */}
         <div className="chat-role-indicator">
           <span className="role-indicator-label">Perfil Ativo:</span>
           <button
@@ -942,10 +955,12 @@ export default function Chat() {
                         <div className="conversation-avatar">
                           {thread.clientName.charAt(0)}
                         </div>
-                        <span
-                          className="online-indicator"
-                          title="Cliente ativo"
-                        />
+                        {thread.chatStatus === "open" && (
+                          <span
+                            className="online-indicator"
+                            title="Conversa aberta"
+                          />
+                        )}
                       </div>
 
                       <div className="conversation-details">
@@ -972,10 +987,12 @@ export default function Chat() {
                 <div className="conversation-item is-active">
                   <div className="conversation-avatar-box">
                     <div className="conversation-avatar brand-avatar">LT</div>
-                    <span
-                      className="online-indicator"
-                      title="Atendimento Online"
-                    />
+                    {clientChatStatus === "open" && (
+                      <span
+                        className="online-indicator"
+                        title="Conversa aberta"
+                      />
+                    )}
                   </div>
                   <div className="conversation-details">
                     <div className="conversation-top-row">
@@ -1011,12 +1028,20 @@ export default function Chat() {
                   className={`active-attendant-avatar ${isAdmin ? "" : "brand-avatar"}`}
                 >
                   {isAdmin ? currentChatTitle.charAt(0) : "LT"}
-                  <span className="online-indicator" />
+                  {(isAdmin
+                    ? currentAdminThread?.chatStatus
+                    : clientChatStatus) === "open" && (
+                    <span className="online-indicator" />
+                  )}
                 </div>
                 <div>
                   <h3 className="active-attendant-name">{currentChatTitle}</h3>
                   <span className="active-attendant-status">
-                    ● Ativo agora • {currentChatSubtitle}
+                    {(isAdmin
+                      ? currentAdminThread?.chatStatus
+                      : clientChatStatus) === "closed"
+                      ? "Atendimento encerrado"
+                      : "Conversa aberta"}{" • "}{currentChatSubtitle}
                   </span>
                 </div>
               </div>
@@ -1055,7 +1080,6 @@ export default function Chat() {
                         type="button"
                         className="btn-complete-service"
                         onClick={handleCompleteService}
-                        disabled={currentAdminThread.chatStatus === "closed"}
                       >
                         Concluir Serviço
                       </button>
@@ -1178,14 +1202,14 @@ export default function Chat() {
                                     msg.file?.name || "documento.pdf",
                                   )
                                 }
-                                title="Processar vértices e memorial descritivo da matrícula e gerar o arquivo DXF"
+                                title="Gera um DXF demonstrativo com coordenadas fictícias; não processa o PDF"
                               >
                                 {convertingPdfId === msg.id ? (
                                   <span className="converting-spinner">
                                     Convertendo...
                                   </span>
                                 ) : (
-                                  "📐 Converter Coordenadas para DXF"
+                                  "📐 Gerar DXF de demonstração"
                                 )}
                               </button>
                             )}
@@ -1238,6 +1262,7 @@ export default function Chat() {
                                     "accepted",
                                   )
                                 }
+                                disabled={clientChatStatus === "closed"}
                               >
                                 ✓ Aceitar Orçamento
                               </button>
@@ -1250,6 +1275,7 @@ export default function Chat() {
                                     "rejected",
                                   )
                                 }
+                                disabled={clientChatStatus === "closed"}
                               >
                                 Recusar
                               </button>
@@ -1412,7 +1438,7 @@ export default function Chat() {
 
         {!isAdmin && ratingSubmitted && (
           <p className="rating-success-message" role="status">
-            Obrigado pela sua avaliação!
+            Obrigado pela sua avaliação! Nota registrada nesta sessão: {submittedRating?.score}/5.
           </p>
         )}
 
