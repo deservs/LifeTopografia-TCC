@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
@@ -45,6 +45,8 @@ export interface AccountDeletionRequest {
 export interface ProfileServices {
   loadMembers?: (profileId: string) => Promise<CompanyMember[]>;
   saveProfile?: (profile: ProfileData) => Promise<void>;
+  /** Faz upload da foto e retorna a URL que será salva no perfil. */
+  uploadAvatar?: (profileId: string, file: File) => Promise<string>;
   saveMembers?: (profileId: string, members: CompanyMember[]) => Promise<void>;
   confirmMemberAction?: (
     profileId: string,
@@ -164,10 +166,39 @@ export default function Profile({
   const [feedback, setFeedback] = useState("");
   const [feedbackIsError, setFeedbackIsError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const previousViewRef = useRef(view);
   const submittingRef = useRef(false);
+
+  // Gera uma prévia local e libera a URL temporária quando ela deixa de ser usada.
+  useEffect(() => {
+    if (!avatarFile) return;
+    const previewUrl = URL.createObjectURL(avatarFile);
+    setDraft((current) => current ? { ...current, avatarUrl: previewUrl } : current);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [avatarFile]);
+
+  function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      notify("Selecione uma imagem JPG, PNG ou WEBP.", true);
+      event.target.value = "";
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      notify("A imagem deve ter no máximo 5 MB.", true);
+      event.target.value = "";
+      return;
+    }
+
+    setFeedback("");
+    setAvatarFile(file);
+  }
 
   useEffect(() => {
     if (initialProfile) return;
@@ -245,22 +276,35 @@ export default function Profile({
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!draft || submittingRef.current) return;
-    if (!services?.saveProfile) {
-      notify(unavailableMessage, true);
+    if (!services?.saveProfile || (avatarFile && !services.uploadAvatar)) {
+      notify(
+        avatarFile
+          ? "O envio de foto ainda não está integrado ao armazenamento. Nenhuma alteração foi salva."
+          : unavailableMessage,
+        true,
+      );
       return;
     }
     submittingRef.current = true;
     setBusy(true);
     setFeedback("");
     try {
+      let avatarUrl = draft.avatarUrl;
+      if (avatarFile && services.uploadAvatar) {
+        avatarUrl = await services.uploadAvatar(profile.id, avatarFile);
+      }
+
       const updated = {
         ...draft,
+        avatarUrl,
         name: draft.name.trim(),
         email: draft.email.trim(),
       };
       await services.saveProfile(updated);
       setProfile(updated);
       setDraft(updated);
+      setAvatarFile(null);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
       notify("Perfil salvo com sucesso.");
     } catch {
       notify("Não foi possível salvar o perfil. Tente novamente.", true);
@@ -609,7 +653,30 @@ export default function Profile({
                   onSubmit={saveProfile}
                 >
                   <div className="profile-identity">
-                    <Avatar {...profile} />
+                    <div className="profile-avatar-editor">
+                      <Avatar name={draft.name} avatarUrl={draft.avatarUrl} />
+                      <input
+                        ref={avatarInputRef}
+                        className="profile-avatar-input"
+                        id="profile-avatar-input"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        disabled={busy}
+                        onChange={handleAvatarChange}
+                        aria-describedby="profile-avatar-hint"
+                      />
+                      <button
+                        className="profile-avatar-change"
+                        type="button"
+                        disabled={busy}
+                        onClick={() => avatarInputRef.current?.click()}
+                      >
+                        {avatarFile || draft.avatarUrl ? "Alterar foto" : "Adicionar foto"}
+                      </button>
+                      <span id="profile-avatar-hint" className="profile-avatar-hint">
+                        JPG, PNG ou WEBP · até 5 MB
+                      </span>
+                    </div>
                     <p>
                       <span>Status:</span>{" "}
                       {company ? "Empresa" : "Pessoa Física"}
