@@ -341,7 +341,9 @@
   padding: 12px 14px;
   border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
   user-select: none;
 }
 
@@ -530,7 +532,9 @@
   padding: 8px 14px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
   box-shadow: 0 2px 6px rgba(11, 80, 189, 0.25);
 }
 
@@ -875,7 +879,9 @@
   padding: 9px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
   box-shadow: 0 2px 6px rgba(0, 199, 36, 0.25);
 }
 
@@ -918,7 +924,9 @@
   border-radius: 8px;
   text-decoration: none;
   box-shadow: 0 4px 10px rgba(0, 199, 36, 0.3);
-  transition: background-color 0.2s ease, transform 0.15s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease;
 }
 
 .sumup-pay-button:hover {
@@ -1048,7 +1056,9 @@
   font-size: 0.88rem;
   color: #1e293b;
   outline: none;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .chat-text-input:focus {
@@ -1067,7 +1077,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
   flex-shrink: 0;
 }
 

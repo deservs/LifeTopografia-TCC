@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
@@ -136,6 +136,7 @@ export default function Profile({
   initialMembers = [],
   services,
 }: ProfileProps = {}) {
+  const location = useLocation();
   const navigateTo = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(
     initialProfile ?? null,
@@ -579,7 +580,11 @@ export default function Profile({
                   ? "Não foi possível carregar seu perfil. Tente novamente mais tarde."
                   : "Entre na sua conta para acessar seu perfil."}
               </p>
-              <Link className="profile-primary-button" to="/login">
+              <Link
+                className="profile-primary-button"
+                to="/login"
+                state={{ from: location }}
+              >
                 ENTRAR
               </Link>
             </section>
