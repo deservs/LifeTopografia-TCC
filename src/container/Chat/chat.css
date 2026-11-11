@@ -1279,3 +1279,226 @@
     display: none;
   }
 }
+
+
+/* =========================================================
+   STATUS, ENCERRAMENTO E AVALIAÇÃO DO SERVIÇO
+   ========================================================= */
+
+.active-header-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.chat-status-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.chat-status-label.is-open {
+  color: #15803d;
+  background-color: #dcfce7;
+}
+
+.chat-status-label.is-closed {
+  color: #b91c1c;
+  background-color: #fee2e2;
+}
+
+.btn-close-chat,
+.btn-complete-service {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-close-chat {
+  color: #b91c1c;
+  background-color: #fee2e2;
+}
+
+.btn-close-chat:hover:not(:disabled) {
+  background-color: #fecaca;
+}
+
+.btn-complete-service {
+  color: #15803d;
+  background-color: #dcfce7;
+}
+
+.btn-complete-service:hover:not(:disabled) {
+  background-color: #bbf7d0;
+}
+
+.btn-close-chat:disabled,
+.btn-complete-service:disabled,
+.btn-header-budget:disabled,
+.btn-action-trigger:disabled,
+.quick-action-item:disabled,
+.chat-text-input:disabled,
+.btn-send-message:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-closed-notice {
+  padding: 10px 16px;
+  border-top: 1px solid #fecdd3;
+  background-color: #fff1f2;
+  color: #9f1239;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.service-rating-prompt {
+  width: min(100%, 600px);
+  margin: 20px auto;
+  padding: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.service-rating-prompt h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 1.15rem;
+}
+
+.service-rating-prompt p {
+  margin: 0 0 16px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.btn-open-rating {
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background-color: #0b50bd;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-open-rating:hover {
+  background-color: #094098;
+}
+
+.rating-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.rating-fieldset legend {
+  width: 100%;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.rating-stars {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0 16px;
+}
+
+.rating-stars button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 2.2rem;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.rating-stars button.is-selected {
+  color: #f59e0b;
+}
+
+.rating-stars button:hover {
+  transform: scale(1.12);
+}
+
+.rating-stars button:focus-visible,
+.btn-open-rating:focus-visible,
+.btn-close-chat:focus-visible,
+.btn-complete-service:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.rating-success-message {
+  margin: 20px auto;
+  color: #15803d;
+  font-weight: 700;
+  text-align: center;
+}
+
+.rating-modal-content {
+  max-height: min(90dvh, 700px);
+  overflow-y: auto;
+}
+
+@media (max-width: 720px) {
+  .chat-active-header {
+    height: auto;
+    min-height: 72px;
+    padding: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .active-header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .active-attendant-info {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .active-attendant-name,
+  .active-attendant-status {
+    overflow-wrap: anywhere;
+  }
+
+  .rating-modal-content {
+    width: min(100%, 480px);
+    max-height: 90dvh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .active-header-actions > button {
+    flex: 1 1 auto;
+  }
+
+  .chat-status-label {
+    width: 100%;
+  }
+
+  .rating-stars {
+    gap: 6px;
+  }
+}
