@@ -35,6 +35,9 @@ export interface ChatMessage {
   file?: MessageFile;
   budget?: BudgetProposal;
 }
+export type ChatStatus = "open" | "closed";
+
+export type ServiceStatus = "not_started" | "in_progress" | "completed";
 
 export interface ChatThread {
   id: string;
@@ -43,6 +46,8 @@ export interface ChatThread {
   document: string;
   lastMessageTime: string;
   unreadCount: number;
+  chatStatus: ChatStatus;
+  serviceStatus: ServiceStatus;
   messages: ChatMessage[];
 }
 
@@ -151,6 +156,8 @@ const INITIAL_ADMIN_THREADS: ChatThread[] = [
     document: "CNPJ 24.891.042/0001-80",
     lastMessageTime: "09:12",
     unreadCount: 1,
+    chatStatus: "open",
+    serviceStatus: "not_started",
     messages: [
       {
         id: "adm-m1",
@@ -189,6 +196,8 @@ const INITIAL_ADMIN_THREADS: ChatThread[] = [
     document: "CPF ***.482.198-**",
     lastMessageTime: "Ontem",
     unreadCount: 0,
+    chatStatus: "open",
+    serviceStatus: "in_progress",
     messages: [
       {
         id: "adm-m4",
@@ -246,7 +255,16 @@ export default function Chat() {
   const [clientMessages, setClientMessages] = useState<ChatMessage[]>(
     DEFAULT_CLIENT_MESSAGES,
   );
+  const [clientChatStatus, setClientChatStatus] = useState<ChatStatus>("open");
 
+  const [clientServiceStatus, setClientServiceStatus] =
+    useState<ServiceStatus>("in_progress");
+
+  // Controle da avaliação do serviço
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [ratingComment, setRatingComment] = useState("");
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
   // Estado do chat para Administradores
   const [adminThreads, setAdminThreads] = useState<ChatThread[]>(
     INITIAL_ADMIN_THREADS,
@@ -406,6 +424,10 @@ export default function Chat() {
    */
   const handleSendMessage = (e?: FormEvent) => {
     if (e) e.preventDefault();
+    const chatIsClosed = isAdmin
+      ? currentAdminThread?.chatStatus === "closed"
+      : clientChatStatus === "closed";
+    if (chatIsClosed) return;
     const text = inputText.trim();
     if (!text) return;
 
@@ -451,6 +473,14 @@ export default function Chat() {
    * Envio de arquivo em PDF (matrículas e memoriais)
    */
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const chatIsClosed = isAdmin
+      ? currentAdminThread?.chatStatus === "closed"
+      : clientChatStatus === "closed";
+    if (chatIsClosed) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -690,6 +720,86 @@ export default function Chat() {
       setClientMessages((prev) => updateBudgetInList(prev));
     }
   };
+  /**
+   * Encerra a conversa atual.
+   * Não significa que o serviço foi concluído.
+   */
+  const handleCloseChat = () => {
+    const confirmed = window.confirm(
+      "Deseja realmente encerrar esta conversa?",
+    );
+
+    if (!confirmed) return;
+
+    if (isAdmin && currentAdminThread) {
+      setAdminThreads((prev) =>
+        prev.map((thread) =>
+          thread.id === activeThreadId
+            ? { ...thread, chatStatus: "closed" }
+            : thread,
+        ),
+      );
+    } else {
+      setClientChatStatus("closed");
+      // Sincronização demonstrativa com o atendimento selecionado no perfil admin.
+      if (currentAdminThread) {
+        setAdminThreads((prev) =>
+          prev.map((thread) =>
+            thread.id === activeThreadId
+              ? { ...thread, chatStatus: "closed" }
+              : thread,
+          ),
+        );
+      }
+    }
+
+    if (isAdmin) setClientChatStatus("closed");
+    setShowQuickActions(false);
+  };
+
+  /**
+   * Conclui o serviço.
+   * Nesta versão, somente o administrador pode executar a ação.
+   */
+  const handleCompleteService = () => {
+    if (!isAdmin || !currentAdminThread) return;
+
+    const confirmed = window.confirm(
+      "Confirma que o serviço deste cliente foi concluído?",
+    );
+
+    if (!confirmed) return;
+
+    setAdminThreads((prev) =>
+      prev.map((thread) =>
+        thread.id === activeThreadId
+          ? {
+              ...thread,
+              serviceStatus: "completed",
+              chatStatus: "closed",
+            }
+          : thread,
+      ),
+    );
+
+    // Sincronização apenas demonstrativa entre os dois perfis locais.
+    setClientServiceStatus("completed");
+    setClientChatStatus("closed");
+    setShowQuickActions(false);
+  };
+
+  /**
+   * Registra a avaliação localmente.
+   * A persistência definitiva dependerá do backend.
+   */
+  const handleSubmitRating = (e: FormEvent) => {
+    e.preventDefault();
+
+    if (rating < 1 || rating > 5) return;
+
+    setRatingSubmitted(true);
+    setShowRatingModal(false);
+  };
 
   const filteredAdminThreads = adminThreads.filter(
     (t) =>
@@ -912,19 +1022,60 @@ export default function Chat() {
                 </div>
               </div>
 
-              {/* Botão de emissão de orçamento: APENAS ADMIN */}
-              {isAdmin && (
-                <div className="active-header-actions">
+              {/* Ações e status do atendimento */}
+              <div className="active-header-actions">
+                <span
+                  className={`chat-status-label ${
+                    (isAdmin
+                      ? currentAdminThread?.chatStatus
+                      : clientChatStatus) === "closed"
+                      ? "is-closed"
+                      : "is-open"
+                  }`}
+                >
+                  {(isAdmin
+                    ? currentAdminThread?.chatStatus
+                    : clientChatStatus) === "closed"
+                    ? "Chat encerrado"
+                    : "Chat aberto"}
+                </span>
+
+                {isAdmin && currentAdminThread && (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-header-budget"
+                      onClick={() => setShowBudgetModal(true)}
+                      disabled={currentAdminThread.chatStatus === "closed"}
+                    >
+                      + Gerar Orçamento
+                    </button>
+
+                    {currentAdminThread.serviceStatus !== "completed" && (
+                      <button
+                        type="button"
+                        className="btn-complete-service"
+                        onClick={handleCompleteService}
+                        disabled={currentAdminThread.chatStatus === "closed"}
+                      >
+                        Concluir Serviço
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {(isAdmin
+                  ? currentAdminThread?.chatStatus
+                  : clientChatStatus) === "open" && (
                   <button
                     type="button"
-                    className="btn-header-budget"
-                    onClick={() => setShowBudgetModal(true)}
-                    title="Emitir proposta de orçamento oficial para este cliente"
+                    className="btn-close-chat"
+                    onClick={handleCloseChat}
                   >
-                    + Gerar Orçamento
+                    Encerrar Chat
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </header>
 
             {/* Área de Mensagens */}
@@ -1171,6 +1322,14 @@ export default function Chat() {
               </div>
             )}
 
+            {(isAdmin
+              ? currentAdminThread?.chatStatus
+              : clientChatStatus) === "closed" && (
+              <div className="chat-closed-notice" role="status">
+                Esta conversa foi encerrada. O envio de mensagens e arquivos está desabilitado.
+              </div>
+            )}
+
             {/* Barra de Entrada de Mensagens */}
             <form className="chat-input-bar" onSubmit={handleSendMessage}>
               <input
@@ -1179,6 +1338,11 @@ export default function Chat() {
                 style={{ display: "none" }}
                 accept=".pdf,application/pdf"
                 onChange={handleFileUpload}
+                disabled={
+                  (isAdmin
+                    ? currentAdminThread?.chatStatus
+                    : clientChatStatus) === "closed"
+                }
               />
 
               <button
@@ -1187,6 +1351,11 @@ export default function Chat() {
                 onClick={() => setShowQuickActions(!showQuickActions)}
                 aria-label="Abrir opções de anexo"
                 title="Anexar matrícula em PDF ou ações rápidas"
+                disabled={
+                  (isAdmin
+                    ? currentAdminThread?.chatStatus
+                    : clientChatStatus) === "closed"
+                }
               >
                 +
               </button>
@@ -1201,13 +1370,23 @@ export default function Chat() {
                 }
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                disabled={
+                  (isAdmin
+                    ? currentAdminThread?.chatStatus
+                    : clientChatStatus) === "closed"
+                }
                 aria-label="Mensagem de atendimento"
               />
 
               <button
                 type="submit"
                 className="btn-send-message"
-                disabled={!inputText.trim()}
+                disabled={
+                  !inputText.trim() ||
+                  (isAdmin
+                    ? currentAdminThread?.chatStatus
+                    : clientChatStatus) === "closed"
+                }
                 aria-label="Enviar mensagem"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -1217,6 +1396,26 @@ export default function Chat() {
             </form>
           </div>
         </section>
+
+        {!isAdmin && clientServiceStatus === "completed" && !ratingSubmitted && (
+          <section className="service-rating-prompt" aria-labelledby="rating-prompt-title">
+            <h3 id="rating-prompt-title">Como foi sua experiência?</h3>
+            <p>Seu serviço foi concluído. Avalie o atendimento da Life Topografia.</p>
+            <button
+              type="button"
+              className="btn-open-rating"
+              onClick={() => setShowRatingModal(true)}
+            >
+              Avaliar Atendimento
+            </button>
+          </section>
+        )}
+
+        {!isAdmin && ratingSubmitted && (
+          <p className="rating-success-message" role="status">
+            Obrigado pela sua avaliação!
+          </p>
+        )}
 
         {/* MODAL EXCLUSIVO DO ADMINISTRADOR: Criar Proposta de Orçamento */}
         {showBudgetModal && isAdmin && (
@@ -1299,6 +1498,81 @@ export default function Chat() {
                   </button>
                   <button type="submit" className="btn-modal-submit">
                     Enviar Proposta ao Cliente
+                  </button>
+                </footer>
+              </form>
+            </div>
+          </div>
+        )}
+        {showRatingModal && !isAdmin && (
+          <div
+            className="budget-modal-backdrop"
+            onClick={() => setShowRatingModal(false)}
+          >
+            <div
+              className="budget-modal-content rating-modal-content"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="rating-modal-title"
+            >
+              <header className="budget-modal-header">
+                <h3 id="rating-modal-title">Avaliar Atendimento</h3>
+                <button
+                  type="button"
+                  className="btn-close-modal"
+                  onClick={() => setShowRatingModal(false)}
+                  aria-label="Fechar avaliação"
+                >
+                  ✕
+                </button>
+              </header>
+
+              <form onSubmit={handleSubmitRating} className="budget-modal-form">
+                <fieldset className="rating-fieldset">
+                  <legend>Selecione uma nota de 1 a 5:</legend>
+                  <div className="rating-stars">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={value <= rating ? "is-selected" : ""}
+                        onClick={() => setRating(value)}
+                        aria-label={`${value} ${value === 1 ? "estrela" : "estrelas"}`}
+                        aria-pressed={rating === value}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <div className="modal-field-group">
+                  <label htmlFor="rating-comment">Comentário (opcional):</label>
+                  <textarea
+                    id="rating-comment"
+                    rows={4}
+                    maxLength={1000}
+                    placeholder="Conte como foi sua experiência..."
+                    value={ratingComment}
+                    onChange={(e) => setRatingComment(e.target.value)}
+                  />
+                </div>
+
+                <footer className="budget-modal-footer">
+                  <button
+                    type="button"
+                    className="btn-modal-cancel"
+                    onClick={() => setShowRatingModal(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-modal-submit"
+                    disabled={rating === 0}
+                  >
+                    Enviar Avaliação
                   </button>
                 </footer>
               </form>

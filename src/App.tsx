@@ -14,6 +14,7 @@ import Profile from "./container/Profile/profile";
 import Teste from "./container/Enviar-arquivos/enviar_arquivos";
 import Erro404 from "./container/Error/erro404";
 import Chat from "./container/Chat/chat"; // <- Importe o componente do chat
+import FAQ from "./container/FAQ/faq";
 
 function App() {
   return (
@@ -41,8 +42,8 @@ function App() {
         <Route path="/servicos" element={<Services />} />
         <Route path="/teste" element={<Teste />} />
         <Route path="/perfil" element={<Profile />} />
-        <Route path="/chat" element={<Chat />} />{" "}
-        {/* <- Adicione a rota do chat */}
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/FAQ" element={<FAQ />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<Erro404 />} />
       </Routes>
