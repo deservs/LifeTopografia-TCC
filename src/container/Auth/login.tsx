@@ -7,7 +7,7 @@ import {
   type KeyboardEvent,
   type ClipboardEvent,
 } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
@@ -46,6 +46,8 @@ const TEMPO_REENVIO = 60;
 
 export const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [inviCaptcha, setInviCaptcha] = useState(false);
@@ -74,6 +76,9 @@ export const Login = () => {
   });
 
   const [timer, setTimer] = useState(TEMPO_REENVIO);
+
+  const from = location.state?.from?.pathname || "/";
+  console.log("from:", from);
 
   useEffect(() => {
     if (etapa !== "esqueci_codigo" || timer <= 0) {
@@ -257,7 +262,7 @@ export const Login = () => {
         setFeedback("Credenciais inválidas. Tente novamente.");
         throw new Error("Credenciais inválidas");
       }
-      navigate("/", { replace: true });
+      navigate(from, { replace: true });
     } catch (error) {
       setFeedback("Erro ao fazer login. Verifique suas credenciais.");
       console.error("Erro ao fazer login:", error);

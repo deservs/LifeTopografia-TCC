@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import Logo from "../../assets/image/logo-front.webp";
@@ -241,6 +241,7 @@ const INITIAL_ADMIN_THREADS: ChatThread[] = [
 
 export default function Chat() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Estados de sessão e autenticação
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -317,7 +318,7 @@ export default function Chat() {
 
         if ((error || !data?.session) && !storedProfileStr) {
           // Usuário não autenticado: redireciona imediatamente para a tela de login
-          navigate("/login", { replace: true });
+          navigate("/login", { replace: true, state: { from: location } });
           return;
         }
 
@@ -382,7 +383,7 @@ export default function Chat() {
     return () => {
       isMounted = false;
     };
-  }, [navigate]);
+  }, [navigate, location]);
 
   // Rolagem suave para o fim das mensagens
   useEffect(() => {
