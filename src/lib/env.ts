@@ -7,6 +7,9 @@ export const envSchema = z.object({
   VITE_SUPABASE_PUBLISHABLE_KEY: z
     .string({ message: "Chave publicável do Supabase é obrigatória" })
     .min(1, "Chave publicável do Supabase é obrigatória"),
+  VITE_MERCADO_PAGO_PUBLIC_KEY: z
+    .string({ message: "Chave pública do Mercado Pago é obrigatória" })
+    .min(1, "Chave pública do Mercado Pago é obrigatória"),
 });
 
 const _env = envSchema.safeParse(import.meta.env);
@@ -14,9 +17,7 @@ const _env = envSchema.safeParse(import.meta.env);
 if (!_env.success) {
   if (import.meta.env.DEV) {
     console.warn(
-      "⚠️ [Aviso de Ambiente]: Variáveis do Supabase ausentes ou inválidas no .env.\n" +
-        "Defina VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY no arquivo .env com suas credenciais reais.\n" +
-        "Usando valores temporários para permitir a renderização da interface localmente.",
+      "⚠️ [Aviso de Ambiente]: Variáveis ausentes ou inválidas no .env.\n",
       _env.error.format(),
     );
   } else {
@@ -32,4 +33,5 @@ export const env = _env.success
   : {
       VITE_SUPABASE_URL: "https://placeholder-project.supabase.co",
       VITE_SUPABASE_PUBLISHABLE_KEY: "placeholder-anon-key",
+      VITE_MERCADO_PAGO_PUBLIC_KEY: "placeholder-public-key",
     };

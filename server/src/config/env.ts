@@ -8,6 +8,14 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url('A DATABASE_URL precisa ser uma URL válida').optional(),
   JWT_SECRET: z.string().min(1, 'O JWT_SECRET é obrigatório').optional(),
   RESEND_API_KEY: z.string().min(1, 'O RESEND_API_KEY é obrigatório').optional(),
+  MERCADO_PAGO_ACCESS_TOKEN: z
+    .string()
+    .min(1, 'O MERCADO_PAGO_ACCESS_TOKEN é obrigatório')
+    .optional(),
+  MERCADO_PAGO_PUBLIC_KEY: z
+    .string()
+    .min(1, 'O MERCADO_PAGO_PUBLIC_KEY é obrigatório')
+    .optional(),
 })
 
 const envSchemaWithSupabase = envSchema.extend({

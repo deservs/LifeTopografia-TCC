@@ -101,7 +101,7 @@ export default function FAQ() {
 
   const toggleItem = (id: number) => {
     setOpenItemIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -116,7 +116,7 @@ export default function FAQ() {
   const filteredFaq = FAQ_DATA.filter(
     (item) =>
       item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchTerm.toLowerCase())
+      item.answer.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -148,7 +148,11 @@ export default function FAQ() {
           <span aria-hidden="true" />
         </button>
 
-        <Link to="/" className="faq-topbar-logo" aria-label="Ir para a página inicial">
+        <Link
+          to="/"
+          className="faq-topbar-logo"
+          aria-label="Ir para a página inicial"
+        >
           <img src={Logo} alt="Life Topografia" />
         </Link>
       </header>
@@ -160,8 +164,9 @@ export default function FAQ() {
           <span className="faq-badge">Central de Ajuda &amp; Dúvidas</span>
           <h1 className="faq-title">PERGUNTAS FREQUENTES</h1>
           <p className="faq-subtitle">
-            Entenda como funciona a plataforma Life Topografia, o fluxo de envio de matrículas em PDF,
-            emissão de orçamentos, execução presencial em campo e segurança das informações.
+            Entenda como funciona a plataforma Life Topografia, o fluxo de envio
+            de matrículas em PDF, emissão de orçamentos, execução presencial em
+            campo e segurança das informações.
           </p>
           <div className="title-divider" aria-hidden="true">
             <span className="line" />
@@ -173,7 +178,9 @@ export default function FAQ() {
         {/* Barra de Filtro e Controles de Acessibilidade */}
         <div className="faq-controls-bar">
           <div className="faq-search-box">
-            <span className="search-icon" aria-hidden="true">🔍</span>
+            <span className="search-icon" aria-hidden="true">
+              🔍
+            </span>
             <input
               id={searchInputId}
               type="search"
@@ -215,7 +222,10 @@ export default function FAQ() {
         </div>
 
         {/* CONTAINER AZUL PRINCIPAL DO FAQ (CONFORME DESIGN SOLICITADO) */}
-        <section className="faq-accordion-card" aria-label="Lista de Perguntas Frequentes">
+        <section
+          className="faq-accordion-card"
+          aria-label="Lista de Perguntas Frequentes"
+        >
           <header className="faq-card-header">
             <div className="faq-card-header-info">
               <h2>Perguntas Frequentes (FAQ) – Life Topografia</h2>
@@ -246,8 +256,15 @@ export default function FAQ() {
                       aria-controls={panelId}
                     >
                       <span className="faq-question-text">{item.question}</span>
-                      <span className={`faq-chevron-icon ${isOpen ? "is-rotated" : ""}`} aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <span
+                        className={`faq-chevron-icon ${isOpen ? "is-rotated" : ""}`}
+                        aria-hidden="true"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -278,7 +295,10 @@ export default function FAQ() {
               <div className="faq-empty-state">
                 <span className="empty-icon">🔎</span>
                 <h3>Nenhuma pergunta encontrada</h3>
-                <p>Não encontramos respostas correspondentes ao termo "{searchTerm}".</p>
+                <p>
+                  Não encontramos respostas correspondentes ao termo "
+                  {searchTerm}".
+                </p>
                 <button
                   type="button"
                   className="btn-reset-search"
@@ -296,7 +316,8 @@ export default function FAQ() {
           <div className="faq-contact-text">
             <h3>Ainda tem dúvidas sobre o seu projeto?</h3>
             <p>
-              Nossa equipe técnica e agrimensores estão prontos para analisar suas necessidades e elaborar o orçamento sob medida.
+              Nossa equipe técnica e agrimensores estão prontos para analisar
+              suas necessidades e elaborar o orçamento sob medida.
             </p>
           </div>
           <div className="faq-contact-actions">
@@ -315,4 +336,3 @@ export default function FAQ() {
     </div>
   );
 }
-

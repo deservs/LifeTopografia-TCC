@@ -16,19 +16,19 @@ export default function Teste() {
     try {
       console.time("Tempo de Renderização do Canvas");
 
-      // Invoca a função que acabamos de fechar
-
-      console.timeEnd("Tempo de Renderização do Canvas");
-
       console.log(
         "2. Dados da imagem extraídos do PDF:",
         ocrPipeline.executarTarefa(file),
       );
+
+      console.timeEnd("Tempo de Renderização do Canvas");
     } catch (error) {
       console.error("ERRO NO TESTE DO PDF:", error);
     }
   };
   return (
-    <input type="file" accept="application/pdf" onChange={handleTestUpload} />
+    <>
+      <input type="file" accept="application/pdf" onChange={handleTestUpload} />
+    </>
   );
 }
