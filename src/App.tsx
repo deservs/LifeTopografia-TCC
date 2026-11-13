@@ -49,7 +49,7 @@ function App() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/FAQ" element={<FAQ />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/*" element={<Erro404 />} />
+        <Route path="*" element={<Erro404 />} />
       </Routes>
     </BrowserRouter>
   );
