@@ -7,7 +7,7 @@ import {
   ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 
-import { Login } from './modules/login/userSingin.js'
+import { Login } from './modules/auth/userSingin.js'
 
 import sendEmail from './modules/email/sendEmail.js'
 
