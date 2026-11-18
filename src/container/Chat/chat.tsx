@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect, type FormEvent, type ChangeEvent } from "react";
 import { Link, useNavigate, useLocation  } from "react-router-dom";
-import { useState, useRef, useEffect, type FormEvent } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import Logo from "../../assets/image/logo-front.webp";

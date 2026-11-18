@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
