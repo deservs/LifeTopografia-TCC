@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from '../../Shared/database/banco.js'
+import { supabase } from '../../Shared/database/banco.js'
 
 export async function SignUp(
   email: string,

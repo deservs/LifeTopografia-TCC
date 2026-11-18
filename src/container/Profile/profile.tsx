@@ -291,7 +291,7 @@ export default function Profile({
   async function signOut(){
     try {
       await SignOut("local");
-      window.location.replace("/");
+      navigateTo("/");
     } catch (error) {
       console.error("Erro ao sair da conta:", error);
     }
