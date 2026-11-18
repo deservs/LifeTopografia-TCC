@@ -275,7 +275,7 @@ export default function Profile({
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!draft || submittingRef.current) return;
+    if (!profile || !draft || submittingRef.current) return;
     if (!services?.saveProfile || (avatarFile && !services.uploadAvatar)) {
       notify(
         avatarFile
