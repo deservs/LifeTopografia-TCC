@@ -6,7 +6,6 @@ import Home from "./container/Home/home";
 
 import Cadastrar from "./container/Auth/cadastrar";
 import Login from "./container/Auth/login";
-import Logout from "./container/Auth/logout";
 import CheckSession from "./container/Auth/checar";
 
 import Pagamento from "./components/Pop-Up/Pagamento/pagamento";
@@ -48,7 +47,6 @@ function App() {
         <Route path="/perfil" element={<Profile />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/FAQ" element={<FAQ />} />
-        <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<Erro404 />} />
       </Routes>
     </BrowserRouter>

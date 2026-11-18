@@ -17,7 +17,7 @@ export default function Teste() {
     try {
       console.time("Tempo de Renderização do Canvas");
       
-      const resultado = await ocrPipeline.executarTarefa(file);
+      const resultado:any = await ocrPipeline.executarTarefa(file);
 
       console.log(
         "2. Dados da imagem extraídos do PDF:",
