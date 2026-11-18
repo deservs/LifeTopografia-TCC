@@ -6,6 +6,7 @@ type StatusProcesso = "idle" | "carregando" | "sucesso" | "erro";
 
 export default function useOcrPipeline() {
   const [status, setStatus] = useState<StatusProcesso>("idle");
+  const [textExtraido, setTextExtraido] = useState<string | null>(null);
   const ocrEngineRef = useRef<Awaited<
     ReturnType<typeof PaddleOCR.create>
   > | null>(null);
@@ -65,13 +66,16 @@ export default function useOcrPipeline() {
         ocrEngineRef.current = ocrEngineInstance;
         const image = await PdfpageToImage(dados, 1);
 
-        await ocrEngineInstance.predict(image).then((result) => {
-          const textExtraido = result
+        const result = await ocrEngineInstance.predict(image);
+          const textFinal = result
             .flatMap((item) => item.items.map((registro) => registro.text))
             .join("\n");
-          console.log("Texto extraído:", textExtraido);
-        });
-        setStatus("sucesso");
+          if (!textFinal.trim()) {
+            throw new Error("Nenhum texto extraído do PDF.");
+          }
+          setTextExtraido(textFinal);
+          setStatus("sucesso");
+          return textFinal;
       } catch (error) {
         console.error("Erro no pipeline OCR:", error);
         setStatus("erro");
@@ -92,5 +96,5 @@ export default function useOcrPipeline() {
     },
     [limparMotor],
   );
-  return { status, executarTarefa };
+  return { status, executarTarefa, textExtraido };
 }

@@ -13,31 +13,25 @@ export async function SignUp(
   cnpj: string | null = null,
   captchaToken: string,
 ) {
-  if (
-    cnpj === "" ||
-    cnpj === undefined ||
-    cnpj === null ||
-    cnpj == "null" ||
-    cnpj == "undefined"
-  ) {
-    cnpj = null;
-  }
-  const { data, error } = await supabase.auth.signUp({
-    email: email,
-    password: password,
-    options: {
-      data: {
-        nome_ou_razao: nome,
-        cnpj: cnpj,
-      },
-      captchaToken: captchaToken,
+  const resposta = await fetch("/api/signup", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      email,
+      password,
+      nome,
+      cnpj,
+      captchaToken,
+    }),
   });
-
-  if (error) {
-    throw new Error(error.message);
+  const data = await resposta.json();
+  if (!resposta.ok) {
+    throw new Error(
+      data.message ?? "Erro ao registrar usuário. Verifique suas credenciais.",
+    );
   }
-
   return data;
 }
 
@@ -87,7 +81,7 @@ export async function SignIn(
 
 /* função que irá fazer logout de um usuário autenticado */
 export async function SignOut(escopo: "global" | "local") {
-  const { error } = await supabase.auth.signOut({ scope: escopo });
+  const { error } = await supabase.auth.signOut({ scope: escopo});
   if (error) {
     throw new Error(error.message);
   }
