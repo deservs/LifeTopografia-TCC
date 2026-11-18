@@ -351,14 +351,6 @@ export const Login = () => {
 
     setFeedback("");
 
-    /*
-     * Integração:
-     * enviar novaSenha + autorização/token recebido na etapa
-     * anterior ao backend.
-     *
-     * Não retornamos automaticamente para o login aqui, pois
-     * ainda não existe confirmação de sucesso da operação.
-     */
     try {
       setClickedButton(true);
       await ConfirmResetPassword(formData.novaSenha);

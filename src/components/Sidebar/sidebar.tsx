@@ -129,10 +129,6 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
 
   return (
     <>
-      {/*
-       * O overlay é apenas uma camada visual/clicável.
-       * A navegação por teclado continua concentrada no drawer.
-       */}
       <div
         id="overlay-sidebar"
         className={isOpen ? "open" : ""}
@@ -140,10 +136,6 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
         aria-hidden="true"
       />
 
-      {/*
-       * Quando fechado, visibility: hidden no CSS impede que
-       * links fora da tela recebam foco pelo teclado.
-       */}
       <aside
         id="menu-drawer"
         className={isOpen ? "open" : ""}
@@ -169,10 +161,6 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
         </div>
 
         <div id="conteudo-sidebar">
-          {/*
-           * A área de autenticação recebe dados reais quando
-           * o componente pai estiver conectado ao backend.
-           */}
           <div className="sidebar-profile">
             {userData ? (
               <div className="user-box">

@@ -1313,7 +1313,6 @@
   }
 }
 
-
 /* =========================================================
    STATUS, ENCERRAMENTO E AVALIAÇÃO DO SERVIÇO
    ========================================================= */
@@ -1459,7 +1458,9 @@
   color: #cbd5e1;
   font-size: 2.2rem;
   cursor: pointer;
-  transition: color 0.15s ease, transform 0.15s ease;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .rating-stars button.is-selected {
