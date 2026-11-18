@@ -16,7 +16,7 @@ app.setSerializerCompiler(serializerCompiler)
 
 // Registra o CORS liberando acesso geral
 app.register(fastifyCors, {
-  origin: true, // Permite qualquer origem (localhost:5173, localhost:3000, etc.)
+  origin: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 })
 

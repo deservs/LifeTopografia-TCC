@@ -12,7 +12,7 @@ import CheckSession from "./container/Auth/checar";
 import Services from "./container/Services/services";
 import Profile from "./container/Profile/profile";
 import Teste from "./container/Enviar-arquivos/enviar_arquivos";
-import Erro404 from "./components/Pop-Up/Error/erro404";
+import Erro404 from "./container/Error/erro404";
 import Chat from "./container/Chat/chat"; // <- Importe o componente do chat
 import FAQ from "./container/FAQ/faq";
 
@@ -45,15 +45,7 @@ function App() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/FAQ" element={<FAQ />} />
         <Route path="/logout" element={<Logout />} />
-        <Route
-          path="*"
-          element={
-            <>
-              <Home />
-              <Erro404 />
-            </>
-          }
-        />
+        <Route path="*" element={<Erro404 />} />
       </Routes>
     </BrowserRouter>
   );
