@@ -55,7 +55,7 @@ export async function SignIn(
   captchaToken: string,
   loginType: "email" | "cnpj",
 ): Promise<SingInResponse> {
-  const resposta = await fetch("http://localhost:3001/api/login", {
+  const resposta = await fetch("/api/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
