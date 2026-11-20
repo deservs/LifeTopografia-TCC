@@ -1,10 +1,23 @@
+import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "./supabaseClient";
 
 export interface UserProfile {
+  id: string;
   name: string;
   role: string;
   avatarUrl?: string;
 }
+
+export type LoginFieldErrors = {
+  valor?: string[];
+  type?: string[];
+  password?: string[];
+  captchaToken?: string[];
+}
+
+export type SingInResponse = 
+ | { ok: true; session: Session; user: User}
+ | { ok: false; message: string; fieldErrors?: LoginFieldErrors };
 /* função que irá registrar um novo usuário */
 export async function SignUp(
   email: string,
@@ -41,7 +54,7 @@ export async function SignIn(
   password: string,
   captchaToken: string,
   loginType: "email" | "cnpj",
-) {
+): Promise<SingInResponse> {
   const resposta = await fetch("http://localhost:3001/api/login", {
     method: "POST",
     headers: {
@@ -56,27 +69,34 @@ export async function SignIn(
   });
   const login = await resposta.json();
   if (!resposta.ok) {
-    throw new Error(
-      login.message ?? "Erro ao fazer login. Verifique suas credenciais.",
-    );
+    return {
+      ok: false,
+      message: login.message ?? "Erro ao fazer login.",
+      fieldErrors: login.errors,
+    };
   }
-  if (!login.data.data?.session) {
-    console.error("Falha no login. Verifique suas credenciais.");
-    throw new Error(
-      login.data.error?.message ?? login.message ?? "Erro ao fazer login",
-    );
+  if(resposta.status >= 500){
+    return {
+      ok: false,
+      message: "Erro interno do servidor. Tente novamente mais tarde.",
+      fieldErrors: login.status,
+    };
   }
   const { data, error } = await supabase.auth.setSession({
-    access_token: login.data.data.session.access_token,
-    refresh_token: login.data.data.session.refresh_token,
+    access_token: login.data.session.access_token,
+    refresh_token: login.data.session.refresh_token,
   });
-  if (error) {
-    throw new Error(error.message);
+  if (error || !data.session || !data.user) {
+    return {
+      ok: false,
+      message: "Falha ao obter a sessão do usuário após o login.",
+    };
   }
-  if (!data.session) {
-    throw new Error("Falha ao obter a sessão do usuário após o login.");
-  }
-  return login.data;
+  return {
+    ok: true,
+    session: data.session,
+    user: data.user,
+  };
 }
 
 /* função que irá fazer logout de um usuário autenticado */
