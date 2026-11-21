@@ -270,9 +270,6 @@ export const Login = () => {
           if (resultado.fieldErrors.captchaToken?.[0]) {
             setFeedback("Porfavor, complete o captchaToken");
           }
-          if (resultado){
-            
-          }
         }
         setFeedback(resultado.message);
         return;

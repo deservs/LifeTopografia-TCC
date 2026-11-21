@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
-import { SerchDataUser, SignOut } from "../../lib/supabase/auth";
+import { SerchDataUser, SignOut, UpdateUser } from "../../lib/supabase/auth";
 import { supabase } from "../../lib/supabase/supabaseClient";
 import Logo from "../../assets/image/logo-front.webp";
 import "./profile.css";
@@ -277,24 +277,16 @@ export default function Profile({
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!profile || !draft || submittingRef.current) return;
-    if (!services?.saveProfile || (avatarFile && !services.uploadAvatar)) {
-      notify(
-        avatarFile
-          ? "O envio de foto ainda não está integrado ao armazenamento. Nenhuma alteração foi salva."
-          : unavailableMessage,
-        true,
-      );
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setFeedback("");
     try {
-      let avatarUrl = draft.avatarUrl;
-      if (avatarFile && services.uploadAvatar) {
-        avatarUrl = await services.uploadAvatar(profile.id, avatarFile);
+      const updateResponse = await UpdateUser(draft.name, draft.email, avatarFile ?? undefined);
+      if (!updateResponse.ok) {
+        notify(updateResponse.message ?? "Erro ao atualizar os dados do usuário.", true);
+        return;
       }
-
       const updated = {
         ...draft,
         avatarUrl,

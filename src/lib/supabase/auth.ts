@@ -13,11 +13,17 @@ export type LoginFieldErrors = {
   type?: string[];
   password?: string[];
   captchaToken?: string[];
-}
+};
 
-export type SingInResponse = 
- | { ok: true; session: Session; user: User}
- | { ok: false; message: string; fieldErrors?: LoginFieldErrors };
+export type SingInResponse =
+  | { ok: true; session: Session; user: User }
+  | { ok: false; message: string; fieldErrors?: LoginFieldErrors };
+
+export type UpdateUserResponse = {
+  ok: boolean;
+  message?: string;
+};
+
 /* função que irá registrar um novo usuário */
 export async function SignUp(
   email: string,
@@ -55,7 +61,7 @@ export async function SignIn(
   captchaToken: string,
   loginType: "email" | "cnpj",
 ): Promise<SingInResponse> {
-  const resposta = await fetch("/api/login", {
+  const resposta = await fetch("http://localhost:3001/api/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -75,16 +81,9 @@ export async function SignIn(
       fieldErrors: login.errors,
     };
   }
-  if(resposta.status >= 500){
-    return {
-      ok: false,
-      message: "Erro interno do servidor. Tente novamente mais tarde.",
-      fieldErrors: login.status,
-    };
-  }
   const { data, error } = await supabase.auth.setSession({
-    access_token: login.data.session.access_token,
-    refresh_token: login.data.session.refresh_token,
+    access_token: login.data.access_token,
+    refresh_token: login.data.refresh_token,
   });
   if (error || !data.session || !data.user) {
     return {
@@ -101,7 +100,7 @@ export async function SignIn(
 
 /* função que irá fazer logout de um usuário autenticado */
 export async function SignOut(escopo: "global" | "local") {
-  const { error } = await supabase.auth.signOut({ scope: escopo});
+  const { error } = await supabase.auth.signOut({ scope: escopo });
   if (error) {
     throw new Error(error.message);
   }
@@ -110,29 +109,76 @@ export async function SignOut(escopo: "global" | "local") {
 }
 
 /* função que irá atualizar os dados do usuário */
-export async function UpdateUser() {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+export async function UpdateUser(
+  name?: string,
+  email?: string,
+  file?: File,
+): Promise<UpdateUserResponse> {
+  let avatarUrl: string | undefined;
+
+  const { data: user, error } = await supabase.auth.getSession();
+
   if (error) {
     throw new Error(error.message);
   }
-  if (!user) {
+  if (!user.session || !user.session.user) {
     throw new Error("Usuário não autenticado.");
   }
-  const { error: updateError } = await supabase.auth.updateUser({
-    data: {
-      // Adicione aqui os campos que deseja atualizar
-      nome_ou_razao: "Novo Nome",
-      cnpj: "Novo CNPJ",
-      email: "",
-      foto_url: "",
-    },
-  });
-  if (updateError) {
-    throw new Error(updateError.message);
+  if (file) {
+    const preResAvatar = await fetch(
+      "http://localhost:3001/api/updateAvatar",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user.session?.access_token}`,
+        },
+        body: JSON.stringify({
+          avatarType: file.type,
+          avatarSize: file.size,
+        }),
+      },
+    );
+    const preDataAvatar = await preResAvatar.json();
+    if (!preResAvatar.ok) {
+      throw new Error(
+        preDataAvatar.message ?? "Erro ao gerar URL para upload da imagem.",
+      );
+    }
+    const uploadImagem = await fetch(preDataAvatar.uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/octet-stream",
+        authorization: `Bearer ${user.session?.access_token}`,
+      },
+      body: file,
+    });
+    if (!uploadImagem.ok) {
+      throw new Error("Erro ao fazer upload da imagem.");
+    }
+    avatarUrl = preDataAvatar.key;
   }
+  const payload: { name?: string; email?: string; avatarUrl?: string } = {};
+  if (name) payload.name = name;
+  if (email) payload.email = email;
+  if (avatarUrl) payload.avatarUrl = avatarUrl;
+  const resposta = await fetch("http://localhost:3001/api/update-profile", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `Bearer ${user.session?.access_token}`,
+    },
+    body: JSON.stringify({payload}),
+  });
+  const data = await resposta.json();
+  if (!resposta.ok) {
+    throw new Error(data.message ?? "Erro ao atualizar os dados do usuário.");
+  }
+  localStorage.removeItem("userProfile");
+  return {
+    ok: true,
+    message: "Dados do usuário atualizados com sucesso.",
+  };
 }
 
 /* função que irá enviar um código para o email do usuário */
@@ -191,6 +237,7 @@ export async function SerchDataUser() {
       localStorage.removeItem("userProfile");
       await SaveUserData(data.session.user.id);
       localStorage.getItem("userProfile");
+      return;
     }
     return localStorage.getItem("userProfile"); // Retorna os dados do usuário do localStorage, se disponíveis
   } else {
