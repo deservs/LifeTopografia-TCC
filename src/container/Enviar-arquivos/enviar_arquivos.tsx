@@ -1,5 +1,6 @@
 import useOcrPipeline from "../../hook/useOcrPipeline";
 import type { ChangeEvent } from "react";
+import { extrairInformacoes } from "../../utils/textSanitizer";
 
 export default function Teste() {
   // Chamada inicial para configurar o hook
@@ -15,20 +16,27 @@ export default function Teste() {
 
     try {
       console.time("Tempo de Renderização do Canvas");
-
-      // Invoca a função que acabamos de fechar
-
-      console.timeEnd("Tempo de Renderização do Canvas");
+      
+      const resultado:any = await ocrPipeline.executarTarefa(file);
 
       console.log(
         "2. Dados da imagem extraídos do PDF:",
-        ocrPipeline.executarTarefa(file),
+        resultado,
       );
+
+
+      const terreno = extrairInformacoes(resultado);
+
+      console.log("Informações extraídas:", terreno);
+      console.log("Informações:", terreno.medidas);
+      console.timeEnd("Tempo de Renderização do Canvas");
     } catch (error) {
       console.error("ERRO NO TESTE DO PDF:", error);
     }
   };
   return (
-    <input type="file" accept="application/pdf" onChange={handleTestUpload} />
+    <>
+      <input type="file" accept="application/pdf" onChange={handleTestUpload} />
+    </>
   );
 }

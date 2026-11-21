@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
-import { SerchDataUser } from "../../lib/supabase/auth";
+import { SerchDataUser, SignOut } from "../../lib/supabase/auth";
 import { supabase } from "../../lib/supabase/supabaseClient";
 import Logo from "../../assets/image/logo-front.webp";
 import "./profile.css";
@@ -331,6 +331,15 @@ export default function Profile({
       setMembersLoading(false);
     }
   }
+
+  async function signOut(){
+    try {
+      await SignOut("local");
+      navigateTo("/");
+    } catch (error) {
+      console.error("Erro ao sair da conta:", error);
+    }
+  } 
 
   function editMember(selected?: CompanyMember) {
     setMember(
@@ -776,7 +785,7 @@ export default function Profile({
                       className="profile-remove-button profile-signout-button"
                       type="button"
                       disabled={busy}
-                      onClick={() => navigateTo("/logout")}
+                      onClick={signOut}
                     >
                       Sair da conta
                     </button>

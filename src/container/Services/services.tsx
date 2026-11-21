@@ -5,11 +5,11 @@ import type { UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 
 import Logo from "../../assets/image/logo-front.webp";
-import Obra from "../../assets/image/obra.webp";
-import Nivelamento from "../../assets/image/leveling.webp";
-import Terraplanagem from "../../assets/image/surfacing.webp";
+import Obra from "../../assets/image/cards/obra.webp";
+import Nivelamento from "../../assets/image/cards/leveling.webp";
+import Terraplanagem from "../../assets/image/cards/surfacing.webp";
 import LogoIcon from "../../assets/image/logo-front-icon.webp";
-import Acompanhamento from "../../assets/image/supervision.webp";
+import Acompanhamento from "../../assets/image/cards/supervision.webp";
 
 import "./services.css";
 

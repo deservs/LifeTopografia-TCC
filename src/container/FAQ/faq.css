@@ -184,7 +184,9 @@
   padding: 8px 14px;
   gap: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .faq-search-box:focus-within {
@@ -332,7 +334,9 @@
   border: none;
   cursor: pointer;
   text-align: left;
-  transition: background-color 0.2s ease, padding-left 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    padding-left 0.2s ease;
 }
 
 .faq-question-btn:hover {
@@ -510,7 +514,9 @@
   border-radius: 8px;
   text-decoration: none;
   box-shadow: 0 4px 12px rgba(0, 199, 36, 0.25);
-  transition: background-color 0.2s ease, transform 0.15s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease;
 }
 
 .btn-faq-chat:hover {
@@ -577,4 +583,3 @@
     text-align: center;
   }
 }
-

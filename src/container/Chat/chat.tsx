@@ -1525,11 +1525,11 @@ export default function Chat() {
               </>
             )}
 
-            {(isAdmin
-              ? currentAdminThread?.chatStatus
-              : clientChatStatus) === "closed" && (
+            {(isAdmin ? currentAdminThread?.chatStatus : clientChatStatus) ===
+              "closed" && (
               <div className="chat-closed-notice" role="status">
-                Esta conversa foi encerrada. O envio de mensagens e arquivos está desabilitado.
+                Esta conversa foi encerrada. O envio de mensagens e arquivos
+                está desabilitado.
               </div>
             )}
 
@@ -1600,19 +1600,27 @@ export default function Chat() {
           </div>
         </section>
 
-        {!isAdmin && clientServiceStatus === "completed" && !ratingSubmitted && (
-          <section className="service-rating-prompt" aria-labelledby="rating-prompt-title">
-            <h3 id="rating-prompt-title">Como foi sua experiência?</h3>
-            <p>Seu serviço foi concluído. Avalie o atendimento da Life Topografia.</p>
-            <button
-              type="button"
-              className="btn-open-rating"
-              onClick={() => setShowRatingModal(true)}
+        {!isAdmin &&
+          clientServiceStatus === "completed" &&
+          !ratingSubmitted && (
+            <section
+              className="service-rating-prompt"
+              aria-labelledby="rating-prompt-title"
             >
-              Avaliar Atendimento
-            </button>
-          </section>
-        )}
+              <h3 id="rating-prompt-title">Como foi sua experiência?</h3>
+              <p>
+                Seu serviço foi concluído. Avalie o atendimento da Life
+                Topografia.
+              </p>
+              <button
+                type="button"
+                className="btn-open-rating"
+                onClick={() => setShowRatingModal(true)}
+              >
+                Avaliar Atendimento
+              </button>
+            </section>
+          )}
 
         {!isAdmin && ratingSubmitted && (
           <p className="rating-success-message" role="status">
