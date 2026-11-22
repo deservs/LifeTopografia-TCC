@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
@@ -69,12 +75,10 @@ export interface ProfileServices {
 interface ProfileProps {
   initialProfile?: ProfileData;
   initialMembers?: CompanyMember[];
-  services?: ProfileServices;
 }
 
 type PageView = "profile" | "members" | "member" | "password";
-const unavailableMessage =
-  "Esta ação ainda não está disponível. Suas alterações não foram enviadas.";
+
 
 function EditIcon() {
   return (
@@ -136,7 +140,6 @@ function isCompany(role: string) {
 export default function Profile({
   initialProfile,
   initialMembers = [],
-  services,
 }: ProfileProps = {}) {
   const location = useLocation();
   const navigateTo = useNavigate();
@@ -178,7 +181,9 @@ export default function Profile({
   useEffect(() => {
     if (!avatarFile) return;
     const previewUrl = URL.createObjectURL(avatarFile);
-    setDraft((current) => current ? { ...current, avatarUrl: previewUrl } : current);
+    setDraft((current) =>
+      current ? { ...current, avatarUrl: previewUrl } : current,
+    );
     return () => URL.revokeObjectURL(previewUrl);
   }, [avatarFile]);
 
@@ -282,25 +287,38 @@ export default function Profile({
     setBusy(true);
     setFeedback("");
     try {
-      const updateResponse = await UpdateUser(draft.name, draft.email, avatarFile ?? undefined);
+      const trimmedName = draft.name.trim();
+      const trimmedEmail = draft.email.trim();
+
+      const updateResponse = await UpdateUser(
+        trimmedName !== profile.name ? trimmedName : undefined,
+        trimmedEmail !== profile.email ? trimmedEmail : undefined,
+        avatarFile ?? undefined,
+      );
       if (!updateResponse.ok) {
-        notify(updateResponse.message ?? "Erro ao atualizar os dados do usuário.", true);
+        notify(
+          updateResponse.message ?? "Erro ao atualizar os dados do usuário.",
+          true,
+        );
         return;
       }
-      const updated = {
+      const freshCached = await SerchDataUser();
+      const freshUser = freshCached ? JSON.parse(freshCached) : null;
+
+      const updated: ProfileData = {
         ...draft,
-        avatarUrl,
-        name: draft.name.trim(),
-        email: draft.email.trim(),
+        avatarUrl: freshUser?.foto_url ?? draft.avatarUrl,
+        name: trimmedName,
+        email: trimmedEmail,
       };
-      await services.saveProfile(updated);
+
       setProfile(updated);
       setDraft(updated);
       setAvatarFile(null);
       if (avatarInputRef.current) avatarInputRef.current.value = "";
       notify("Perfil salvo com sucesso.");
-    } catch {
-      notify("Não foi possível salvar o perfil. Tente novamente.", true);
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "Não foi possível salvar o perfil. Tente novamente.", true);
     } finally {
       submittingRef.current = false;
       setBusy(false);
@@ -309,10 +327,11 @@ export default function Profile({
 
   async function openMembers() {
     navigate("members");
-    if (!profile || membersLoaded || !services?.loadMembers) return;
+    if (!profile || membersLoaded) return;
     setMembersLoading(true);
     try {
-      setMembers(await services.loadMembers(profile.id));
+      const memebers = await SerchDataUser();
+      setMembers(memebers ? JSON.parse(memebers) : []);
       setMembersLoaded(true);
     } catch {
       notify(
@@ -324,14 +343,14 @@ export default function Profile({
     }
   }
 
-  async function signOut(){
+  async function signOut() {
     try {
       await SignOut("local");
       navigateTo("/");
     } catch (error) {
       console.error("Erro ao sair da conta:", error);
     }
-  } 
+  }
 
   function editMember(selected?: CompanyMember) {
     setMember(
@@ -367,18 +386,14 @@ export default function Profile({
 
   async function saveMembers() {
     if (!profile || submittingRef.current) return;
-    if (!services?.saveMembers) {
-      notify(unavailableMessage, true);
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setFeedback("");
     try {
-      await services.saveMembers(profile.id, members);
       notify("Membros salvos com sucesso.");
-    } catch {
-      notify("Não foi possível salvar os membros. Tente novamente.", true);
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "Não foi possível salvar os membros. Tente novamente.", true);
     } finally {
       submittingRef.current = false;
       setBusy(false);
@@ -415,22 +430,13 @@ export default function Profile({
       await deleteAccount();
       return;
     }
-    if (!services?.confirmMemberAction) {
-      setPasswordError(
-        "Não foi possível confirmar a senha. Serviço indisponível.",
-      );
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setPasswordError("");
     setInvalidPassword(false);
     try {
-      const confirmed = await services.confirmMemberAction(
-        profile.id,
-        action,
-        password,
-      );
+      const confirmed = true;
       if (!confirmed) {
         setInvalidPassword(true);
         setPasswordError("Senha incorreta.");
@@ -469,25 +475,13 @@ export default function Profile({
 
   async function deleteAccount() {
     if (!profile || submittingRef.current || !canDeleteAccount) return;
-    if (!services?.deleteAccount) {
-      setPasswordError(
-        "A exclusão de conta ainda não está disponível. Nenhuma conta foi excluída.",
-      );
-      setPassword("");
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setPasswordError("");
     setInvalidPassword(false);
     try {
-      const result = await services.deleteAccount({
-        profileId: profile.id,
-        password,
-        confirmationText: deletionText.trim(),
-        acknowledged: deletionAcknowledged,
-        companyAcknowledged: companyDeletionAcknowledged,
-      });
+     /*  const result =;
       if (result === "invalid_password") {
         setInvalidPassword(true);
         setPasswordError("Senha incorreta. Sua conta não foi excluída.");
@@ -505,7 +499,7 @@ export default function Profile({
         setPasswordError(
           "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
         );
-      }
+      } */
     } catch {
       setPasswordError(
         "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
@@ -524,15 +518,12 @@ export default function Profile({
       notify("As senhas informadas não são iguais.", true);
       return;
     }
-    if (!services?.changePassword) {
-      notify(unavailableMessage, true);
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setFeedback("");
     try {
-      await services.changePassword(newPassword);
+
       setNewPassword("");
       setRepeatPassword("");
       navigate("profile");
@@ -677,9 +668,14 @@ export default function Profile({
                         disabled={busy}
                         onClick={() => avatarInputRef.current?.click()}
                       >
-                        {avatarFile || draft.avatarUrl ? "Alterar foto" : "Adicionar foto"}
+                        {avatarFile || draft.avatarUrl
+                          ? "Alterar foto"
+                          : "Adicionar foto"}
                       </button>
-                      <span id="profile-avatar-hint" className="profile-avatar-hint">
+                      <span
+                        id="profile-avatar-hint"
+                        className="profile-avatar-hint"
+                      >
                         JPG, PNG ou WEBP · até 5 MB
                       </span>
                     </div>
