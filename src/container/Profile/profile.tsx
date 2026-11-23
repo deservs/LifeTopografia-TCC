@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
@@ -178,7 +184,9 @@ export default function Profile({
   useEffect(() => {
     if (!avatarFile) return;
     const previewUrl = URL.createObjectURL(avatarFile);
-    setDraft((current) => current ? { ...current, avatarUrl: previewUrl } : current);
+    setDraft((current) =>
+      current ? { ...current, avatarUrl: previewUrl } : current,
+    );
     return () => URL.revokeObjectURL(previewUrl);
   }, [avatarFile]);
 
@@ -332,14 +340,14 @@ export default function Profile({
     }
   }
 
-  async function signOut(){
+  async function signOut() {
     try {
       await SignOut("local");
       navigateTo("/");
     } catch (error) {
       console.error("Erro ao sair da conta:", error);
     }
-  } 
+  }
 
   function editMember(selected?: CompanyMember) {
     setMember(
@@ -361,6 +369,7 @@ export default function Profile({
     if (!member) return;
     const updated = {
       ...member,
+      status: existingMember ? member.status : "ativo",
       name: member.name.trim(),
       email: member.email.trim(),
     };
@@ -685,9 +694,14 @@ export default function Profile({
                         disabled={busy}
                         onClick={() => avatarInputRef.current?.click()}
                       >
-                        {avatarFile || draft.avatarUrl ? "Alterar foto" : "Adicionar foto"}
+                        {avatarFile || draft.avatarUrl
+                          ? "Alterar foto"
+                          : "Adicionar foto"}
                       </button>
-                      <span id="profile-avatar-hint" className="profile-avatar-hint">
+                      <span
+                        id="profile-avatar-hint"
+                        className="profile-avatar-hint"
+                      >
                         JPG, PNG ou WEBP · até 5 MB
                       </span>
                     </div>
@@ -950,28 +964,32 @@ export default function Profile({
                       }
                     />
                   </label>
-                  <label
-                    className="profile-field"
-                    htmlFor="profile-member-status"
-                  >
-                    Status:
-                    <select
-                      id="profile-member-status"
-                      aria-label="Status do membro"
-                      value={member.status}
-                      className={`profile-status profile-status--${member.status}`}
-                      onChange={(event) => {
-                        const status = event.target
-                          .value as CompanyMember["status"];
-                        if (existingMember)
-                          requestAction({ type: "status", member, status });
-                        else setMember({ ...member, status });
-                      }}
+                  {existingMember && (
+                    <label
+                      className="profile-field"
+                      htmlFor="profile-member-status"
                     >
-                      <option value="ativo">Ativo</option>
-                      <option value="afastado">Afastado</option>
-                    </select>
-                  </label>
+                      Status:
+                      <select
+                        id="profile-member-status"
+                        aria-label="Status do membro"
+                        value={member.status}
+                        className={`profile-status profile-status--${member.status}`}
+                        disabled={busy}
+                        onChange={(event) => {
+                          const status = event.currentTarget
+                            .value as CompanyMember["status"];
+
+                          if (status !== member.status) {
+                            requestAction({ type: "status", member, status });
+                          }
+                        }}
+                      >
+                        <option value="ativo">Ativo</option>
+                        <option value="afastado">Afastado</option>
+                      </select>
+                    </label>
+                  )}
                   {existingMember && (
                     <button
                       type="button"
