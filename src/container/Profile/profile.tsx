@@ -703,14 +703,7 @@ export default function Profile({
                         {avatarFile || draft.avatarUrl
                           ? "Alterar foto"
                           : "Adicionar foto"}
-                        {avatarFile || draft.avatarUrl
-                          ? "Alterar foto"
-                          : "Adicionar foto"}
                       </button>
-                      <span
-                        id="profile-avatar-hint"
-                        className="profile-avatar-hint"
-                      >
                       <span
                         id="profile-avatar-hint"
                         className="profile-avatar-hint"
