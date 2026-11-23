@@ -186,6 +186,9 @@ export default function Profile({
     setDraft((current) =>
       current ? { ...current, avatarUrl: previewUrl } : current,
     );
+    setDraft((current) =>
+      current ? { ...current, avatarUrl: previewUrl } : current,
+    );
     return () => URL.revokeObjectURL(previewUrl);
   }, [avatarFile]);
 
@@ -348,12 +351,14 @@ export default function Profile({
   }
 
   async function signOut() {
+  async function signOut() {
     try {
       await SignOut("local");
       navigateTo("/");
     } catch (error) {
       console.error("Erro ao sair da conta:", error);
     }
+  }
   }
 
   function editMember(selected?: CompanyMember) {
@@ -698,7 +703,14 @@ export default function Profile({
                         {avatarFile || draft.avatarUrl
                           ? "Alterar foto"
                           : "Adicionar foto"}
+                        {avatarFile || draft.avatarUrl
+                          ? "Alterar foto"
+                          : "Adicionar foto"}
                       </button>
+                      <span
+                        id="profile-avatar-hint"
+                        className="profile-avatar-hint"
+                      >
                       <span
                         id="profile-avatar-hint"
                         className="profile-avatar-hint"
@@ -968,6 +980,51 @@ export default function Profile({
                       <option value="afastado">Afastado</option>
                     </select>
                   </label>
+                  <label className="profile-field" htmlFor="profile-member-cpf">
+                    CPF:
+                    <input
+                      id="profile-member-cpf"
+                      name="memberCpf"
+                      inputMode="numeric"
+                      value={member.cpf}
+                      required
+                      pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+                      maxLength={14}
+                      title="Informe os 11 dígitos do CPF"
+                      onChange={(event) =>
+                        setMember({
+                          ...member,
+                          cpf: formatCpf(event.target.value),
+                        })
+                      }
+                    />
+                  </label>
+                  {existingMember && (
+                    <label
+                      className="profile-field"
+                      htmlFor="profile-member-status"
+                    >
+                      Status:
+                      <select
+                        id="profile-member-status"
+                        aria-label="Status do membro"
+                        value={member.status}
+                        className={`profile-status profile-status--${member.status}`}
+                        disabled={busy}
+                        onChange={(event) => {
+                          const status = event.currentTarget
+                            .value as CompanyMember["status"];
+
+                          if (status !== member.status) {
+                            requestAction({ type: "status", member, status });
+                          }
+                        }}
+                      >
+                        <option value="ativo">Ativo</option>
+                        <option value="afastado">Afastado</option>
+                      </select>
+                    </label>
+                  )}
                   {existingMember && (
                     <button
                       type="button"
