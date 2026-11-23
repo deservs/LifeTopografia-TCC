@@ -8,13 +8,13 @@ export async function SignUp(
   captchaToken: string,
 ) {
   if (
-    cnpj === "" ||
+    cnpj === '' ||
     cnpj === undefined ||
     cnpj === null ||
-    cnpj == "null" ||
-    cnpj == "undefined"
+    cnpj == 'null' ||
+    cnpj == 'undefined'
   ) {
-    cnpj = null;
+    cnpj = null
   }
   const { data, error } = await supabase.auth.signUp({
     email: email,
@@ -26,11 +26,11 @@ export async function SignUp(
       },
       captchaToken: captchaToken,
     },
-  });
+  })
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(error.message)
   }
 
-  return data;
+  return data
 }

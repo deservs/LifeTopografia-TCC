@@ -69,10 +69,7 @@ export interface Confrontacao {
 }
 
 export type TipoFormatoDescricao =
-  | "georreferenciada"
-  | "convencional"
-  | "mista"
-  | "insuficiente";
+  "georreferenciada" | "convencional" | "mista" | "insuficiente";
 
 export interface ResultadoExtracao {
   textoOriginal: string;
@@ -140,11 +137,13 @@ export function extrairAzimute(valor: string): Azimute | null {
 
   const graus = Number(resultado.groups.graus);
   const minutos = Number(resultado.groups.minutos);
-  const segundos = Number(
-    (resultado.groups.segundos || "0").replace(",", ".")
-  );
+  const segundos = Number((resultado.groups.segundos || "0").replace(",", "."));
 
-  if (!Number.isFinite(graus) || !Number.isFinite(minutos) || !Number.isFinite(segundos)) {
+  if (
+    !Number.isFinite(graus) ||
+    !Number.isFinite(minutos) ||
+    !Number.isFinite(segundos)
+  ) {
     return null;
   }
 
@@ -161,7 +160,7 @@ export function converterRumoParaAzimute(
   minutos: number,
   segundos: number,
   quadrante: string,
-  original: string
+  original: string,
 ): Azimute {
   const q = quadrante.toUpperCase().replace("O", "W");
   const angulo = graus + minutos / 60 + segundos / 3600;
@@ -199,7 +198,7 @@ export function extrairRumoOuAzimute(trecho: string): Azimute | null {
   // 1. Procura por Rumos com quadrante: "rumo de 75º 57'30" NE", "83229'54" SW", "22º2'06" NW", "l2s0l'-07" NW"
   const regexRumo = new RegExp(
     String.raw`rumo\s*(?:de\s*)?[-–—\s]*(?<ang>[\d\s°ºoO*'"′’‘″””ls\.-]+?)\s*(?<quad>N[EWSO]|S[EWSO]|NE|SE|SW|SO|NW|NO)\b`,
-    "i"
+    "i",
   );
   const matchRumo = trecho.match(regexRumo);
 
@@ -214,13 +213,23 @@ export function extrairRumoOuAzimute(trecho: string): Azimute | null {
       .trim();
 
     // Se o grau virou 2 entre números, ex: 83229'54" -> 83°29'54"
-    if (/^\d{2}2\d{2}/.test(limpo) && !limpo.includes("°") && !limpo.includes("º")) {
+    if (
+      /^\d{2}2\d{2}/.test(limpo) &&
+      !limpo.includes("°") &&
+      !limpo.includes("º")
+    ) {
       limpo = limpo.slice(0, 2) + "°" + limpo.slice(3);
     }
 
     const az = extrairAzimute(limpo);
     if (az) {
-      return converterRumoParaAzimute(az.graus, az.minutos, az.segundos, quad, matchRumo[0]);
+      return converterRumoParaAzimute(
+        az.graus,
+        az.minutos,
+        az.segundos,
+        quad,
+        matchRumo[0],
+      );
     }
 
     // Se falhar o formato com símbolos, faz parse numérico livre
@@ -280,15 +289,30 @@ function extrairMedidas(texto: string): Medida[] {
   // 1. FRENTE
   const regexesFrente = [
     // "frente para ..., (para onde) mede/mède 10,00 m"
-    new RegExp(String.raw`frente\s*[:=-]?\s*(?:para\s+[^,;\n]+,?\s*)?(?:para\s+onde\s+)?(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`frente\s*[:=-]?\s*(?:para\s+[^,;\n]+,?\s*)?(?:para\s+onde\s+)?(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "mede/medindo/com/por 10,00 metros de frente / pela frente / na frente / de testada"
-    new RegExp(String.raw`(?:${VERBO_MEDIR})\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:de\s+frente|pela\s+frente|na\s+frente|de\s+testada)`, "gi"),
+    new RegExp(
+      String.raw`(?:${VERBO_MEDIR})\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:de\s+frente|pela\s+frente|na\s+frente|de\s+testada)`,
+      "gi",
+    ),
     // "10,00 metros de frente / pela frente / na frente"
-    new RegExp(String.raw`${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)\s+(?:de\s+frente|pela\s+frente|na\s+frente|de\s+testada)`, "gi"),
+    new RegExp(
+      String.raw`${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)\s+(?:de\s+frente|pela\s+frente|na\s+frente|de\s+testada)`,
+      "gi",
+    ),
     // "pela frente / na frente mede/medindo/com 10,00 metros"
-    new RegExp(String.raw`(?:pela|na|de)\s+frente\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`(?:pela|na|de)\s+frente\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "linha de/da frente ... 10,00 m"
-    new RegExp(String.raw`linha\s+d[ea]\s+frente\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`linha\s+d[ea]\s+frente\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
   ];
 
   for (const r of regexesFrente) {
@@ -300,17 +324,35 @@ function extrairMedidas(texto: string): Medida[] {
   // 2. LADO DIREITO
   const regexesLadoDireito = [
     // "lado direito / lateral direita mede/medindo/com 22,19 m"
-    new RegExp(String.raw`(?:lado\s+direito|lateral\s+direita)\s*[:=-]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`(?:lado\s+direito|lateral\s+direita)\s*[:=-]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "pelo lado direito / pela lateral direita / do lado direito / da lateral direita mede/medindo/com 22,19 m"
-    new RegExp(String.raw`(?:pelo|do|no|pela|da|na)\s+(?:lado\s+direito|lateral\s+direita)\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`(?:pelo|do|no|pela|da|na)\s+(?:lado\s+direito|lateral\s+direita)\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "mede/medindo/com/por 22,19 m do lado direito / pelo lado direito / à direita"
-    new RegExp(String.raw`(?:${VERBO_MEDIR})\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:do\s+lado\s+direito|pelo\s+lado\s+direito|na\s+lateral\s+direita|pela\s+direita|[àa]\s+direita)`, "gi"),
+    new RegExp(
+      String.raw`(?:${VERBO_MEDIR})\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:do\s+lado\s+direito|pelo\s+lado\s+direito|na\s+lateral\s+direita|pela\s+direita|[àa]\s+direita)`,
+      "gi",
+    ),
     // "22,19 m do lado direito / pelo lado direito / à direita"
-    new RegExp(String.raw`${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)\s+(?:do\s+lado\s+direito|pelo\s+lado\s+direito|na\s+lateral\s+direita|pela\s+direita|[àa]\s+direita)`, "gi"),
+    new RegExp(
+      String.raw`${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)\s+(?:do\s+lado\s+direito|pelo\s+lado\s+direito|na\s+lateral\s+direita|pela\s+direita|[àa]\s+direita)`,
+      "gi",
+    ),
     // "da frente aos fundos do lado direito mede 22,19 m"
-    new RegExp(String.raw`da\s+frente\s+aos\s+fundos\s+(?:do\s+lado\s+direito|pelo\s+lado\s+direito)\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`da\s+frente\s+aos\s+fundos\s+(?:do\s+lado\s+direito|pelo\s+lado\s+direito)\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "à direita / pela direita mede 22,19 m"
-    new RegExp(String.raw`(?:[àa]|pela)\s+direita\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`(?:[àa]|pela)\s+direita\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
   ];
 
   for (const r of regexesLadoDireito) {
@@ -322,17 +364,35 @@ function extrairMedidas(texto: string): Medida[] {
   // 3. LADO ESQUERDO
   const regexesLadoEsquerdo = [
     // "lado esquerdo / lateral esquerda mede/medindo/com 30,64 m"
-    new RegExp(String.raw`(?:lado\s+esquerdo|lateral\s+esquerda)\s*[:=-]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`(?:lado\s+esquerdo|lateral\s+esquerda)\s*[:=-]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "pelo lado esquerdo / pela lateral esquerda / do lado esquerdo / da lateral esquerda mede/medindo/com 30,64 m"
-    new RegExp(String.raw`(?:pelo|do|no|pela|da|na)\s+(?:lado\s+esquerdo|lateral\s+esquerda)\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`(?:pelo|do|no|pela|da|na)\s+(?:lado\s+esquerdo|lateral\s+esquerda)\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "mede/medindo/com/por 30,64 m do lado esquerdo / pelo lado esquerdo / à esquerda"
-    new RegExp(String.raw`(?:${VERBO_MEDIR})\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:do\s+lado\s+esquerdo|pelo\s+lado\s+esquerdo|na\s+lateral\s+esquerda|pela\s+esquerda|[àa]\s+esquerda)`, "gi"),
+    new RegExp(
+      String.raw`(?:${VERBO_MEDIR})\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:do\s+lado\s+esquerdo|pelo\s+lado\s+esquerdo|na\s+lateral\s+esquerda|pela\s+esquerda|[àa]\s+esquerda)`,
+      "gi",
+    ),
     // "30,64 m do lado esquerdo / pelo lado esquerdo / à esquerda"
-    new RegExp(String.raw`${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)\s+(?:do\s+lado\s+esquerdo|pelo\s+lado\s+esquerdo|na\s+lateral\s+esquerda|pela\s+esquerda|[àa]\s+esquerda)`, "gi"),
+    new RegExp(
+      String.raw`${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)\s+(?:do\s+lado\s+esquerdo|pelo\s+lado\s+esquerdo|na\s+lateral\s+esquerda|pela\s+esquerda|[àa]\s+esquerda)`,
+      "gi",
+    ),
     // "da frente aos fundos do lado esquerdo mede 30,64 m"
-    new RegExp(String.raw`da\s+frente\s+aos\s+fundos\s+(?:do\s+lado\s+esquerdo|pelo\s+lado\s+esquerdo)\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`da\s+frente\s+aos\s+fundos\s+(?:do\s+lado\s+esquerdo|pelo\s+lado\s+esquerdo)\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "à esquerda / pela esquerda mede 30,64 m"
-    new RegExp(String.raw`(?:[àa]|pela)\s+esquerda\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`(?:[àa]|pela)\s+esquerda\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
   ];
 
   for (const r of regexesLadoEsquerdo) {
@@ -344,27 +404,44 @@ function extrairMedidas(texto: string): Medida[] {
   // 4. AMBOS OS LADOS (preenche direito e esquerdo se não existirem)
   const regexAmbosLados = new RegExp(
     String.raw`(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:da\s+frente\s+aos\s+fundos\s+)?(?:de|em)\s+ambos\s+os\s+lados`,
-    "gi"
+    "gi",
   );
   for (const m of texto.matchAll(regexAmbosLados)) {
     if (m.groups?.valor) {
-      if (!capturas.has("lado direito")) registrar("lado direito", m.groups.valor, m[0]);
-      if (!capturas.has("lado esquerdo")) registrar("lado esquerdo", m.groups.valor, m[0]);
+      if (!capturas.has("lado direito"))
+        registrar("lado direito", m.groups.valor, m[0]);
+      if (!capturas.has("lado esquerdo"))
+        registrar("lado esquerdo", m.groups.valor, m[0]);
     }
   }
 
   // 5. FUNDOS
   const regexesFundos = [
     // "fundos mede/medindo/com 10,00 m"
-    new RegExp(String.raw`\bfundos\s*[:=-]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`\bfundos\s*[:=-]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "pelos fundos / nos fundos / aos fundos mede/medindo/com 10,00 m"
-    new RegExp(String.raw`(?:pelos|nos|aos|de)\s+fundos\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`(?:pelos|nos|aos|de)\s+fundos\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
     // "mede/medindo/com/por 10,00 m nos fundos / pelos fundos / de fundos"
-    new RegExp(String.raw`(?:${VERBO_MEDIR})\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:nos\s+fundos|pelos\s+fundos|aos\s+fundos|de\s+fundos)`, "gi"),
+    new RegExp(
+      String.raw`(?:${VERBO_MEDIR})\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?\s+(?:nos\s+fundos|pelos\s+fundos|aos\s+fundos|de\s+fundos)`,
+      "gi",
+    ),
     // "10,00 m nos fundos / pelos fundos / de fundos"
-    new RegExp(String.raw`${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)\s+(?:nos\s+fundos|pelos\s+fundos|aos\s+fundos|de\s+fundos)`, "gi"),
+    new RegExp(
+      String.raw`${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)\s+(?:nos\s+fundos|pelos\s+fundos|aos\s+fundos|de\s+fundos)`,
+      "gi",
+    ),
     // "linha dos/de fundos ... 10,00 m"
-    new RegExp(String.raw`linha\s+d(?:os|e)\s+fundos\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`, "gi"),
+    new RegExp(
+      String.raw`linha\s+d(?:os|e)\s+fundos\s*[,:]?\s*(?:${VERBO_MEDIR})?\s*${NUMERO_MEDIDA}\s*(?:m\b|metros?\b)?`,
+      "gi",
+    ),
   ];
 
   for (const r of regexesFundos) {
@@ -400,7 +477,7 @@ function extrairCoordenadas(texto: string): Coordenada[] {
   // Padrão 1: "ponto XX, de coordenadas N = ... e E = ..." ou N: ... ; E: ...
   const regex1 = new RegExp(
     String.raw`\b(?:ponto|v[eé]rtice|marco)\s+(?<vertice>${VERTICE})\s*,?\s*(?:de\s+coordenadas\s+)?N\s*[:=]\s*(?<n>${COORDENADA})\s*[;e,\s]+E\s*[:=]\s*(?<e>${COORDENADA})`,
-    "gi"
+    "gi",
   );
 
   for (const match of texto.matchAll(regex1)) {
@@ -422,7 +499,7 @@ function extrairCoordenadas(texto: string): Coordenada[] {
   // Padrão 2: "N = ... e E = ... do ponto XX" ou formato inverso
   const regex2 = new RegExp(
     String.raw`\bN\s*[:=]\s*(?<n>${COORDENADA})\s*[;e,\s]+E\s*[:=]\s*(?<e>${COORDENADA})[\s\S]{0,40}?\b(?:ponto|v[eé]rtice)\s+(?<vertice>${VERTICE})`,
-    "gi"
+    "gi",
   );
 
   for (const match of texto.matchAll(regex2)) {
@@ -430,7 +507,8 @@ function extrairCoordenadas(texto: string): Coordenada[] {
     if (!grupos) continue;
 
     const pos = match.index ?? 0;
-    if (matchesEncontrados.some((m) => Math.abs(m.posicao - pos) < 30)) continue;
+    if (matchesEncontrados.some((m) => Math.abs(m.posicao - pos) < 30))
+      continue;
 
     matchesEncontrados.push({
       posicao: pos,
@@ -456,7 +534,11 @@ function extrairCoordenadas(texto: string): Coordenada[] {
         anterior.vertice === item.coordenada.vertice &&
         Math.abs(anterior.norte - item.coordenada.norte) < 0.0001 &&
         Math.abs(anterior.este - item.coordenada.este) < 0.0001 &&
-        Math.abs(item.posicao - (matchesEncontrados.find((m) => m.coordenada === anterior)?.posicao ?? 0)) < 40
+        Math.abs(
+          item.posicao -
+            (matchesEncontrados.find((m) => m.coordenada === anterior)
+              ?.posicao ?? 0),
+        ) < 40
       ) {
         continue;
       }
@@ -475,7 +557,7 @@ function extrairVerticeInicial(texto: string): string | null {
   // 1. Ponto ou marco entre aspas (ex: denominado Ponto "D" ou Marco "01")
   const regexAspas = new RegExp(
     String.raw`(?:\binicia(?:-se)?|\bcomeça|\bpartindo|\bpartir)[\s\S]{0,150}?\b(?:ponto|v[eé]rtice|marco)\s*["“'](?<vertice>[A-Za-z0-9]+(?:-[A-Za-z0-9]+)?)["”']`,
-    "i"
+    "i",
   );
   const matchAspas = texto.match(regexAspas);
   if (matchAspas?.groups?.vertice) {
@@ -485,7 +567,7 @@ function extrairVerticeInicial(texto: string): string | null {
   // 2. Denominado Ponto X ou Marco X
   const regexDenominado = new RegExp(
     String.raw`(?:\binicia(?:-se)?|\bcomeça|\bpartindo|\bpartir)[\s\S]{0,150}?\bdenominado\s+(?:ponto|v[eé]rtice|marco)\s*["“']?(?<vertice>[A-Za-z0-9]+(?:-[A-Za-z0-9]+)?)["”']?`,
-    "i"
+    "i",
   );
   const matchDenom = texto.match(regexDenominado);
   if (matchDenom?.groups?.vertice) {
@@ -495,7 +577,7 @@ function extrairVerticeInicial(texto: string): string | null {
   // 3. Padrão geral: 'no ponto 04-C', 'no vértice V1'
   const regexGeral = new RegExp(
     String.raw`(?:\binicia(?:-se)?|\bcomeça|\bpartindo|\bpartir)\s+(?:a\s+descri[çc][aã]o\s+(?:deste\s+per[íi]metro\s+)?(?:no|do)\s+)?(?:ponto|v[eé]rtice|marco)\s+["“']?(?<vertice>${VERTICE})["”']?`,
-    "i"
+    "i",
   );
   const matchGeral = texto.match(regexGeral);
   return matchGeral?.groups?.vertice?.toUpperCase() ?? null;
@@ -508,10 +590,11 @@ function extrairSegmentosUnificados(texto: string): Segmento[] {
   // Reconhece marcos de parada: até o ponto X, encontra-se com o ponto X, atinge o ponto X
   const regexAtePonto = new RegExp(
     String.raw`(?:\bat[eé]|encontra(?:-se)?|enoontra(?:-se)?|atinge|chega(?:-se)?)\s*[-–—\s]*(?:com\s+)?(?:o\s*[-–—\s]*)?[\s\S]{0,35}?\b(?:ponto|v[eé]rtice|marco)\s*["“']?(?<destino>${VERTICE})["”']?`,
-    "gi"
+    "gi",
   );
 
-  const posicoesAte: { index: number; destino: string; textoMatch: string }[] = [];
+  const posicoesAte: { index: number; destino: string; textoMatch: string }[] =
+    [];
   for (const m of texto.matchAll(regexAtePonto)) {
     if (m.groups?.destino) {
       posicoesAte.push({
@@ -532,7 +615,12 @@ function extrairSegmentosUnificados(texto: string): Segmento[] {
       const trechoSegmento = texto.substring(cursor, fimTrecho);
       cursor = fimTrecho;
 
-      const seg = analisarTrechoSegmento(trechoSegmento, ate.destino, origemAtual, i);
+      const seg = analisarTrechoSegmento(
+        trechoSegmento,
+        ate.destino,
+        origemAtual,
+        i,
+      );
       if (seg) {
         segmentos.push(seg);
         origemAtual = seg.destino;
@@ -551,7 +639,7 @@ function analisarTrechoSegmento(
   trecho: string,
   destino: string,
   origem: string | null,
-  ordem: number
+  ordem: number,
 ): Segmento | null {
   const trechoLower = trecho.toLowerCase();
   const eCurva =
@@ -561,19 +649,19 @@ function analisarTrechoSegmento(
 
   const regexDistancia = new RegExp(
     String.raw`(?:\bdist[âa]ncia|\bextens[aã]o|\bextene[aã]o|\bextensao|\bextencao)\s*(?:de\s*)?[-–—\s]*(?<distancia>[0-9lLoO.,]+)\s*(?:m\b|mts?\b|metros?\b)`,
-    "i"
+    "i",
   );
   const regexDesenv = new RegExp(
     String.raw`(?:desenvolvimento|desenv\.?)\s+(?:de\s+)?(?<desenv>${NUMERO})\s*m\b`,
-    "i"
+    "i",
   );
   const regexRaio = new RegExp(
     String.raw`raio\s+(?:de\s+)?(?<raio>${NUMERO})\s*m\b`,
-    "i"
+    "i",
   );
   const regexAngulo = new RegExp(
     String.raw`[âa]ngulo\s+central\s+(?:de\s+)?(?<angulo>\d{1,3}\s*[°ºoO*]?\s*\d{1,2}\s*['′’‘]\s*\d{1,2}(?:[,.]\d+)?\s*(?:["″””]|'')?)`,
-    "i"
+    "i",
   );
 
   if (eCurva) {
@@ -588,13 +676,19 @@ function analisarTrechoSegmento(
       ? numeroBrasileiro(matchRaio.groups.raio)
       : undefined;
     const angulo = matchAngulo?.groups?.angulo
-      ? extrairAzimute(matchAngulo.groups.angulo) ?? undefined
+      ? (extrairAzimute(matchAngulo.groups.angulo) ?? undefined)
       : undefined;
 
     let deflexao: "direita" | "esquerda" | undefined = undefined;
-    if (/deflex[aã]o\s+(?:à|a)\s+direita|curva\s+(?:à|a)\s+direita/i.test(trecho)) {
+    if (
+      /deflex[aã]o\s+(?:à|a)\s+direita|curva\s+(?:à|a)\s+direita/i.test(trecho)
+    ) {
       deflexao = "direita";
-    } else if (/deflex[aã]o\s+(?:à|a)\s+esquerda|curva\s+(?:à|a)\s+esquerda/i.test(trecho)) {
+    } else if (
+      /deflex[aã]o\s+(?:à|a)\s+esquerda|curva\s+(?:à|a)\s+esquerda/i.test(
+        trecho,
+      )
+    ) {
       deflexao = "esquerda";
     }
 
@@ -616,11 +710,18 @@ function analisarTrechoSegmento(
 
   let distancia: number | undefined = undefined;
   if (matchDist?.groups?.distancia) {
-    distancia = numeroBrasileiro(sanitizarNumeroOcr(matchDist.groups.distancia));
+    distancia = numeroBrasileiro(
+      sanitizarNumeroOcr(matchDist.groups.distancia),
+    );
   }
 
   if (distancia === undefined && azimute === undefined) {
-    const numSolto = trecho.match(new RegExp(String.raw`(?<valor>[0-9lLoO.,]+)\s*(?:m\b|mts?\b|metros?\b)`, "i"));
+    const numSolto = trecho.match(
+      new RegExp(
+        String.raw`(?<valor>[0-9lLoO.,]+)\s*(?:m\b|mts?\b|metros?\b)`,
+        "i",
+      ),
+    );
     if (numSolto?.groups?.valor) {
       distancia = numeroBrasileiro(sanitizarNumeroOcr(numSolto.groups.valor));
     }
@@ -647,7 +748,7 @@ function analisarTrechoSegmento(
 
 export function reconstruirCoordenadasPoligonal(
   verticeInicial: string,
-  segmentos: Segmento[]
+  segmentos: Segmento[],
 ): Coordenada[] {
   if (segmentos.length < 3) return [];
 
@@ -669,7 +770,8 @@ export function reconstruirCoordenadasPoligonal(
     calculado: i === 0,
   }));
 
-  const fechaNoInicio = verticesNomes[verticesNomes.length - 1] === verticeInicial;
+  const fechaNoInicio =
+    verticesNomes[verticesNomes.length - 1] === verticeInicial;
   if (fechaNoInicio) {
     pontos[pontos.length - 1].este = ORIGEM_E;
     pontos[pontos.length - 1].norte = ORIGEM_N;
@@ -683,7 +785,10 @@ export function reconstruirCoordenadasPoligonal(
     const pProx = pontos[i + 1];
 
     if (pAtual.calculado && !pProx.calculado && seg.distancia && seg.azimute) {
-      const azDec = seg.azimute.graus + seg.azimute.minutos / 60 + seg.azimute.segundos / 3600;
+      const azDec =
+        seg.azimute.graus +
+        seg.azimute.minutos / 60 +
+        seg.azimute.segundos / 3600;
       const azRad = (azDec * Math.PI) / 180;
 
       pProx.este = pAtual.este + seg.distancia * Math.sin(azRad);
@@ -699,7 +804,10 @@ export function reconstruirCoordenadasPoligonal(
     const pProx = pontos[i + 1];
 
     if (pProx.calculado && !pAtual.calculado && seg.distancia && seg.azimute) {
-      const azDec = seg.azimute.graus + seg.azimute.minutos / 60 + seg.azimute.segundos / 3600;
+      const azDec =
+        seg.azimute.graus +
+        seg.azimute.minutos / 60 +
+        seg.azimute.segundos / 3600;
       const azRad = (azDec * Math.PI) / 180;
 
       pAtual.este = pProx.este - seg.distancia * Math.sin(azRad);
@@ -747,7 +855,10 @@ export function reconstruirCoordenadasPoligonal(
   }));
 }
 
-function extrairSegmentosPadrao(texto: string, verticeInicial: string | null): Segmento[] {
+function extrairSegmentosPadrao(
+  texto: string,
+  verticeInicial: string | null,
+): Segmento[] {
   interface MatchSegmento {
     posicao: number;
     segmento: Omit<Segmento, "ordem">;
@@ -757,7 +868,7 @@ function extrairSegmentosPadrao(texto: string, verticeInicial: string | null): S
 
   const regexReta = new RegExp(
     String.raw`deste ponto\b[\s\S]{0,250}?(?:dist[âa]ncia)\s+(?:de\s+)?(?<distancia>${NUMERO})\s*(?:m\b|metros?\b)[\s\S]{0,100}?azimute\s+(?:de\s+)?(?<azimute>\d{1,3}\s*[°ºoO*]?\s*\d{1,2}\s*['′’‘]\s*\d{1,2}(?:[,.]\d+)?\s*(?:["″””]|'')?)[\s\S]{0,200}?\bat[eé]\s+(?:o\s+)?(?:ponto|v[eé]rtice)\s+(?<destino>${VERTICE})`,
-    "gi"
+    "gi",
   );
   for (const match of texto.matchAll(regexReta)) {
     if (!match.groups) continue;
@@ -775,7 +886,7 @@ function extrairSegmentosPadrao(texto: string, verticeInicial: string | null): S
 
   const regexReta2 = new RegExp(
     String.raw`deste ponto\b[\s\S]{0,250}?azimute\s+(?:de\s+)?(?<azimute>\d{1,3}\s*[°ºoO*]?\s*\d{1,2}\s*['′’‘]\s*\d{1,2}(?:[,.]\d+)?\s*(?:["″””]|'')?)[\s\S]{0,100}?(?:dist[âa]ncia)\s+(?:de\s+)?(?<distancia>${NUMERO})\s*(?:m\b|metros?\b)[\s\S]{0,200}?\bat[eé]\s+(?:o\s+)?(?:ponto|v[eé]rtice)\s+(?<destino>${VERTICE})`,
-    "gi"
+    "gi",
   );
   for (const match of texto.matchAll(regexReta2)) {
     if (!match.groups) continue;
@@ -795,7 +906,7 @@ function extrairSegmentosPadrao(texto: string, verticeInicial: string | null): S
 
   const regexCurva = new RegExp(
     String.raw`deste ponto\b[\s\S]{0,250}?(?:segue\s+(?:por|em)\s+curva|curva)[\s\S]{0,50}?(?:desenvolvimento|desenv)\s+(?:de\s+)?(?<desenv>${NUMERO})\s*m\b[\s\S]{0,100}?raio\s+(?:de\s+)?(?<raio>${NUMERO})\s*m\b[\s\S]{0,100}?[âa]ngulo\s+central\s+(?:de\s+)?(?<angulo>\d{1,3}\s*[°ºoO*]?\s*\d{1,2}\s*['′’‘]\s*\d{1,2}(?:[,.]\d+)?\s*(?:["″””]|'')?)[\s\S]{0,200}?\bat[eé]\s+(?:o\s+)?(?:ponto|v[eé]rtice)\s+(?<destino>${VERTICE})`,
-    "gi"
+    "gi",
   );
   for (const match of texto.matchAll(regexCurva)) {
     if (!match.groups) continue;
@@ -858,11 +969,11 @@ function extrairArea(texto: string): number | undefined {
   const regexes = [
     new RegExp(
       String.raw`(?:área|area|érea)\s+(?:total\s+)?(?:de\s+)?[-–—\s]*(?<valor>${NUMERO})[-–—\s]*(?:m\s*[²2]|mts\s*[²2]|metros\s*quadrados)`,
-      "i"
+      "i",
     ),
     new RegExp(
       String.raw`(?:que\s+)?mede\s+[-–—\s]*(?<valor>${NUMERO})\s*(?:m\s*[²2]|mts\s*[²2]|metros\s*quadrados)`,
-      "i"
+      "i",
     ),
   ];
 
@@ -883,7 +994,7 @@ function extrairArea(texto: string): number | undefined {
 function identificarFormato(
   coordenadas: Coordenada[],
   segmentos: Segmento[],
-  medidas: Medida[]
+  medidas: Medida[],
 ): TipoFormatoDescricao {
   const temCoordenadas = coordenadas.length > 0;
   const temSegmentos = segmentos.length > 0;
@@ -949,7 +1060,11 @@ export interface TerrenoExtraido {
 export interface OpcoesSeparacaoTerrenos {
   expectedLotsCount?: number;
   qtdEsperada?: number;
-  intervalosManuais?: { titulo?: string; texto: string; intervaloPaginas?: string }[];
+  intervalosManuais?: {
+    titulo?: string;
+    texto: string;
+    intervaloPaginas?: string;
+  }[];
 }
 
 export interface ResultadoSeparacaoTerrenos {
@@ -982,9 +1097,12 @@ function extrairIntervaloPaginasDoTexto(texto: string): string | undefined {
 
 export function separarTerrenosComResultado(
   textoCompleto: string,
-  opcoes?: OpcoesSeparacaoTerrenos
+  opcoes?: OpcoesSeparacaoTerrenos,
 ): ResultadoSeparacaoTerrenos {
-  const expectedLotsCount = Math.max(1, opcoes?.expectedLotsCount ?? opcoes?.qtdEsperada ?? 1);
+  const expectedLotsCount = Math.max(
+    1,
+    opcoes?.expectedLotsCount ?? opcoes?.qtdEsperada ?? 1,
+  );
 
   // 1. Se o usuário forneceu blocos manuais, processa cada um diretamente
   if (opcoes?.intervalosManuais && opcoes.intervalosManuais.length > 0) {
@@ -1093,7 +1211,8 @@ export function separarTerrenosComResultado(
 
   for (let i = 0; i < cortes.length; i++) {
     const inicio = cortes[i].posicao;
-    const fim = i + 1 < cortes.length ? cortes[i + 1].posicao : textoCompleto.length;
+    const fim =
+      i + 1 < cortes.length ? cortes[i + 1].posicao : textoCompleto.length;
     const trecho = textoCompleto.slice(inicio, fim).trim();
 
     if (trecho.length > 20) {
@@ -1111,7 +1230,9 @@ export function separarTerrenosComResultado(
     const res = extrairInformacoes(bloco.texto);
 
     const temDados =
-      res.coordenadas.length > 0 || res.medidas.length > 0 || res.areaTotal !== undefined;
+      res.coordenadas.length > 0 ||
+      res.medidas.length > 0 ||
+      res.areaTotal !== undefined;
 
     if (temDados) {
       terrenos.push({
@@ -1146,7 +1267,7 @@ export function separarTerrenosComResultado(
 
 export function separarTerrenos(
   textoCompleto: string,
-  opcoes?: OpcoesSeparacaoTerrenos
+  opcoes?: OpcoesSeparacaoTerrenos,
 ): TerrenosExtraidosLista {
   const resultado = separarTerrenosComResultado(textoCompleto, opcoes);
   const lista = [...resultado.terrenos] as TerrenosExtraidosLista;

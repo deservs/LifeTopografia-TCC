@@ -125,20 +125,17 @@ export async function UpdateUser(
     throw new Error("Usuário não autenticado.");
   }
   if (file) {
-    const preResAvatar = await fetch(
-      "http://localhost:3001/api/updateAvatar",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${user.session?.access_token}`,
-        },
-        body: JSON.stringify({
-          avatarType: file.type,
-          avatarSize: file.size,
-        }),
+    const preResAvatar = await fetch("http://localhost:3001/api/updateAvatar", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${user.session?.access_token}`,
       },
-    );
+      body: JSON.stringify({
+        avatarType: file.type,
+        avatarSize: file.size,
+      }),
+    });
     const preDataAvatar = await preResAvatar.json();
     if (!preResAvatar.ok) {
       throw new Error(
@@ -168,7 +165,7 @@ export async function UpdateUser(
       "Content-Type": "application/json",
       authorization: `Bearer ${user.session?.access_token}`,
     },
-    body: JSON.stringify({payload}),
+    body: JSON.stringify( payload ),
   });
   const data = await resposta.json();
   if (!resposta.ok) {

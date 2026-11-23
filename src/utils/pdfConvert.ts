@@ -118,7 +118,7 @@ export function normalizarPageRanges(
 
     if (start < 1 || end < start || end > totalPages) {
       throw new Error(
-        `Intervalo de páginas inválido: de ${r.start} até ${r.end}. O documento possui ${totalPages} página(s) (exige-se 1 <= início <= fim <= ${totalPages}).`
+        `Intervalo de páginas inválido: de ${r.start} até ${r.end}. O documento possui ${totalPages} página(s) (exige-se 1 <= início <= fim <= ${totalPages}).`,
       );
     }
 
@@ -170,7 +170,11 @@ export async function extrairTextoNativoPagina(
       // Ignora marcações de conteúdo
       if ("type" in item) continue;
 
-      const textItem = item as { str: string; transform: number[]; hasEOL: boolean };
+      const textItem = item as {
+        str: string;
+        transform: number[];
+        hasEOL: boolean;
+      };
       const currentY = textItem.transform[5];
 
       // Detecta nova linha pela mudança de posição Y
@@ -216,7 +220,7 @@ export async function extrairTextoNativoPaginas(
     const totalPaginas = pdfDoc.numPages;
 
     const paginasValidas = Array.from(
-      new Set(paginas.filter((p) => p >= 1 && p <= totalPaginas))
+      new Set(paginas.filter((p) => p >= 1 && p <= totalPaginas)),
     ).sort((a, b) => a - b);
 
     if (paginasValidas.length === 0) {
@@ -240,7 +244,11 @@ export async function extrairTextoNativoPaginas(
       for (const item of textContent.items) {
         if ("type" in item) continue;
 
-        const textItem = item as { str: string; transform: number[]; hasEOL: boolean };
+        const textItem = item as {
+          str: string;
+          transform: number[];
+          hasEOL: boolean;
+        };
         const currentY = textItem.transform[5];
 
         if (ultimoY !== null && Math.abs(currentY - ultimoY) > 2) {
@@ -266,7 +274,10 @@ export async function extrairTextoNativoPaginas(
       .map((p) => `--- PÁGINA ${p.pagina} ---\n${p.texto}`)
       .join("\n\n");
 
-    const totalCaracteres = textosPorPagina.reduce((acc, p) => acc + p.texto.length, 0);
+    const totalCaracteres = textosPorPagina.reduce(
+      (acc, p) => acc + p.texto.length,
+      0,
+    );
     const mediaPorPagina = totalCaracteres / paginasValidas.length;
     const foiNativo = mediaPorPagina > 40;
 
@@ -319,7 +330,9 @@ export async function detectarPaginasComDescricao(
         .map((it) => ("str" in it ? (it as { str: string }).str : ""))
         .join(" ");
 
-      const pontuacao = termosMemorial.filter((regex) => regex.test(texto)).length;
+      const pontuacao = termosMemorial.filter((regex) =>
+        regex.test(texto),
+      ).length;
       if (pontuacao >= 2) {
         paginasSugeridas.push(i);
       }

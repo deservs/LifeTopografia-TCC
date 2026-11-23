@@ -10,11 +10,7 @@ import {
   type LWPolylineVertex,
 } from "@tarikjabiri/dxf";
 
-import type {
-  Coordenada,
-  Segmento,
-  ResultadoExtracao,
-} from "./textSanitizer";
+import type { Coordenada, Segmento, ResultadoExtracao } from "./textSanitizer";
 
 import type { ResultadoValidacao } from "./validarGeometria";
 
@@ -106,7 +102,7 @@ function calcularArcoDXF(
   destinoE: number,
   destinoN: number,
   raio: number,
-  deflexao: "direita" | "esquerda" = "direita"
+  deflexao: "direita" | "esquerda" = "direita",
 ): {
   centroX: number;
   centroY: number;
@@ -150,8 +146,12 @@ function calcularArcoDXF(
   const centroY = my + h * ny;
 
   // Ângulo do centro para origem e centro para destino
-  const angOrigem = normalizarGraus(radianosParaGraus(Math.atan2(origemN - centroY, origemE - centroX)));
-  const angDestino = normalizarGraus(radianosParaGraus(Math.atan2(destinoN - centroY, destinoE - centroX)));
+  const angOrigem = normalizarGraus(
+    radianosParaGraus(Math.atan2(origemN - centroY, origemE - centroX)),
+  );
+  const angDestino = normalizarGraus(
+    radianosParaGraus(Math.atan2(destinoN - centroY, destinoE - centroX)),
+  );
 
   let startAngle: number;
   let endAngle: number;
@@ -192,7 +192,7 @@ function gerarDXFGeorreferenciado(
   opcoes: Required<OpcoesGeracaoDXF>,
   avisos: string[],
   prefixoCamada: string = "",
-  tituloTerreno?: string
+  tituloTerreno?: string,
 ): void {
   const coordenadas = dados.coordenadas;
 
@@ -205,7 +205,9 @@ function gerarDXFGeorreferenciado(
   const cInfo = `${prefixoCamada}${CAMADAS.INFO}`;
 
   if (coordenadas.length < 3) {
-    throw new Error("Coordenadas insuficientes para gerar o terreno (mínimo 3).");
+    throw new Error(
+      "Coordenadas insuficientes para gerar o terreno (mínimo 3).",
+    );
   }
 
   const pontos = [...coordenadas];
@@ -215,11 +217,14 @@ function gerarDXFGeorreferenciado(
   // Se o último ponto repete o primeiro, mantemos uma lista sem o ponto duplicado para desenhar vértices
   const repetePrimeiro =
     primeiro.vertice === ultimo.vertice ||
-    Math.hypot(primeiro.este - ultimo.este, primeiro.norte - ultimo.norte) < 0.05;
+    Math.hypot(primeiro.este - ultimo.este, primeiro.norte - ultimo.norte) <
+      0.05;
 
   const pontosVertices = repetePrimeiro ? pontos.slice(0, -1) : pontos;
   const alturaTexto =
-    opcoes.alturaTexto > 0 ? opcoes.alturaTexto : calcularAlturaTexto(pontosVertices);
+    opcoes.alturaTexto > 0
+      ? opcoes.alturaTexto
+      : calcularAlturaTexto(pontosVertices);
 
   // Mapeamento dos segmentos por origem -> destino para rápida consulta
   const segmentosMap = new Map<string, Segmento>();
@@ -234,7 +239,7 @@ function gerarDXFGeorreferenciado(
 
   for (let i = 0; i < totalConexoes; i++) {
     const p1 = pontos[i];
-    const p2 = (i + 1 < pontos.length) ? pontos[i + 1] : pontos[0];
+    const p2 = i + 1 < pontos.length ? pontos[i + 1] : pontos[0];
 
     const chave = `${p1.vertice}→${p2.vertice}`;
     const seg = segmentosMap.get(chave) ?? dados.segmentos[i];
@@ -248,7 +253,7 @@ function gerarDXFGeorreferenciado(
         p2.este,
         p2.norte,
         seg.raio,
-        seg.deflexao ?? "direita"
+        seg.deflexao ?? "direita",
       );
 
       if (arco) {
@@ -257,16 +262,16 @@ function gerarDXFGeorreferenciado(
           seg.raio,
           arco.startAngle,
           arco.endAngle,
-          { layerName: cCurvas }
+          { layerName: cCurvas },
         );
       } else {
         dxf.addLine(
           point3d(p1.este, p1.norte, 0),
           point3d(p2.este, p2.norte, 0),
-          { layerName: cCurvas }
+          { layerName: cCurvas },
         );
         avisos.push(
-          `Curva ${p1.vertice} → ${p2.vertice}: geometria incompatível com arco esférico (corda maior que diâmetro). Representada como segmento reto na camada ${cCurvas}.`
+          `Curva ${p1.vertice} → ${p2.vertice}: geometria incompatível com arco esférico (corda maior que diâmetro). Representada como segmento reto na camada ${cCurvas}.`,
         );
       }
     } else {
@@ -275,7 +280,7 @@ function gerarDXFGeorreferenciado(
       dxf.addLine(
         point3d(p1.este, p1.norte, 0),
         point3d(p2.este, p2.norte, 0),
-        { layerName: cContorno }
+        { layerName: cContorno },
       );
     }
   }
@@ -293,12 +298,12 @@ function gerarDXFGeorreferenciado(
       dxf.addLine(
         point3d(ponto.este - tamX, ponto.norte - tamX, 0),
         point3d(ponto.este + tamX, ponto.norte + tamX, 0),
-        { layerName: cVertices }
+        { layerName: cVertices },
       );
       dxf.addLine(
         point3d(ponto.este + tamX, ponto.norte - tamX, 0),
         point3d(ponto.este - tamX, ponto.norte + tamX, 0),
-        { layerName: cVertices }
+        { layerName: cVertices },
       );
     }
   }
@@ -309,10 +314,14 @@ function gerarDXFGeorreferenciado(
 
     for (const ponto of pontosVertices) {
       dxf.addText(
-        point3d(ponto.este + alturaTexto * 0.5, ponto.norte + alturaTexto * 0.5, 0),
+        point3d(
+          ponto.este + alturaTexto * 0.5,
+          ponto.norte + alturaTexto * 0.5,
+          0,
+        ),
         alturaTexto,
         ponto.vertice,
-        { layerName: cIdentificacao }
+        { layerName: cIdentificacao },
       );
     }
   }
@@ -323,11 +332,18 @@ function gerarDXFGeorreferenciado(
 
     for (let i = 0; i < totalConexoes; i++) {
       const p1 = pontos[i];
-      const p2 = (i + 1 < pontos.length) ? pontos[i + 1] : pontos[0];
-      const seg = segmentosMap.get(`${p1.vertice}→${p2.vertice}`) ?? dados.segmentos[i];
+      const p2 = i + 1 < pontos.length ? pontos[i + 1] : pontos[0];
+      const seg =
+        segmentosMap.get(`${p1.vertice}→${p2.vertice}`) ?? dados.segmentos[i];
 
-      const valor = seg?.distancia ?? seg?.desenvolvimento ?? Math.hypot(p2.este - p1.este, p2.norte - p1.norte);
-      const texto = seg?.geometria === "curva" ? `D=${valor.toFixed(2)}m` : `${valor.toFixed(2)}m`;
+      const valor =
+        seg?.distancia ??
+        seg?.desenvolvimento ??
+        Math.hypot(p2.este - p1.este, p2.norte - p1.norte);
+      const texto =
+        seg?.geometria === "curva"
+          ? `D=${valor.toFixed(2)}m`
+          : `${valor.toFixed(2)}m`;
 
       const mx = (p1.este + p2.este) / 2;
       const my = (p1.norte + p2.norte) / 2;
@@ -348,7 +364,7 @@ function gerarDXFGeorreferenciado(
         {
           layerName: cMedidas,
           rotation: angDeg,
-        }
+        },
       );
     }
   }
@@ -359,8 +375,9 @@ function gerarDXFGeorreferenciado(
 
     for (let i = 0; i < totalConexoes; i++) {
       const p1 = pontos[i];
-      const p2 = (i + 1 < pontos.length) ? pontos[i + 1] : pontos[0];
-      const seg = segmentosMap.get(`${p1.vertice}→${p2.vertice}`) ?? dados.segmentos[i];
+      const p2 = i + 1 < pontos.length ? pontos[i + 1] : pontos[0];
+      const seg =
+        segmentosMap.get(`${p1.vertice}→${p2.vertice}`) ?? dados.segmentos[i];
 
       if (!seg?.azimute) continue;
 
@@ -386,7 +403,7 @@ function gerarDXFGeorreferenciado(
         {
           layerName: cAzimutes,
           rotation: angDeg,
-        }
+        },
       );
     }
   }
@@ -402,7 +419,7 @@ function gerarDXFGeorreferenciado(
       point3d(minE, maxN + alturaTexto * 2.5, 0),
       alturaTexto * 1.3,
       tituloTerreno.toUpperCase(),
-      { layerName: cInfo }
+      { layerName: cInfo },
     );
   }
 
@@ -411,7 +428,7 @@ function gerarDXFGeorreferenciado(
       point3d(minE, minN - alturaTexto * 3, 0),
       alturaTexto * 1.1,
       `Area total declarada: ${dados.areaTotal.toFixed(2)} m2`,
-      { layerName: cInfo }
+      { layerName: cInfo },
     );
   }
 
@@ -419,7 +436,7 @@ function gerarDXFGeorreferenciado(
     point3d(minE, minN - alturaTexto * 5, 0),
     alturaTexto * 0.8,
     `Levantamento perimetrico gerado via LifeTopografia - ${pontosVertices.length} vertices`,
-    { layerName: cInfo }
+    { layerName: cInfo },
   );
 }
 
@@ -435,7 +452,7 @@ function gerarDXFConvencional(
   prefixoCamada: string = "",
   offsetX: number = 0,
   offsetY: number = 0,
-  tituloTerreno?: string
+  tituloTerreno?: string,
 ): void {
   const cContorno = `${prefixoCamada}${CAMADAS.CONTORNO}`;
   const cVertices = `${prefixoCamada}${CAMADAS.VERTICES}`;
@@ -446,11 +463,13 @@ function gerarDXFConvencional(
   const medidas = dados.medidas;
 
   if (medidas.length < 2) {
-    throw new Error("Medidas insuficientes para gerar a representação gráfica convencional.");
+    throw new Error(
+      "Medidas insuficientes para gerar a representação gráfica convencional.",
+    );
   }
 
   avisos.push(
-    "ATENÇÃO: Desenho ESQUEMÁTICO/APROXIMADO. Medidas convencionais (frente, lados, fundos) não determinam um polígono único sem ângulos ou azimutes. Ângulos assumidos ilustrativamente em 90°."
+    "ATENÇÃO: Desenho ESQUEMÁTICO/APROXIMADO. Medidas convencionais (frente, lados, fundos) não determinam um polígono único sem ângulos ou azimutes. Ângulos assumidos ilustrativamente em 90°.",
   );
 
   const frente = medidas.find((m) => m.descricao === "frente")?.valor;
@@ -478,7 +497,9 @@ function gerarDXFConvencional(
   }
 
   const alturaTexto =
-    opcoes.alturaTexto > 0 ? opcoes.alturaTexto : Math.max(frenteV, ladoD, ladoE) * 0.025;
+    opcoes.alturaTexto > 0
+      ? opcoes.alturaTexto
+      : Math.max(frenteV, ladoD, ladoE) * 0.025;
 
   if (tituloTerreno) {
     dxf.setCurrentLayerName(cInfo);
@@ -486,7 +507,7 @@ function gerarDXFConvencional(
       point3d(offsetX, offsetY + Math.max(ladoD, ladoE) + alturaTexto * 3, 0),
       alturaTexto * 1.3,
       tituloTerreno.toUpperCase(),
-      { layerName: cInfo }
+      { layerName: cInfo },
     );
   }
 
@@ -517,7 +538,7 @@ function gerarDXFConvencional(
         point3d(v.x + alturaTexto * 0.5, v.y + alturaTexto * 0.5, 0),
         alturaTexto,
         v.label,
-        { layerName: cIdentificacao }
+        { layerName: cIdentificacao },
       );
     }
   }
@@ -526,10 +547,26 @@ function gerarDXFConvencional(
   if (opcoes.incluirMedidas) {
     dxf.setCurrentLayerName(cMedidas);
     const lados = [
-      { p1: vertices[0], p2: vertices[1], texto: `Frente: ${frenteV.toFixed(2)}m` },
-      { p1: vertices[1], p2: vertices[2], texto: `Lado Dir.: ${ladoD.toFixed(2)}m` },
-      { p1: vertices[2], p2: vertices[3], texto: `Fundos: ${fundosV.toFixed(2)}m` },
-      { p1: vertices[3], p2: vertices[0], texto: `Lado Esq.: ${ladoE.toFixed(2)}m` },
+      {
+        p1: vertices[0],
+        p2: vertices[1],
+        texto: `Frente: ${frenteV.toFixed(2)}m`,
+      },
+      {
+        p1: vertices[1],
+        p2: vertices[2],
+        texto: `Lado Dir.: ${ladoD.toFixed(2)}m`,
+      },
+      {
+        p1: vertices[2],
+        p2: vertices[3],
+        texto: `Fundos: ${fundosV.toFixed(2)}m`,
+      },
+      {
+        p1: vertices[3],
+        p2: vertices[0],
+        texto: `Lado Esq.: ${ladoE.toFixed(2)}m`,
+      },
     ];
 
     for (const lado of lados) {
@@ -552,7 +589,7 @@ function gerarDXFConvencional(
         {
           layerName: cMedidas,
           rotation: angDeg,
-        }
+        },
       );
     }
   }
@@ -564,14 +601,14 @@ function gerarDXFConvencional(
     point3d(offsetX, offsetY - alturaTexto * 4, 0),
     alturaTexto * 1.1,
     "*** REPRESENTACAO ESQUEMATICA - NAO ESTA EM ESCALA REAL ***",
-    { layerName: cInfo }
+    { layerName: cInfo },
   );
 
   dxf.addText(
     point3d(offsetX, offsetY - alturaTexto * 6.5, 0),
     alturaTexto * 0.75,
     "Angulos assumidos a 90 graus. O perimetro real depende de levantamento topografico in loco.",
-    { layerName: cInfo }
+    { layerName: cInfo },
   );
 }
 
@@ -582,7 +619,7 @@ function gerarDXFConvencional(
 export function gerarDXF(
   dados: ResultadoExtracao,
   validacao: ResultadoValidacao,
-  opcoes: OpcoesGeracaoDXF = {}
+  opcoes: OpcoesGeracaoDXF = {},
 ): ResultadoGeracaoDXF {
   const opcoesCompletas: Required<OpcoesGeracaoDXF> = {
     ...OPCOES_PADRAO,
@@ -594,7 +631,8 @@ export function gerarDXF(
   if (!validacao.resumo.permiteGeracaoDXF) {
     return {
       sucesso: false,
-      mensagem: "Dados insuficientes para gerar o DXF. Consulte os diagnósticos da validação.",
+      mensagem:
+        "Dados insuficientes para gerar o DXF. Consulte os diagnósticos da validação.",
       aproximado: false,
       avisos: [],
     };
@@ -623,7 +661,8 @@ export function gerarDXF(
     } else {
       return {
         sucesso: false,
-        mensagem: "Formato de descrição insuficiente para reconstrução gráfica.",
+        mensagem:
+          "Formato de descrição insuficiente para reconstrução gráfica.",
         aproximado: false,
         avisos: [],
       };
@@ -631,7 +670,7 @@ export function gerarDXF(
 
     if (validacao.resumo.possuiDivergencias) {
       avisos.push(
-        `O memorial possui divergências registradas (${validacao.resumo.avisos} aviso(s), ${validacao.resumo.erros} erro(s)).`
+        `O memorial possui divergências registradas (${validacao.resumo.avisos} aviso(s), ${validacao.resumo.erros} erro(s)).`,
       );
     }
 
@@ -661,7 +700,8 @@ export function gerarDXF(
       avisos,
     };
   } catch (error) {
-    const mensagem = error instanceof Error ? error.message : "Erro desconhecido";
+    const mensagem =
+      error instanceof Error ? error.message : "Erro desconhecido";
     return {
       sucesso: false,
       mensagem: `Falha na geração do DXF: ${mensagem}`,
@@ -677,7 +717,7 @@ export function gerarDXF(
 export function gerarDXFString(
   dados: ResultadoExtracao,
   validacao: ResultadoValidacao,
-  opcoes: OpcoesGeracaoDXF = {}
+  opcoes: OpcoesGeracaoDXF = {},
 ): { stringDxf: string; avisos: string[] } {
   const opcoesCompletas: Required<OpcoesGeracaoDXF> = {
     ...OPCOES_PADRAO,
@@ -716,7 +756,7 @@ export function gerarDXFString(
 
 export function gerarDXFMultiplosTerrenos(
   terrenos: ItemTerrenoDXF[],
-  opcoes: OpcoesGeracaoDXF = {}
+  opcoes: OpcoesGeracaoDXF = {},
 ): ResultadoGeracaoDXF {
   const opcoesCompletas: Required<OpcoesGeracaoDXF> = {
     ...OPCOES_PADRAO,
@@ -724,12 +764,15 @@ export function gerarDXFMultiplosTerrenos(
   };
 
   const avisos: string[] = [];
-  const terrenosValidos = terrenos.filter((t) => t.validacao.resumo.permiteGeracaoDXF);
+  const terrenosValidos = terrenos.filter(
+    (t) => t.validacao.resumo.permiteGeracaoDXF,
+  );
 
   if (terrenosValidos.length === 0) {
     return {
       sucesso: false,
-      mensagem: "Nenhum dos terrenos identificados possui dados suficientes para gerar DXF.",
+      mensagem:
+        "Nenhum dos terrenos identificados possui dados suficientes para gerar DXF.",
       aproximado: false,
       avisos: [],
     };
@@ -748,13 +791,33 @@ export function gerarDXFMultiplosTerrenos(
       const tit = item.titulo || `Terreno ${i + 1}`;
 
       // Registra camadas independentes para este terreno
-      dxf.addLayer(`${prefixo}${CAMADAS.CONTORNO}`, CORES.CONTORNO, "Continuous");
+      dxf.addLayer(
+        `${prefixo}${CAMADAS.CONTORNO}`,
+        CORES.CONTORNO,
+        "Continuous",
+      );
       dxf.addLayer(`${prefixo}${CAMADAS.CURVAS}`, CORES.CURVAS, "Continuous");
-      dxf.addLayer(`${prefixo}${CAMADAS.VERTICES}`, CORES.VERTICES, "Continuous");
-      dxf.addLayer(`${prefixo}${CAMADAS.IDENTIFICACAO}`, CORES.IDENTIFICACAO, "Continuous");
+      dxf.addLayer(
+        `${prefixo}${CAMADAS.VERTICES}`,
+        CORES.VERTICES,
+        "Continuous",
+      );
+      dxf.addLayer(
+        `${prefixo}${CAMADAS.IDENTIFICACAO}`,
+        CORES.IDENTIFICACAO,
+        "Continuous",
+      );
       dxf.addLayer(`${prefixo}${CAMADAS.MEDIDAS}`, CORES.MEDIDAS, "Continuous");
-      dxf.addLayer(`${prefixo}${CAMADAS.AZIMUTES}`, CORES.AZIMUTES, "Continuous");
-      dxf.addLayer(`${prefixo}${CAMADAS.CONFRONTACOES}`, CORES.CONFRONTACOES, "Continuous");
+      dxf.addLayer(
+        `${prefixo}${CAMADAS.AZIMUTES}`,
+        CORES.AZIMUTES,
+        "Continuous",
+      );
+      dxf.addLayer(
+        `${prefixo}${CAMADAS.CONFRONTACOES}`,
+        CORES.CONFRONTACOES,
+        "Continuous",
+      );
       dxf.addLayer(`${prefixo}${CAMADAS.INFO}`, CORES.INFO, "Continuous");
 
       if (item.validacao.resumo.dxfAproximado) {
@@ -771,7 +834,7 @@ export function gerarDXFMultiplosTerrenos(
           opcoesCompletas,
           avisos,
           prefixo,
-          tit
+          tit,
         );
       } else if (item.validacao.tipoDescricao === "convencional") {
         gerarDXFConvencional(
@@ -782,9 +845,12 @@ export function gerarDXFMultiplosTerrenos(
           prefixo,
           offsetConvencionalX,
           0,
-          tit
+          tit,
         );
-        const maxMedida = Math.max(...item.dados.medidas.map((m) => m.valor), 20);
+        const maxMedida = Math.max(
+          ...item.dados.medidas.map((m) => m.valor),
+          20,
+        );
         offsetConvencionalX += maxMedida + 20;
       }
     }
@@ -796,7 +862,9 @@ export function gerarDXFMultiplosTerrenos(
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = opcoesCompletas.nomeArquivo.replace(/\.dxf$/i, "") + "_todos_terrenos.dxf";
+      link.download =
+        opcoesCompletas.nomeArquivo.replace(/\.dxf$/i, "") +
+        "_todos_terrenos.dxf";
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -812,7 +880,8 @@ export function gerarDXFMultiplosTerrenos(
       avisos,
     };
   } catch (error) {
-    const mensagem = error instanceof Error ? error.message : "Erro desconhecido";
+    const mensagem =
+      error instanceof Error ? error.message : "Erro desconhecido";
     return {
       sucesso: false,
       mensagem: `Falha na geração do DXF combinado: ${mensagem}`,
@@ -824,7 +893,7 @@ export function gerarDXFMultiplosTerrenos(
 
 export function gerarDXFStringMultiplosTerrenos(
   terrenos: ItemTerrenoDXF[],
-  opcoes: OpcoesGeracaoDXF = {}
+  opcoes: OpcoesGeracaoDXF = {},
 ): { stringDxf: string; avisos: string[] } {
   const opcoesCompletas: Required<OpcoesGeracaoDXF> = {
     ...OPCOES_PADRAO,
@@ -845,17 +914,32 @@ export function gerarDXFStringMultiplosTerrenos(
     dxf.addLayer(`${prefixo}${CAMADAS.CONTORNO}`, CORES.CONTORNO, "Continuous");
     dxf.addLayer(`${prefixo}${CAMADAS.CURVAS}`, CORES.CURVAS, "Continuous");
     dxf.addLayer(`${prefixo}${CAMADAS.VERTICES}`, CORES.VERTICES, "Continuous");
-    dxf.addLayer(`${prefixo}${CAMADAS.IDENTIFICACAO}`, CORES.IDENTIFICACAO, "Continuous");
+    dxf.addLayer(
+      `${prefixo}${CAMADAS.IDENTIFICACAO}`,
+      CORES.IDENTIFICACAO,
+      "Continuous",
+    );
     dxf.addLayer(`${prefixo}${CAMADAS.MEDIDAS}`, CORES.MEDIDAS, "Continuous");
     dxf.addLayer(`${prefixo}${CAMADAS.AZIMUTES}`, CORES.AZIMUTES, "Continuous");
-    dxf.addLayer(`${prefixo}${CAMADAS.CONFRONTACOES}`, CORES.CONFRONTACOES, "Continuous");
+    dxf.addLayer(
+      `${prefixo}${CAMADAS.CONFRONTACOES}`,
+      CORES.CONFRONTACOES,
+      "Continuous",
+    );
     dxf.addLayer(`${prefixo}${CAMADAS.INFO}`, CORES.INFO, "Continuous");
 
     if (
       item.validacao.tipoDescricao === "georreferenciada" ||
       item.validacao.tipoDescricao === "mista"
     ) {
-      gerarDXFGeorreferenciado(dxf, item.dados, opcoesCompletas, avisos, prefixo, tit);
+      gerarDXFGeorreferenciado(
+        dxf,
+        item.dados,
+        opcoesCompletas,
+        avisos,
+        prefixo,
+        tit,
+      );
     } else if (item.validacao.tipoDescricao === "convencional") {
       gerarDXFConvencional(
         dxf,
@@ -865,7 +949,7 @@ export function gerarDXFStringMultiplosTerrenos(
         prefixo,
         offsetConvencionalX,
         0,
-        tit
+        tit,
       );
       const maxMedida = Math.max(...item.dados.medidas.map((m) => m.valor), 20);
       offsetConvencionalX += maxMedida + 20;

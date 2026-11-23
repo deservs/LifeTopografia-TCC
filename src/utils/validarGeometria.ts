@@ -80,14 +80,8 @@ function distanciaEntrePontos(a: Coordenada, b: Coordenada): number {
   return Math.hypot(b.este - a.este, b.norte - a.norte);
 }
 
-function anguloEmGraus(
-  angulo: NonNullable<Segmento["anguloCentral"]>
-): number {
-  return (
-    angulo.graus +
-    angulo.minutos / 60 +
-    angulo.segundos / 3600
-  );
+function anguloEmGraus(angulo: NonNullable<Segmento["anguloCentral"]>): number {
+  return angulo.graus + angulo.minutos / 60 + angulo.segundos / 3600;
 }
 
 function grausParaRadianos(graus: number): number {
@@ -107,7 +101,7 @@ function cordaCalculada(raio: number, anguloGraus: number): number {
 // ======================================================
 
 export function identificarTipoDescricao(
-  dados: ResultadoExtracao
+  dados: ResultadoExtracao,
 ): TipoDescricao {
   return dados.formatoDescricao;
 }
@@ -118,7 +112,7 @@ export function identificarTipoDescricao(
 
 function validarCoordenadas(
   coordenadas: Coordenada[],
-  diagnosticos: DiagnosticoGeometria[]
+  diagnosticos: DiagnosticoGeometria[],
 ): void {
   if (coordenadas.length === 0) {
     diagnosticos.push({
@@ -183,7 +177,7 @@ function validarCoordenadas(
 
 function encontrarParCoordenadas(
   coordenadas: Coordenada[],
-  segmento: Segmento
+  segmento: Segmento,
 ): { origemIdx: number; destinoIdx: number } | null {
   if (segmento.origem) {
     // Busca em sequência o par origem -> destino
@@ -215,7 +209,7 @@ function validarSegmentoReto(
   segmento: Segmento,
   coordenadas: Coordenada[],
   tolerancia: number,
-  diagnosticos: DiagnosticoGeometria[]
+  diagnosticos: DiagnosticoGeometria[],
 ): void {
   if (
     segmento.distancia === undefined ||
@@ -272,7 +266,7 @@ function validarCurva(
   segmento: Segmento,
   coordenadas: Coordenada[],
   tolerancia: number,
-  diagnosticos: DiagnosticoGeometria[]
+  diagnosticos: DiagnosticoGeometria[],
 ): void {
   const { raio, desenvolvimento, anguloCentral } = segmento;
 
@@ -392,7 +386,7 @@ function validarCurva(
 function validarFechamento(
   coordenadas: Coordenada[],
   tolerancia: number,
-  diagnosticos: DiagnosticoGeometria[]
+  diagnosticos: DiagnosticoGeometria[],
 ): void {
   if (coordenadas.length < 3) return;
 
@@ -437,7 +431,7 @@ function validarFechamento(
 
 function validarMedidasConvencionais(
   dados: ResultadoExtracao,
-  diagnosticos: DiagnosticoGeometria[]
+  diagnosticos: DiagnosticoGeometria[],
 ): void {
   if (dados.medidas.length === 0) return;
 
@@ -481,7 +475,7 @@ function validarMedidasConvencionais(
 
 function validarCoerenciaSegmentos(
   dados: ResultadoExtracao,
-  diagnosticos: DiagnosticoGeometria[]
+  diagnosticos: DiagnosticoGeometria[],
 ): void {
   const coordenadas = dados.coordenadas;
   const segmentos = dados.segmentos;
@@ -517,18 +511,18 @@ function determinarPermissaoDXF(
   tipo: TipoDescricao,
   coordenadas: Coordenada[],
   medidas: { valor: number }[],
-  _erros: number
+  _erros: number,
 ): boolean {
   if (tipo === "georreferenciada" || tipo === "mista") {
     const coordenadasValidas = coordenadas.filter(
-      (c) => Number.isFinite(c.norte) && Number.isFinite(c.este)
+      (c) => Number.isFinite(c.norte) && Number.isFinite(c.este),
     );
     return coordenadasValidas.length >= 3;
   }
 
   if (tipo === "convencional") {
     const medidasValidas = medidas.filter(
-      (m) => Number.isFinite(m.valor) && m.valor > 0
+      (m) => Number.isFinite(m.valor) && m.valor > 0,
     );
     return medidasValidas.length >= 2;
   }
@@ -542,7 +536,7 @@ function determinarPermissaoDXF(
 
 export function validarGeometria(
   dados: ResultadoExtracao,
-  opcoes: OpcoesValidacao = {}
+  opcoes: OpcoesValidacao = {},
 ): ResultadoValidacao {
   const toleranciaDistancia =
     opcoes.toleranciaDistancia ?? TOLERANCIAS_PADRAO.toleranciaDistancia;
@@ -574,7 +568,8 @@ export function validarGeometria(
     diagnosticos.push({
       tipo: "dados_insuficientes",
       severidade: "aviso",
-      mensagem: "Não foram encontradas coordenadas ou medidas suficientes para análise geométrica.",
+      mensagem:
+        "Não foram encontradas coordenadas ou medidas suficientes para análise geométrica.",
     });
   }
 
@@ -587,7 +582,12 @@ export function validarGeometria(
   // Valida cada segmento
   for (const segmento of segmentos) {
     if (segmento.geometria === "reta") {
-      validarSegmentoReto(segmento, coordenadas, toleranciaDistancia, diagnosticos);
+      validarSegmentoReto(
+        segmento,
+        coordenadas,
+        toleranciaDistancia,
+        diagnosticos,
+      );
     } else if (segmento.geometria === "curva") {
       validarCurva(segmento, coordenadas, toleranciaCurva, diagnosticos);
     }
@@ -601,19 +601,19 @@ export function validarGeometria(
 
   const erros = diagnosticos.filter((d) => d.severidade === "erro").length;
   const avisos = diagnosticos.filter((d) => d.severidade === "aviso").length;
-  const informacoes = diagnosticos.filter((d) => d.severidade === "informacao").length;
+  const informacoes = diagnosticos.filter(
+    (d) => d.severidade === "informacao",
+  ).length;
 
   const permiteGeracaoDXF = determinarPermissaoDXF(
     tipoDescricao,
     coordenadas,
     dados.medidas,
-    erros
+    erros,
   );
 
   const dxfAproximado =
-    tipoDescricao === "convencional" ||
-    tipoDescricao === "mista" ||
-    avisos > 0;
+    tipoDescricao === "convencional" || tipoDescricao === "mista" || avisos > 0;
 
   return {
     tipoDescricao,

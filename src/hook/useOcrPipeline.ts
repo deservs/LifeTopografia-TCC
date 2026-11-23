@@ -25,7 +25,7 @@ export interface OcrPipelineResult {
   textExtraido: string | null;
   executarTarefa: (
     dados: File,
-    opcoes: OpcoesPipelineOcr
+    opcoes: OpcoesPipelineOcr,
   ) => Promise<string | undefined>;
   limpar: () => void;
 }
@@ -74,7 +74,7 @@ export default function useOcrPipeline(): OcrPipelineResult {
   const executarTarefa = useCallback(
     async (
       dados: File,
-      opcoes: OpcoesPipelineOcr
+      opcoes: OpcoesPipelineOcr,
     ): Promise<string | undefined> => {
       if (statusRef.current) {
         console.warn("Processo já em andamento. Aguarde a conclusão.");
@@ -82,11 +82,18 @@ export default function useOcrPipeline(): OcrPipelineResult {
       }
 
       if (!opcoes || !opcoes.pageRanges || opcoes.pageRanges.length === 0) {
-        throw new Error("Intervalos de páginas (pageRanges) são obrigatórios para a extração.");
+        throw new Error(
+          "Intervalos de páginas (pageRanges) são obrigatórios para a extração.",
+        );
       }
 
-      if (opcoes.expectedLotsCount === undefined || opcoes.expectedLotsCount < 1) {
-        throw new Error("Quantidade esperada de terrenos (expectedLotsCount >= 1) é obrigatória.");
+      if (
+        opcoes.expectedLotsCount === undefined ||
+        opcoes.expectedLotsCount < 1
+      ) {
+        throw new Error(
+          "Quantidade esperada de terrenos (expectedLotsCount >= 1) é obrigatória.",
+        );
       }
 
       const forcarOcr = opcoes.forcarOcr ?? false;
@@ -97,7 +104,10 @@ export default function useOcrPipeline(): OcrPipelineResult {
         setProgresso("Analisando estrutura do PDF...");
 
         const totalPaginas = await getPdfPageCount(dados);
-        const paginasAlvo = normalizarPageRanges(opcoes.pageRanges, totalPaginas);
+        const paginasAlvo = normalizarPageRanges(
+          opcoes.pageRanges,
+          totalPaginas,
+        );
 
         if (paginasAlvo.length === 0) {
           throw new Error("Nenhuma página válida selecionada para leitura.");
@@ -106,11 +116,21 @@ export default function useOcrPipeline(): OcrPipelineResult {
         // 1. TENTATIVA COM EXTRAÇÃO NATIVA (somente se não foi forçado OCR)
         if (!forcarOcr) {
           try {
-            setProgresso(`Lendo texto nativo de ${paginasAlvo.length} página(s)...`);
-            const resultadoNativo = await extrairTextoNativoPaginas(dados, paginasAlvo);
+            setProgresso(
+              `Lendo texto nativo de ${paginasAlvo.length} página(s)...`,
+            );
+            const resultadoNativo = await extrairTextoNativoPaginas(
+              dados,
+              paginasAlvo,
+            );
 
-            if (resultadoNativo.foiNativo && resultadoNativo.texto.trim().length > 30) {
-              const dadosIdentificados = extrairInformacoes(resultadoNativo.texto);
+            if (
+              resultadoNativo.foiNativo &&
+              resultadoNativo.texto.trim().length > 30
+            ) {
+              const dadosIdentificados = extrairInformacoes(
+                resultadoNativo.texto,
+              );
 
               // Valida se a extração nativa encontrou o memorial real ou apenas carimbo/metadados
               const temDadosSuficientes =
@@ -121,25 +141,25 @@ export default function useOcrPipeline(): OcrPipelineResult {
                 console.log(
                   `Texto nativo validado com sucesso (${resultadoNativo.paginasProcessadas.length} página(s)):`,
                   dadosIdentificados.formatoDescricao,
-                  `${dadosIdentificados.coordenadas.length} coords, ${dadosIdentificados.medidas.length} medidas.`
+                  `${dadosIdentificados.coordenadas.length} coords, ${dadosIdentificados.medidas.length} medidas.`,
                 );
                 setTextExtraido(resultadoNativo.texto);
                 setMetodoExtracao("nativo");
                 setProgresso(
-                  `Concluído via leitura nativa (${resultadoNativo.paginasProcessadas.length} página(s): ${paginasAlvo.join(", ")}).`
+                  `Concluído via leitura nativa (${resultadoNativo.paginasProcessadas.length} página(s): ${paginasAlvo.join(", ")}).`,
                 );
                 setStatus("sucesso");
                 return resultadoNativo.texto;
               } else {
                 console.log(
-                  "Texto nativo insuficiente ou apenas carimbo/cabeçalho. Alternando para OCR visual com PaddleOCR."
+                  "Texto nativo insuficiente ou apenas carimbo/cabeçalho. Alternando para OCR visual com PaddleOCR.",
                 );
               }
             }
           } catch (erroNativo) {
             console.warn(
               "Extração nativa falhou ou PDF é escaneado, alternando para OCR:",
-              erroNativo
+              erroNativo,
             );
           }
         }
@@ -177,7 +197,7 @@ export default function useOcrPipeline(): OcrPipelineResult {
         for (let i = 0; i < paginasOcr.length; i++) {
           const numPag = paginasOcr[i];
           setProgresso(
-            `Processando OCR da página ${numPag} (${i + 1} de ${paginasOcr.length})...`
+            `Processando OCR da página ${numPag} (${i + 1} de ${paginasOcr.length})...`,
           );
 
           const image = await PdfpageToImage(dados, numPag);
@@ -188,7 +208,9 @@ export default function useOcrPipeline(): OcrPipelineResult {
             .join("\n");
 
           if (textoPagina.trim()) {
-            textosPaginas.push(`--- PÁGINA ${numPag} ---\n${textoPagina.trim()}`);
+            textosPaginas.push(
+              `--- PÁGINA ${numPag} ---\n${textoPagina.trim()}`,
+            );
           }
         }
 
@@ -199,7 +221,9 @@ export default function useOcrPipeline(): OcrPipelineResult {
         }
 
         setTextExtraido(textFinal);
-        setProgresso(`OCR concluído com sucesso (${paginasOcr.length} página(s) processadas).`);
+        setProgresso(
+          `OCR concluído com sucesso (${paginasOcr.length} página(s) processadas).`,
+        );
         setStatus("sucesso");
         return textFinal;
       } catch (error) {
@@ -211,7 +235,10 @@ export default function useOcrPipeline(): OcrPipelineResult {
         try {
           await limparMotor();
         } catch (cleanupError) {
-          console.error("Erro ao limpar a instância do motor OCR:", cleanupError);
+          console.error(
+            "Erro ao limpar a instância do motor OCR:",
+            cleanupError,
+          );
         } finally {
           statusRef.current = false;
         }

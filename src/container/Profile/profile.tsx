@@ -79,7 +79,6 @@ interface ProfileProps {
 
 type PageView = "profile" | "members" | "member" | "password";
 
-
 function EditIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -318,7 +317,12 @@ export default function Profile({
       if (avatarInputRef.current) avatarInputRef.current.value = "";
       notify("Perfil salvo com sucesso.");
     } catch (err) {
-      notify(err instanceof Error ? err.message : "Não foi possível salvar o perfil. Tente novamente.", true);
+      notify(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível salvar o perfil. Tente novamente.",
+        true,
+      );
     } finally {
       submittingRef.current = false;
       setBusy(false);
@@ -393,7 +397,12 @@ export default function Profile({
     try {
       notify("Membros salvos com sucesso.");
     } catch (err) {
-      notify(err instanceof Error ? err.message : "Não foi possível salvar os membros. Tente novamente.", true);
+      notify(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível salvar os membros. Tente novamente.",
+        true,
+      );
     } finally {
       submittingRef.current = false;
       setBusy(false);
@@ -481,7 +490,7 @@ export default function Profile({
     setPasswordError("");
     setInvalidPassword(false);
     try {
-     /*  const result =;
+      /*  const result =;
       if (result === "invalid_password") {
         setInvalidPassword(true);
         setPasswordError("Senha incorreta. Sua conta não foi excluída.");
@@ -523,7 +532,6 @@ export default function Profile({
     setBusy(true);
     setFeedback("");
     try {
-
       setNewPassword("");
       setRepeatPassword("");
       navigate("profile");

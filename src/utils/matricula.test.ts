@@ -1,6 +1,10 @@
 // src/utils/matricula.test.ts
 
-import { extrairInformacoes, separarTerrenos, separarTerrenosComResultado } from "./textSanitizer";
+import {
+  extrairInformacoes,
+  separarTerrenos,
+  separarTerrenosComResultado,
+} from "./textSanitizer";
 import { validarGeometria } from "./validarGeometria";
 import { gerarDXFString, gerarDXFStringMultiplosTerrenos } from "./drawDXF";
 import { normalizarPageRanges } from "./pdfConvert";
@@ -16,7 +20,9 @@ function assert(condition: boolean, message: string) {
 async function runTests() {
   console.log("==============================================================");
   console.log("INICIANDO BATERIA DE TESTES DO PROCESSADOR DE MATRÍCULAS E DXF");
-  console.log("==============================================================\n");
+  console.log(
+    "==============================================================\n",
+  );
 
   // =========================================================================
   // CASO 1: Matrícula Georreferenciada
@@ -26,7 +32,9 @@ async function runTests() {
   // - Área total de 10.490,13 m²
   // - Ordem preservada dos 6 segmentos
   // =========================================================================
-  console.log("TESTE 1: Matrícula Georreferenciada (7 coordenadas, 6 segmentos)");
+  console.log(
+    "TESTE 1: Matrícula Georreferenciada (7 coordenadas, 6 segmentos)",
+  );
   const textoCaso1 = `
     MEMORIAL DESCRITIVO DO IMÓVEL
     Inicia-se a descrição deste perímetro no ponto 04-C, de coordenadas N=7.410.242,9289 e E=307.925,7590;
@@ -41,37 +49,82 @@ async function runTests() {
   const resultado1 = extrairInformacoes(textoCaso1);
   const validacao1 = validarGeometria(resultado1);
 
-  assert(resultado1.formatoDescricao === "georreferenciada", "Formato classificado como georreferenciada");
-  assert(resultado1.coordenadas.length === 7, `Extraídos 7 registros de coordenadas (obtido: ${resultado1.coordenadas.length})`);
-  assert(resultado1.coordenadas[0].vertice === "04-C", "Primeiro vértice é 04-C");
-  assert(resultado1.coordenadas[6].vertice === "04-C", "Último vértice é 04-C (fechamento)");
-  assert(resultado1.segmentos.length === 6, `Extraídos exatamente 6 segmentos (obtido: ${resultado1.segmentos.length})`);
+  assert(
+    resultado1.formatoDescricao === "georreferenciada",
+    "Formato classificado como georreferenciada",
+  );
+  assert(
+    resultado1.coordenadas.length === 7,
+    `Extraídos 7 registros de coordenadas (obtido: ${resultado1.coordenadas.length})`,
+  );
+  assert(
+    resultado1.coordenadas[0].vertice === "04-C",
+    "Primeiro vértice é 04-C",
+  );
+  assert(
+    resultado1.coordenadas[6].vertice === "04-C",
+    "Último vértice é 04-C (fechamento)",
+  );
+  assert(
+    resultado1.segmentos.length === 6,
+    `Extraídos exatamente 6 segmentos (obtido: ${resultado1.segmentos.length})`,
+  );
 
   // Verificar segmentos retos e curvos
   const retos = resultado1.segmentos.filter((s) => s.geometria === "reta");
   const curvas = resultado1.segmentos.filter((s) => s.geometria === "curva");
-  assert(retos.length === 5, `5 segmentos retos extraídos (obtido: ${retos.length})`);
-  assert(curvas.length === 1, `1 segmento em curva extraído (obtido: ${curvas.length})`);
+  assert(
+    retos.length === 5,
+    `5 segmentos retos extraídos (obtido: ${retos.length})`,
+  );
+  assert(
+    curvas.length === 1,
+    `1 segmento em curva extraído (obtido: ${curvas.length})`,
+  );
 
   // Verificar a ordem sequencial dos segmentos
   assert(resultado1.segmentos[0].destino === "06", "Segmento 1 termina em 06");
   assert(resultado1.segmentos[1].destino === "05", "Segmento 2 termina em 05");
   assert(resultado1.segmentos[2].destino === "04", "Segmento 3 termina em 04");
-  assert(resultado1.segmentos[3].destino === "04-A", "Segmento 4 termina em 04-A");
-  assert(resultado1.segmentos[4].destino === "04-B", "Segmento 5 termina em 04-B");
-  assert(resultado1.segmentos[5].destino === "04-C", "Segmento 6 (curva) termina em 04-C");
-  assert(resultado1.segmentos[5].geometria === "curva", "Segmento 6 é geometria de curva");
+  assert(
+    resultado1.segmentos[3].destino === "04-A",
+    "Segmento 4 termina em 04-A",
+  );
+  assert(
+    resultado1.segmentos[4].destino === "04-B",
+    "Segmento 5 termina em 04-B",
+  );
+  assert(
+    resultado1.segmentos[5].destino === "04-C",
+    "Segmento 6 (curva) termina em 04-C",
+  );
+  assert(
+    resultado1.segmentos[5].geometria === "curva",
+    "Segmento 6 é geometria de curva",
+  );
 
   // Verificar área
-  assert(resultado1.areaTotal === 10490.13, `Área total extraída com precisão (10.490,13 m²): ${resultado1.areaTotal}`);
+  assert(
+    resultado1.areaTotal === 10490.13,
+    `Área total extraída com precisão (10.490,13 m²): ${resultado1.areaTotal}`,
+  );
 
   // Verificar validação e DXF
-  assert(validacao1.resumo.permiteGeracaoDXF, "Validação aprova geração de DXF");
+  assert(
+    validacao1.resumo.permiteGeracaoDXF,
+    "Validação aprova geração de DXF",
+  );
   const dxf1 = gerarDXFString(resultado1, validacao1);
-  assert(dxf1.stringDxf.includes("SECTION"), "DXF gerado contém seções válidas");
+  assert(
+    dxf1.stringDxf.includes("SECTION"),
+    "DXF gerado contém seções válidas",
+  );
   assert(dxf1.stringDxf.includes("CONTORNO"), "DXF possui camada CONTORNO");
   assert(dxf1.stringDxf.includes("CURVAS"), "DXF possui camada CURVAS");
-  assert(dxf1.stringDxf.includes("ARC"), "DXF desenhou entidade ARC para a curva real");
+  assert(
+    dxf1.stringDxf.includes("ARC"),
+    "DXF desenhou entidade ARC para a curva real",
+  );
   console.log("  ✓ Caso 1 concluído com sucesso.\n");
 
   // =========================================================================
@@ -95,23 +148,48 @@ async function runTests() {
   const resultado2 = extrairInformacoes(textoCaso2);
   const validacao2 = validarGeometria(resultado2);
 
-  assert(resultado2.formatoDescricao === "convencional", "Formato classificado como convencional");
+  assert(
+    resultado2.formatoDescricao === "convencional",
+    "Formato classificado como convencional",
+  );
   assert(resultado2.coordenadas.length === 0, "Nenhuma coordenada exigida");
-  assert(resultado2.medidas.length >= 3, `Medidas extraídas: ${resultado2.medidas.length}`);
+  assert(
+    resultado2.medidas.length >= 3,
+    `Medidas extraídas: ${resultado2.medidas.length}`,
+  );
 
   const frente = resultado2.medidas.find((m) => m.descricao === "frente");
-  const ladoDir = resultado2.medidas.find((m) => m.descricao === "lado direito");
-  const ladoEsq = resultado2.medidas.find((m) => m.descricao === "lado esquerdo");
+  const ladoDir = resultado2.medidas.find(
+    (m) => m.descricao === "lado direito",
+  );
+  const ladoEsq = resultado2.medidas.find(
+    (m) => m.descricao === "lado esquerdo",
+  );
 
   assert(frente?.valor === 10.0, `Frente extraída: ${frente?.valor} m`);
-  assert(ladoDir?.valor === 22.19, `Lado direito extraído: ${ladoDir?.valor} m`);
-  assert(ladoEsq?.valor === 30.64, `Lado esquerdo extraído: ${ladoEsq?.valor} m`);
+  assert(
+    ladoDir?.valor === 22.19,
+    `Lado direito extraído: ${ladoDir?.valor} m`,
+  );
+  assert(
+    ladoEsq?.valor === 30.64,
+    `Lado esquerdo extraído: ${ladoEsq?.valor} m`,
+  );
 
-  assert(validacao2.resumo.permiteGeracaoDXF, "Validação permite geração de DXF esquemático");
-  assert(validacao2.resumo.dxfAproximado, "DXF identificado explicitamente como aproximado");
+  assert(
+    validacao2.resumo.permiteGeracaoDXF,
+    "Validação permite geração de DXF esquemático",
+  );
+  assert(
+    validacao2.resumo.dxfAproximado,
+    "DXF identificado explicitamente como aproximado",
+  );
 
   const dxf2 = gerarDXFString(resultado2, validacao2);
-  assert(dxf2.stringDxf.includes("REPRESENTACAO ESQUEMATICA"), "DXF convencional contém nota de representação esquemática");
+  assert(
+    dxf2.stringDxf.includes("REPRESENTACAO ESQUEMATICA"),
+    "DXF convencional contém nota de representação esquemática",
+  );
   console.log("  ✓ Caso 2 concluído com sucesso.\n");
 
   // =========================================================================
@@ -121,7 +199,9 @@ async function runTests() {
   // - "do lado direito mède 22,19metros onde confronta com o lote 39"
   // - "do lado esquerdo mede 30,64 metro."
   // =========================================================================
-  console.log("TESTE 2B: Matrícula Convencional Cartorária (hífens de proteção e acentos)");
+  console.log(
+    "TESTE 2B: Matrícula Convencional Cartorária (hífens de proteção e acentos)",
+  );
   const textoCaso2B = `
     com a área de -368,35- metros quadrados, o qual assim
     se descreve, caracteriza e confronta:com frente para a RUA PELICANO,para
@@ -132,18 +212,37 @@ async function runTests() {
   const resultado2B = extrairInformacoes(textoCaso2B);
   const validacao2B = validarGeometria(resultado2B);
 
-  assert(resultado2B.formatoDescricao === "convencional", "Formato classificado como convencional");
-  assert(resultado2B.areaTotal === 368.35, `Área com hífens protetores extraída: ${resultado2B.areaTotal} m²`);
-  
+  assert(
+    resultado2B.formatoDescricao === "convencional",
+    "Formato classificado como convencional",
+  );
+  assert(
+    resultado2B.areaTotal === 368.35,
+    `Área com hífens protetores extraída: ${resultado2B.areaTotal} m²`,
+  );
+
   const frente2B = resultado2B.medidas.find((m) => m.descricao === "frente");
-  const ladoDir2B = resultado2B.medidas.find((m) => m.descricao === "lado direito");
-  const ladoEsq2B = resultado2B.medidas.find((m) => m.descricao === "lado esquerdo");
+  const ladoDir2B = resultado2B.medidas.find(
+    (m) => m.descricao === "lado direito",
+  );
+  const ladoEsq2B = resultado2B.medidas.find(
+    (m) => m.descricao === "lado esquerdo",
+  );
 
   assert(frente2B?.valor === 10.0, `Frente extraída: ${frente2B?.valor} m`);
-  assert(ladoDir2B?.valor === 22.19, `Lado direito extraído (com verbo mède e sem espaço): ${ladoDir2B?.valor} m`);
-  assert(ladoEsq2B?.valor === 30.64, `Lado esquerdo extraído: ${ladoEsq2B?.valor} m`);
+  assert(
+    ladoDir2B?.valor === 22.19,
+    `Lado direito extraído (com verbo mède e sem espaço): ${ladoDir2B?.valor} m`,
+  );
+  assert(
+    ladoEsq2B?.valor === 30.64,
+    `Lado esquerdo extraído: ${ladoEsq2B?.valor} m`,
+  );
 
-  assert(validacao2B.resumo.permiteGeracaoDXF, "Validação 2B permite geração de DXF esquemático");
+  assert(
+    validacao2B.resumo.permiteGeracaoDXF,
+    "Validação 2B permite geração de DXF esquemático",
+  );
   console.log("  ✓ Caso 2B concluído com sucesso.\n");
 
   // =========================================================================
@@ -165,17 +264,30 @@ async function runTests() {
 
   // Distância declarada P1->P2 é 50.00m, mas coordenadas P1(1000, 1000) e P2(1000, 1070) dão 70.00m
   // Desenvolvimento declarado da curva é 40.00m, mas para R=20 e angulo=45°, D_calc = 20 * (45 * PI / 180) = 15.708m
-  assert(resultado3.segmentos[0].distancia === 50.0, "Distância declarada original mantida intacta (50,00m)");
-  assert(resultado3.coordenadas[1].este === 1070.0, "Coordenada original mantida intacta (1070,00)");
+  assert(
+    resultado3.segmentos[0].distancia === 50.0,
+    "Distância declarada original mantida intacta (50,00m)",
+  );
+  assert(
+    resultado3.coordenadas[1].este === 1070.0,
+    "Coordenada original mantida intacta (1070,00)",
+  );
 
   assert(validacao3.resumo.possuiDivergencias, "Sistema acusou divergências");
-  const alertaDist = validacao3.diagnosticos.some((d) => d.tipo === "distancia_divergente");
-  const alertaCurva = validacao3.diagnosticos.some((d) => d.tipo === "curva_divergente");
+  const alertaDist = validacao3.diagnosticos.some(
+    (d) => d.tipo === "distancia_divergente",
+  );
+  const alertaCurva = validacao3.diagnosticos.some(
+    (d) => d.tipo === "curva_divergente",
+  );
   assert(alertaDist, "Diagnosticou alerta de distância divergente");
   assert(alertaCurva, "Diagnosticou alerta de curva divergente");
 
   const dxf3 = gerarDXFString(resultado3, validacao3);
-  assert(dxf3.avisos.length > 0, "DXF registrou avisos de divergências sem quebrar a execução");
+  assert(
+    dxf3.avisos.length > 0,
+    "DXF registrou avisos de divergências sem quebrar a execução",
+  );
   console.log("  ✓ Caso 3 concluído com sucesso.\n");
 
   // =========================================================================
@@ -193,9 +305,17 @@ async function runTests() {
   const resultado4 = extrairInformacoes(textoCaso4);
   const validacao4 = validarGeometria(resultado4);
 
-  assert(resultado4.formatoDescricao === "insuficiente", "Formato classificado corretamente como insuficiente");
-  assert(!validacao4.resumo.permiteGeracaoDXF, "Sistema NÃO inventa coordenadas nem gera DXF arbitrário");
-  const alertaInsuf = validacao4.diagnosticos.some((d) => d.tipo === "dados_insuficientes");
+  assert(
+    resultado4.formatoDescricao === "insuficiente",
+    "Formato classificado corretamente como insuficiente",
+  );
+  assert(
+    !validacao4.resumo.permiteGeracaoDXF,
+    "Sistema NÃO inventa coordenadas nem gera DXF arbitrário",
+  );
+  const alertaInsuf = validacao4.diagnosticos.some(
+    (d) => d.tipo === "dados_insuficientes",
+  );
   assert(alertaInsuf, "Diagnosticou explicitamente dados insuficientes");
   console.log("  ✓ Caso 4 concluído com sucesso.\n");
 
@@ -205,7 +325,9 @@ async function runTests() {
   // - Separação individual sem mistura de medidas
   // - Validações geométricas independentes
   // =========================================================================
-  console.log("TESTE 5: Múltiplos Terrenos (Separação individual de informações)");
+  console.log(
+    "TESTE 5: Múltiplos Terrenos (Separação individual de informações)",
+  );
   const textoCaso5 = `
     MATRÍCULA Nº 45.678 - DESMEMBRAMENTO DE ÁREA
     O imóvel foi desmembrado nos seguintes lotes:
@@ -222,22 +344,43 @@ async function runTests() {
   `;
 
   const terrenosCaso5 = separarTerrenos(textoCaso5, { qtdEsperada: 2 });
-  assert(terrenosCaso5.length === 2, `Identificados exatamente 2 terrenos (obtido: ${terrenosCaso5.length})`);
+  assert(
+    terrenosCaso5.length === 2,
+    `Identificados exatamente 2 terrenos (obtido: ${terrenosCaso5.length})`,
+  );
 
   const t1 = terrenosCaso5[0];
   const t2 = terrenosCaso5[1];
 
   // Validação do Terreno 1
-  assert(t1.resultado.formatoDescricao === "convencional", "Terreno 1 classificado como convencional");
-  assert(t1.resultado.areaTotal === 300, `Terreno 1 com área de 300 m² (obtido: ${t1.resultado.areaTotal})`);
+  assert(
+    t1.resultado.formatoDescricao === "convencional",
+    "Terreno 1 classificado como convencional",
+  );
+  assert(
+    t1.resultado.areaTotal === 300,
+    `Terreno 1 com área de 300 m² (obtido: ${t1.resultado.areaTotal})`,
+  );
   const frenteT1 = t1.resultado.medidas.find((m) => m.descricao === "frente");
-  assert(frenteT1?.valor === 12.0, `Terreno 1 frente: 12.00m (obtido: ${frenteT1?.valor})`);
+  assert(
+    frenteT1?.valor === 12.0,
+    `Terreno 1 frente: 12.00m (obtido: ${frenteT1?.valor})`,
+  );
 
   // Validação do Terreno 2
-  assert(t2.resultado.formatoDescricao === "convencional", "Terreno 2 classificado como convencional");
-  assert(t2.resultado.areaTotal === 450, `Terreno 2 com área de 450 m² (obtido: ${t2.resultado.areaTotal})`);
+  assert(
+    t2.resultado.formatoDescricao === "convencional",
+    "Terreno 2 classificado como convencional",
+  );
+  assert(
+    t2.resultado.areaTotal === 450,
+    `Terreno 2 com área de 450 m² (obtido: ${t2.resultado.areaTotal})`,
+  );
   const frenteT2 = t2.resultado.medidas.find((m) => m.descricao === "frente");
-  assert(frenteT2?.valor === 15.0, `Terreno 2 frente: 15.00m (obtido: ${frenteT2?.valor})`);
+  assert(
+    frenteT2?.valor === 15.0,
+    `Terreno 2 frente: 15.00m (obtido: ${frenteT2?.valor})`,
+  );
 
   // Validação geométrica independente de cada um
   const valT1 = validarGeometria(t1.resultado);
@@ -249,17 +392,31 @@ async function runTests() {
   // =========================================================================
   // CASO 6: Geração de DXF Unificado Multi-Terreno com Camadas Independentes
   // =========================================================================
-  console.log("TESTE 6: Geração de DXF Unificado Multi-Terreno (Camadas independentes)");
+  console.log(
+    "TESTE 6: Geração de DXF Unificado Multi-Terreno (Camadas independentes)",
+  );
   const itensDxf = [
     { id: t1.id, titulo: t1.titulo, dados: t1.resultado, validacao: valT1 },
     { id: t2.id, titulo: t2.titulo, dados: t2.resultado, validacao: valT2 },
   ];
 
   const dxfMulti = gerarDXFStringMultiplosTerrenos(itensDxf);
-  assert(dxfMulti.stringDxf.includes("T1_CONTORNO"), "DXF possui camada T1_CONTORNO");
-  assert(dxfMulti.stringDxf.includes("T2_CONTORNO"), "DXF possui camada T2_CONTORNO");
-  assert(dxfMulti.stringDxf.includes("T1_MEDIDAS"), "DXF possui camada T1_MEDIDAS");
-  assert(dxfMulti.stringDxf.includes("T2_MEDIDAS"), "DXF possui camada T2_MEDIDAS");
+  assert(
+    dxfMulti.stringDxf.includes("T1_CONTORNO"),
+    "DXF possui camada T1_CONTORNO",
+  );
+  assert(
+    dxfMulti.stringDxf.includes("T2_CONTORNO"),
+    "DXF possui camada T2_CONTORNO",
+  );
+  assert(
+    dxfMulti.stringDxf.includes("T1_MEDIDAS"),
+    "DXF possui camada T1_MEDIDAS",
+  );
+  assert(
+    dxfMulti.stringDxf.includes("T2_MEDIDAS"),
+    "DXF possui camada T2_MEDIDAS",
+  );
   console.log("  ✓ Caso 6 concluído com sucesso.\n");
 
   // =========================================================================
@@ -301,22 +458,48 @@ async function runTests() {
   const resultado7 = extrairInformacoes(textoCaso7);
   const validacao7 = validarGeometria(resultado7);
 
-  assert(resultado7.areaTotal === 16224.21, `Área total de 16.224,21 m² extraída com sucesso (obtido: ${resultado7.areaTotal})`);
-  assert(resultado7.segmentos.length >= 5, `Pelo menos 5 segmentos extraídos (obtido: ${resultado7.segmentos.length})`);
-  assert(resultado7.coordenadas.length >= 5, `Coordenadas da poligonal reconstruídas com sucesso (obtido: ${resultado7.coordenadas.length} vértices)`);
-  assert(resultado7.coordenadas[0].vertice === "D", "Vértice inicial é o ponto D");
-  assert(resultado7.formatoDescricao === "georreferenciada", "Formato classificado como georreferenciada/perimétrica");
+  assert(
+    resultado7.areaTotal === 16224.21,
+    `Área total de 16.224,21 m² extraída com sucesso (obtido: ${resultado7.areaTotal})`,
+  );
+  assert(
+    resultado7.segmentos.length >= 5,
+    `Pelo menos 5 segmentos extraídos (obtido: ${resultado7.segmentos.length})`,
+  );
+  assert(
+    resultado7.coordenadas.length >= 5,
+    `Coordenadas da poligonal reconstruídas com sucesso (obtido: ${resultado7.coordenadas.length} vértices)`,
+  );
+  assert(
+    resultado7.coordenadas[0].vertice === "D",
+    "Vértice inicial é o ponto D",
+  );
+  assert(
+    resultado7.formatoDescricao === "georreferenciada",
+    "Formato classificado como georreferenciada/perimétrica",
+  );
 
-  assert(validacao7.resumo.permiteGeracaoDXF, "Validação geométrica aprova a geração do DXF da poligonal");
+  assert(
+    validacao7.resumo.permiteGeracaoDXF,
+    "Validação geométrica aprova a geração do DXF da poligonal",
+  );
   const dxf7 = gerarDXFString(resultado7, validacao7);
-  assert(dxf7.stringDxf.includes("CONTORNO"), "DXF possui camada de contorno da poligonal");
-  assert(dxf7.stringDxf.includes("VERTICES"), "DXF possui marcação dos vértices D, C, H, I, J");
+  assert(
+    dxf7.stringDxf.includes("CONTORNO"),
+    "DXF possui camada de contorno da poligonal",
+  );
+  assert(
+    dxf7.stringDxf.includes("VERTICES"),
+    "DXF possui marcação dos vértices D, C, H, I, J",
+  );
   console.log("  ✓ Caso 7 concluído com sucesso.\n");
 
   // =========================================================================
   // CASO 8: Validação de Intervalos de Páginas e Flag de Divergência
   // =========================================================================
-  console.log("TESTE 8: Validação de PageRanges e Divergência de Quantidade de Terrenos");
+  console.log(
+    "TESTE 8: Validação de PageRanges e Divergência de Quantidade de Terrenos",
+  );
 
   // 8.1 Validação e desduplicação de pageRanges
   const paginasValidas = normalizarPageRanges(
@@ -325,11 +508,11 @@ async function runTests() {
       { start: 2, end: 4 },
       { start: 6, end: 6 },
     ],
-    10
+    10,
   );
   assert(
     JSON.stringify(paginasValidas) === JSON.stringify([1, 2, 3, 4, 6]),
-    `Intervalos desduplicados e ordenados corretamente: ${paginasValidas.join(", ")}`
+    `Intervalos desduplicados e ordenados corretamente: ${paginasValidas.join(", ")}`,
   );
 
   // 8.2 Rejeição de intervalos inválidos
@@ -350,19 +533,35 @@ async function runTests() {
   assert(erroDisparado, "Erro lançado quando end > totalPages");
 
   // 8.3 Verificação da flag divergenciaQtd quando a contagem coincide
-  const resSeparacaoCorreta = separarTerrenosComResultado(textoCaso5, { expectedLotsCount: 2 });
+  const resSeparacaoCorreta = separarTerrenosComResultado(textoCaso5, {
+    expectedLotsCount: 2,
+  });
   assert(resSeparacaoCorreta.terrenos.length === 2, "2 terrenos extraídos");
-  assert(resSeparacaoCorreta.divergenciaQtd === false, "divergenciaQtd é false quando esperado coincide com extraído");
+  assert(
+    resSeparacaoCorreta.divergenciaQtd === false,
+    "divergenciaQtd é false quando esperado coincide com extraído",
+  );
 
   // 8.4 Verificação da flag divergenciaQtd quando a contagem diverge
-  const resSeparacaoDivergente = separarTerrenosComResultado(textoCaso5, { expectedLotsCount: 3 });
+  const resSeparacaoDivergente = separarTerrenosComResultado(textoCaso5, {
+    expectedLotsCount: 3,
+  });
   assert(resSeparacaoDivergente.terrenos.length === 2, "2 terrenos extraídos");
-  assert(resSeparacaoDivergente.divergenciaQtd === true, "divergenciaQtd é true quando esperado (3) diverge do extraído (2)");
+  assert(
+    resSeparacaoDivergente.divergenciaQtd === true,
+    "divergenciaQtd é true quando esperado (3) diverge do extraído (2)",
+  );
 
   // 8.5 Verificação via chamada padrão com propriedades anexadas
   const terrenosArray = separarTerrenos(textoCaso5, { expectedLotsCount: 4 });
-  assert(terrenosArray.divergenciaQtd === true, "terrenosArray.divergenciaQtd é true");
-  assert(terrenosArray.expectedLotsCount === 4, "terrenosArray.expectedLotsCount é 4");
+  assert(
+    terrenosArray.divergenciaQtd === true,
+    "terrenosArray.divergenciaQtd é true",
+  );
+  assert(
+    terrenosArray.expectedLotsCount === 4,
+    "terrenosArray.expectedLotsCount é 4",
+  );
   console.log("  ✓ Caso 8 concluído com sucesso.\n");
 
   console.log("==============================================================");

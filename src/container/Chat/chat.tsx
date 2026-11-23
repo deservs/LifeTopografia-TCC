@@ -1,5 +1,11 @@
-import { useState, useRef, useEffect, type FormEvent, type ChangeEvent } from "react";
-import { Link, useNavigate, useLocation  } from "react-router-dom";
+import {
+  useState,
+  useRef,
+  useEffect,
+  type FormEvent,
+  type ChangeEvent,
+} from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import Logo from "../../assets/image/logo-front.webp";
@@ -320,7 +326,9 @@ export default function Chat() {
           const profileRaw = cached || storedProfileStr;
           if (profileRaw) {
             const profileData =
-              typeof profileRaw === "string" ? JSON.parse(profileRaw) : profileRaw;
+              typeof profileRaw === "string"
+                ? JSON.parse(profileRaw)
+                : profileRaw;
             const userRole = (profileData.tipo_perfil || "").toLowerCase();
             loadedName = profileData.nome_ou_razao || "Cliente";
             loadedAvatar = profileData.foto_url;
@@ -413,7 +421,8 @@ export default function Chat() {
   // Os estados de atendimento são vinculados à conversa selecionada, não globais.
   // A alternância de perfil é apenas uma visualização demonstrativa do frontend.
   const clientChatStatus = currentAdminThread?.chatStatus ?? "open";
-  const clientServiceStatus = currentAdminThread?.serviceStatus ?? "not_started";
+  const clientServiceStatus =
+    currentAdminThread?.serviceStatus ?? "not_started";
 
   const activeMessages = isAdmin
     ? currentAdminThread?.messages || []
@@ -633,7 +642,8 @@ export default function Chat() {
       !budgetAmount.trim() ||
       !activeThreadId ||
       currentAdminThread?.chatStatus === "closed"
-    ) return;
+    )
+      return;
 
     const now = new Date();
     const formattedTime = now.toLocaleTimeString("pt-BR", {
@@ -690,7 +700,8 @@ export default function Chat() {
     const targetBudget = clientMessages.find(
       (message) => message.type === "budget" && message.budget?.id === budgetId,
     );
-    if (!targetBudget?.budget || targetBudget.budget.status !== "pending") return;
+    if (!targetBudget?.budget || targetBudget.budget.status !== "pending")
+      return;
 
     const now = new Date();
     const formattedTime = now.toLocaleTimeString("pt-BR", {
@@ -800,11 +811,7 @@ export default function Chat() {
   const handleSubmitRating = (e: FormEvent) => {
     e.preventDefault();
 
-    if (
-      rating < 1 ||
-      rating > 5 ||
-      clientServiceStatus !== "completed"
-    ) return;
+    if (rating < 1 || rating > 5 || clientServiceStatus !== "completed") return;
 
     setSubmittedRating({
       score: rating,
@@ -1042,7 +1049,9 @@ export default function Chat() {
                       ? currentAdminThread?.chatStatus
                       : clientChatStatus) === "closed"
                       ? "Atendimento encerrado"
-                      : "Conversa aberta"}{" • "}{currentChatSubtitle}
+                      : "Conversa aberta"}
+                    {" • "}
+                    {currentChatSubtitle}
                   </span>
                 </div>
               </div>
@@ -1447,7 +1456,8 @@ export default function Chat() {
 
         {!isAdmin && ratingSubmitted && (
           <p className="rating-success-message" role="status">
-            Obrigado pela sua avaliação! Nota registrada nesta sessão: {submittedRating?.score}/5.
+            Obrigado pela sua avaliação! Nota registrada nesta sessão:{" "}
+            {submittedRating?.score}/5.
           </p>
         )}
 
