@@ -13,9 +13,6 @@ export const envSchema = z.object({
   VITE_R2_PUBLIC_URL: z
     .string({ message: "URL pública do R2 é obrigatória" })
     .url("URL pública do R2 inválida"),
-  VITE_API_URL: z
-    .string({ message: "URL da API é obrigatória" })
-    .url("URL da API inválida").optional().or(z.literal("")),
 });
 
 const _env = envSchema.safeParse(import.meta.env);
