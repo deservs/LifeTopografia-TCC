@@ -1044,38 +1044,39 @@ export default function Chat() {
                           }
                         }}
                       >
-                      <div className="conversation-avatar-box">
-                        <div className="conversation-avatar">
-                          {thread.clientName.charAt(0)}
+                        <div className="conversation-avatar-box">
+                          <div className="conversation-avatar">
+                            {thread.clientName.charAt(0)}
+                          </div>
+                          {thread.chatStatus === "open" && (
+                            <span
+                              className="online-indicator"
+                              title="Conversa aberta"
+                            />
+                          )}
                         </div>
-                        {thread.chatStatus === "open" && (
-                          <span
-                            className="online-indicator"
-                            title="Conversa aberta"
-                          />
-                        )}
-                      </div>
 
-                      <div className="conversation-details">
-                        <div className="conversation-top-row">
-                          <span className="conversation-name">
-                            {thread.clientName}
+                        <div className="conversation-details">
+                          <div className="conversation-top-row">
+                            <span className="conversation-name">
+                              {thread.clientName}
+                            </span>
+                            <span className="conversation-time">
+                              {thread.lastMessageTime}
+                            </span>
+                          </div>
+                          <span className="conversation-role">
+                            {thread.clientType === "empresa"
+                              ? "Empresa"
+                              : "Pessoa Física"}{" "}
+                            • {thread.document}
                           </span>
-                          <span className="conversation-time">
-                            {thread.lastMessageTime}
-                          </span>
+                          <p className="conversation-preview">{previewText}</p>
                         </div>
-                        <span className="conversation-role">
-                          {thread.clientType === "empresa"
-                            ? "Empresa"
-                            : "Pessoa Física"}{" "}
-                          • {thread.document}
-                        </span>
-                        <p className="conversation-preview">{previewText}</p>
                       </div>
-                    </div>
-                  );
-                }))
+                    );
+                  })
+                )
               ) : (
                 <div className="conversation-item is-active">
                   <div className="conversation-avatar-box">
@@ -1156,7 +1157,10 @@ export default function Chat() {
 
                 <div className="active-attendant-text">
                   <div className="active-attendant-title-row">
-                    <h3 className="active-attendant-name" title={currentChatTitle}>
+                    <h3
+                      className="active-attendant-name"
+                      title={currentChatTitle}
+                    >
                       {currentChatTitle}
                     </h3>
                     <span
@@ -1179,7 +1183,10 @@ export default function Chat() {
                     </span>
                   </div>
 
-                  <span className="active-attendant-status" title={currentChatSubtitle}>
+                  <span
+                    className="active-attendant-status"
+                    title={currentChatSubtitle}
+                  >
                     {(isAdmin
                       ? currentAdminThread?.chatStatus
                       : clientChatStatus) === "closed" ? (

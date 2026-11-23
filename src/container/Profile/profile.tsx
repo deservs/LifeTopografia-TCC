@@ -5,12 +5,21 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, replace } from "react-router-dom";
+
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
-import { SerchDataUser, SignOut, UpdateUser } from "../../lib/supabase/auth";
-import { supabase } from "../../lib/supabase/supabaseClient";
+
+import {
+  SerchDataUser,
+  SignOut,
+  UpdateUser,
+  SaveNewMemberData,
+  SearchMemberData,
+  DeleteAccount,
+} from "../../lib/supabase/auth";
+
 import Logo from "../../assets/image/logo-front.webp";
 import "./profile.css";
 
@@ -23,8 +32,7 @@ export interface CompanyMember {
   id: string;
   name: string;
   email: string;
-  cpf: string;
-  status: "ativo" | "afastado";
+  status: "ATIVO" | "EXCLUIDO" | "AFASTADO" | "PENDENTE";
   avatarUrl?: string;
 }
 
@@ -92,32 +100,27 @@ function EditIcon() {
   );
 }
 
-function Avatar({ name, avatarUrl }: Pick<UserProfile, "name" | "avatarUrl">) {
+function Avatar({
+  name = "",
+  avatarUrl,
+}: Partial<Pick<UserProfile, "name" | "avatarUrl">>) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const safeName = (name ?? "").trim();
   return (
     <span className="profile-avatar">
       {avatarUrl && failedUrl !== avatarUrl ? (
         <img
           src={avatarUrl}
-          alt={`Foto de ${name}`}
+          alt={`Foto de ${safeName || "usuário"}`}
           onError={() => setFailedUrl(avatarUrl)}
         />
       ) : (
-        <span aria-label={`Perfil de ${name}`}>
-          {name.trim().charAt(0).toUpperCase() || "P"}
+        <span aria-label={`Perfil de ${safeName || "usuário"}`}>
+          {safeName.charAt(0).toUpperCase() || "P"}
         </span>
       )}
     </span>
   );
-}
-
-function formatCpf(value: string) {
-  return value
-    .replace(/\D/g, "")
-    .slice(0, 11)
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
 function isCompany(role: string) {
@@ -210,20 +213,17 @@ export default function Profile({
     let active = true;
     async function loadProfile() {
       try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        if (!data.session) return;
-        const cached = await SerchDataUser();
-        if (!cached) throw new Error("Perfil não encontrado");
-        const user = JSON.parse(cached);
+        const user = await SerchDataUser();
+        if (!user) {
+          if (active) setProfile(null);
+          return;
+        }
         const loadedProfile: ProfileData = {
-          id: data.session.user.id,
-          name: user.nome_ou_razao ?? "",
-          role:
-            user.tipo_perfil ??
-            (data.session.user.user_metadata.cnpj ? "empresa" : "pessoa"),
-          avatarUrl: user.foto_url ?? undefined,
-          email: data.session.user.email ?? "",
+          id: user?.id,
+          name: user?.name ?? "",
+          role: user.role ?? (user.role === "empresa" ? "empresa" : "pessoa"),
+          avatarUrl: user.avatarUrl ?? undefined,
+          email: user.email ?? "",
         };
         if (active) {
           setProfile(loadedProfile);
@@ -301,12 +301,11 @@ export default function Profile({
         );
         return;
       }
-      const freshCached = await SerchDataUser();
-      const freshUser = freshCached ? JSON.parse(freshCached) : null;
+      const freshUser = await SerchDataUser();
 
       const updated: ProfileData = {
         ...draft,
-        avatarUrl: freshUser?.foto_url ?? draft.avatarUrl,
+        avatarUrl: freshUser?.avatarUrl ?? draft.avatarUrl,
         name: trimmedName,
         email: trimmedEmail,
       };
@@ -334,8 +333,9 @@ export default function Profile({
     if (!profile || membersLoaded) return;
     setMembersLoading(true);
     try {
-      const memebers = await SerchDataUser();
-      setMembers(memebers ? JSON.parse(memebers) : []);
+      const searchMembers = await SearchMemberData();
+
+      setMembers(searchMembers ?? []);
       setMembersLoaded(true);
     } catch {
       notify(
@@ -359,33 +359,48 @@ export default function Profile({
   function editMember(selected?: CompanyMember) {
     setMember(
       selected
-        ? { ...selected, cpf: formatCpf(selected.cpf) }
+        ? { ...selected }
         : {
             id: crypto.randomUUID(),
             name: "",
             email: "",
-            cpf: "",
-            status: "ativo",
+            status: "ATIVO",
           },
     );
     navigate("member");
   }
 
-  function saveMember(event: FormEvent<HTMLFormElement>) {
+  async function saveMember(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!member) return;
-    const updated = {
-      ...member,
-      name: member.name.trim(),
-      email: member.email.trim(),
-    };
-    setMembers((previous) =>
-      previous.some((item) => item.id === updated.id)
-        ? previous.map((item) => (item.id === updated.id ? updated : item))
-        : [...previous, updated],
-    );
-    navigate("members");
-    notify("Alterações preparadas. Clique em Salvar para concluir.");
+    const name = member?.name.trim();
+    const email = member?.email.trim();
+    if (!name || !email) {
+      notify("Nome e email são obrigatórios.", true);
+      return;
+    }
+    try {
+      const newMember = await SaveNewMemberData(name, email);
+
+      if (!newMember) {
+        notify("Não foi possível salvar o membro. Tente novamente.", true);
+        return;
+      }
+
+      const updated = await SearchMemberData();
+      setMembers(updated ?? []);
+      navigate("members");
+      setMembersLoaded(true);
+      notify(
+        "Usuário salvo com sucesso. A alteração será efetivada após a confirmação do convite.",
+      );
+    } catch (err) {
+      notify(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível salvar o membro. Tente novamente.",
+        true,
+      );
+    }
   }
 
   async function saveMembers() {
@@ -490,7 +505,10 @@ export default function Profile({
     setPasswordError("");
     setInvalidPassword(false);
     try {
-      /*  const result =;
+      const result = await DeleteAccount(  
+        profile.id,
+        password,
+      );
       if (result === "invalid_password") {
         setInvalidPassword(true);
         setPasswordError("Senha incorreta. Sua conta não foi excluída.");
@@ -503,12 +521,13 @@ export default function Profile({
           "Existem vínculos ou pendências que impedem a exclusão. Resolva-os com o atendimento antes de tentar novamente.",
         );
       } else if (result === "deleted") {
-        window.location.replace("/");
+        await SignOut("global");
+        navigateTo("/", { replace: true });
       } else {
         setPasswordError(
           "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
         );
-      } */
+      }
     } catch {
       setPasswordError(
         "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
@@ -834,7 +853,7 @@ export default function Profile({
                               <span
                                 className={`profile-status profile-status--${item.status}`}
                               >
-                                {item.status === "ativo" ? "Ativo" : "Afastado"}
+                                {item.status}
                               </span>
                             </div>
                             <button
@@ -924,25 +943,6 @@ export default function Profile({
                       maxLength={254}
                       onChange={(event) =>
                         setMember({ ...member, email: event.target.value })
-                      }
-                    />
-                  </label>
-                  <label className="profile-field" htmlFor="profile-member-cpf">
-                    CPF:
-                    <input
-                      id="profile-member-cpf"
-                      name="memberCpf"
-                      inputMode="numeric"
-                      value={member.cpf}
-                      required
-                      pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
-                      maxLength={14}
-                      title="Informe os 11 dígitos do CPF"
-                      onChange={(event) =>
-                        setMember({
-                          ...member,
-                          cpf: formatCpf(event.target.value),
-                        })
                       }
                     />
                   </label>

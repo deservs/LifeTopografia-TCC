@@ -11,18 +11,21 @@ import {
   separarTerrenos,
   type TerrenoExtraido,
   type TerrenosExtraidosLista,
-} from "../../utils/textSanitizer";
+} from "../../utils/pdfConversor/textSanitizer";
 import {
   validarGeometria,
   type ResultadoValidacao,
-} from "../../utils/validarGeometria";
+} from "../../utils/pdfConversor/validarGeometria";
 import {
   gerarDXF,
   gerarDXFMultiplosTerrenos,
   type OpcoesGeracaoDXF,
   type ResultadoGeracaoDXF,
-} from "../../utils/drawDXF";
-import { getPdfPageCount, type PageRange } from "../../utils/pdfConvert";
+} from "../../utils/pdfConversor/drawDXF";
+import {
+  getPdfPageCount,
+  type PageRange,
+} from "../../utils/pdfConversor/pdfConvert";
 
 export default function EnviarArquivos() {
   const ocrPipeline = useOcrPipeline();

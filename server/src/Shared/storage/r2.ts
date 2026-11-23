@@ -27,6 +27,7 @@ const s3Client = new S3Client({
     accessKeyId: env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: env.AWS_SECRET_ACCESS_KEY!,
   },
+  requestChecksumCalculation: 'WHEN_REQUIRED',
 })
 
 const MIME_TO_EXT: Record<MimeTypes, string> = {
@@ -85,11 +86,10 @@ export async function UrlFileGenerator(
     Bucket: env.AWS_S3_BUCKET_NAME,
     Key: key,
     ContentType: mimeType,
-    ContentLength: fileSize,
   })
   const uploadUrl = await getSignedUrl(s3Client, command, {
     expiresIn: 60,
-    signableHeaders: new Set(['Content-Type', 'Content-Length']),
+    signableHeaders: new Set(['Content-Type']),
   })
   return { ok: true, uploadUrl, key }
 }

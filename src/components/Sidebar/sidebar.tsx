@@ -45,11 +45,10 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
           setPerfil(null);
           return;
         }
-        const userProfile = JSON.parse(response);
         setPerfil({
-          name: userProfile.nome_ou_razao,
-          role: userProfile.tipo_perfil,
-          avatarUrl: userProfile.foto_url,
+          name: response.name,
+          role: response.role,
+          avatarUrl: response.avatarUrl,
         });
       })
       .catch((error) => {

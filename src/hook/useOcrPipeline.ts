@@ -5,8 +5,8 @@ import {
   extrairTextoNativoPaginas,
   normalizarPageRanges,
   type PageRange,
-} from "../utils/pdfConvert";
-import { extrairInformacoes } from "../utils/textSanitizer";
+} from "../utils/pdfConversor/pdfConvert";
+import { extrairInformacoes } from "../utils/pdfConversor/textSanitizer";
 import { useCallback, useRef, useState, useEffect } from "react";
 
 export type StatusProcesso = "idle" | "carregando" | "sucesso" | "erro";

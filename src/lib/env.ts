@@ -10,6 +10,12 @@ export const envSchema = z.object({
   VITE_MERCADO_PAGO_PUBLIC_KEY: z
     .string({ message: "Chave pública do Mercado Pago é obrigatória" })
     .min(1, "Chave pública do Mercado Pago é obrigatória"),
+  VITE_R2_PUBLIC_URL: z
+    .string({ message: "URL pública do R2 é obrigatória" })
+    .url("URL pública do R2 inválida"),
+  VITE_API_URL: z
+    .string({ message: "URL da API é obrigatória" })
+    .url("URL da API inválida"),
 });
 
 const _env = envSchema.safeParse(import.meta.env);
@@ -34,4 +40,6 @@ export const env = _env.success
       VITE_SUPABASE_URL: "https://placeholder-project.supabase.co",
       VITE_SUPABASE_PUBLISHABLE_KEY: "placeholder-anon-key",
       VITE_MERCADO_PAGO_PUBLIC_KEY: "placeholder-public-key",
+      VITE_R2_PUBLIC_URL: "https://placeholder-r2-url.com",
+      VITE_API_URL: "http://localhost:3001",
     };
