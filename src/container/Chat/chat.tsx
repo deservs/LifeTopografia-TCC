@@ -285,8 +285,40 @@ export default function Chat() {
   // Busca na lista de clientes (visão admin)
   const [searchTerm, setSearchTerm] = useState("");
 
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Controle de scroll e navegação responsiva mobile
+  const [isScrolledUp, setIsScrolledUp] = useState(false);
+  const isScrolledUpRef = useRef(false);
+  const [unreadWhileScrolled, setUnreadWhileScrolled] = useState(0);
+  const [mobileView, setMobileView] = useState<"list" | "chat">("chat");
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior,
+      });
+      setIsScrolledUp(false);
+      isScrolledUpRef.current = false;
+      setUnreadWhileScrolled(0);
+    }
+  };
+
+  const handleMessagesScroll = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const distanceToBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    const isAway = distanceToBottom > 90;
+    setIsScrolledUp(isAway);
+    isScrolledUpRef.current = isAway;
+    if (!isAway) {
+      setUnreadWhileScrolled(0);
+    }
+  };
 
   /**
    * 1. PROTEÇÃO DE ACESSO:
@@ -390,10 +422,33 @@ export default function Chat() {
     setShowRatingModal(false);
   }, [activeRole, activeThreadId]);
 
-  // Rolagem suave para o fim das mensagens.
+  // Rolagem inteligente para o fim das mensagens
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [clientMessages, adminThreads, activeThreadId, activeRole]);
+    if (!isScrolledUpRef.current) {
+      scrollToBottom("smooth");
+    } else {
+      setUnreadWhileScrolled((prev) => prev + 1);
+    }
+  }, [clientMessages, adminThreads]);
+
+  // Ao trocar conversa ou papel, sempre posiciona no fim
+  useEffect(() => {
+    scrollToBottom("auto");
+    setUnreadWhileScrolled(0);
+  }, [activeThreadId, activeRole]);
+
+  // Fecha modais e menus de ação com tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowQuickActions(false);
+        setShowBudgetModal(false);
+        setShowRatingModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Se ainda estiver validando a sessão, exibe tela padronizada de checagem
   if (isCheckingAuth) {
@@ -477,6 +532,7 @@ export default function Chat() {
 
     setInputText("");
     setShowQuickActions(false);
+    setTimeout(() => scrollToBottom("smooth"), 30);
   };
 
   /**
@@ -545,6 +601,7 @@ export default function Chat() {
 
     setShowQuickActions(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    setTimeout(() => scrollToBottom("smooth"), 30);
   };
 
   /**
@@ -615,6 +672,7 @@ export default function Chat() {
       }
 
       setConvertingPdfId(null);
+      setTimeout(() => scrollToBottom("smooth"), 40);
     }, 1200);
   };
 
@@ -675,6 +733,7 @@ export default function Chat() {
     setBudgetAmount("");
     setBudgetDescription("");
     setShowBudgetModal(false);
+    setTimeout(() => scrollToBottom("smooth"), 40);
   };
 
   /**
@@ -730,6 +789,7 @@ export default function Chat() {
     };
 
     setClientMessages((prev) => updateBudgetInList(prev));
+    setTimeout(() => scrollToBottom("smooth"), 40);
   };
   /**
    * Encerra a conversa atual.
@@ -863,7 +923,11 @@ export default function Chat() {
           <button
             type="button"
             className={`role-toggle-btn ${isAdmin ? "is-admin" : "is-client"}`}
-            onClick={() => setActiveRole(isAdmin ? "client" : "admin")}
+            onClick={() => {
+              const nextRole = isAdmin ? "client" : "admin";
+              setActiveRole(nextRole);
+              setMobileView("chat");
+            }}
             title="Alternar visão entre Cliente e Administrador para testes de hierarquia"
           >
             {isAdmin ? "🛡️ Administrador" : "👤 Cliente (Empresa/Pessoa)"}
@@ -901,7 +965,16 @@ export default function Chat() {
         </div>
 
         {/* Card Unificado de Chat com Hierarquia */}
-        <section className="chat-card" aria-label="Central de Mensagens">
+        <section
+          className={`chat-card ${
+            isAdmin
+              ? mobileView === "list"
+                ? "mobile-view--list"
+                : "mobile-view--chat"
+              : "is-client-view"
+          }`}
+          aria-label="Central de Mensagens"
+        >
           {/* PAINEL LATERAL: 
               - No modo ADMIN: Lista todos os clientes e solicitações em aberto.
               - No modo CLIENTE: Mostra o canal direto com a Life Topografia e status. */}
@@ -928,30 +1001,42 @@ export default function Chat() {
 
             <div className="chat-conversations-list" role="list">
               {isAdmin ? (
-                filteredAdminThreads.map((thread) => {
-                  const isActive = thread.id === activeThreadId;
-                  const lastMsg = thread.messages[thread.messages.length - 1];
-                  const previewText =
-                    lastMsg?.type === "file"
-                      ? `📎 Arquivo: ${lastMsg.file?.name}`
-                      : lastMsg?.type === "budget"
-                        ? `💼 Orçamento: R$ ${lastMsg.budget?.amount}`
-                        : lastMsg?.text || "Inicie a conversa...";
+                filteredAdminThreads.length === 0 ? (
+                  <div className="chat-empty-search" role="status">
+                    <span className="empty-search-icon" aria-hidden="true">
+                      🔍
+                    </span>
+                    <p>Nenhum cliente encontrado para "{searchTerm}".</p>
+                  </div>
+                ) : (
+                  filteredAdminThreads.map((thread) => {
+                    const isActive = thread.id === activeThreadId;
+                    const lastMsg = thread.messages[thread.messages.length - 1];
+                    const previewText =
+                      lastMsg?.type === "file"
+                        ? `📎 Arquivo: ${lastMsg.file?.name}`
+                        : lastMsg?.type === "budget"
+                          ? `💼 Orçamento: R$ ${lastMsg.budget?.amount}`
+                          : lastMsg?.text || "Inicie a conversa...";
 
-                  return (
-                    <div
-                      key={thread.id}
-                      role="listitem"
-                      className={`conversation-item ${isActive ? "is-active" : ""}`}
-                      onClick={() => setActiveThreadId(thread.id)}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
+                    return (
+                      <div
+                        key={thread.id}
+                        role="listitem"
+                        className={`conversation-item ${isActive ? "is-active" : ""}`}
+                        onClick={() => {
                           setActiveThreadId(thread.id);
-                        }
-                      }}
-                    >
+                          setMobileView("chat");
+                        }}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setActiveThreadId(thread.id);
+                            setMobileView("chat");
+                          }
+                        }}
+                      >
                       <div className="conversation-avatar-box">
                         <div className="conversation-avatar">
                           {thread.clientName.charAt(0)}
@@ -983,7 +1068,7 @@ export default function Chat() {
                       </div>
                     </div>
                   );
-                })
+                }))
               ) : (
                 <div className="conversation-item is-active">
                   <div className="conversation-avatar-box">
@@ -1025,46 +1110,85 @@ export default function Chat() {
             {/* Header da Conversa Ativa */}
             <header className="chat-active-header">
               <div className="active-attendant-info">
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className="btn-mobile-back"
+                    onClick={() => setMobileView("list")}
+                    aria-label="Voltar para lista de conversas"
+                    title="Voltar para lista de clientes"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                    <span className="btn-mobile-back-text">Clientes</span>
+                  </button>
+                )}
+
                 <div
                   className={`active-attendant-avatar ${isAdmin ? "" : "brand-avatar"}`}
+                  aria-hidden="true"
                 >
                   {isAdmin ? currentChatTitle.charAt(0) : "LT"}
                   {(isAdmin
                     ? currentAdminThread?.chatStatus
                     : clientChatStatus) === "open" && (
-                    <span className="online-indicator" />
+                    <span className="online-indicator" title="Conversa ativa" />
                   )}
                 </div>
-                <div>
-                  <h3 className="active-attendant-name">{currentChatTitle}</h3>
-                  <span className="active-attendant-status">
+
+                <div className="active-attendant-text">
+                  <div className="active-attendant-title-row">
+                    <h3 className="active-attendant-name" title={currentChatTitle}>
+                      {currentChatTitle}
+                    </h3>
+                    <span
+                      className={`chat-status-label ${
+                        (isAdmin
+                          ? currentAdminThread?.chatStatus
+                          : clientChatStatus) === "closed"
+                          ? "is-closed"
+                          : "is-open"
+                      }`}
+                    >
+                      <span className="status-dot" aria-hidden="true" />
+                      <span className="status-label-text">
+                        {(isAdmin
+                          ? currentAdminThread?.chatStatus
+                          : clientChatStatus) === "closed"
+                          ? "Chat encerrado"
+                          : "Chat aberto"}
+                      </span>
+                    </span>
+                  </div>
+
+                  <span className="active-attendant-status" title={currentChatSubtitle}>
                     {(isAdmin
                       ? currentAdminThread?.chatStatus
-                      : clientChatStatus) === "closed"
-                      ? "Atendimento encerrado"
-                      : "Conversa aberta"}{" • "}{currentChatSubtitle}
+                      : clientChatStatus) === "closed" ? (
+                      "Atendimento encerrado"
+                    ) : (
+                      <span className="online-status-line">
+                        <span className="pulse-dot" aria-hidden="true" />
+                        Ativo agora • {currentChatSubtitle}
+                      </span>
+                    )}
                   </span>
                 </div>
               </div>
 
               {/* Ações e status do atendimento */}
               <div className="active-header-actions">
-                <span
-                  className={`chat-status-label ${
-                    (isAdmin
-                      ? currentAdminThread?.chatStatus
-                      : clientChatStatus) === "closed"
-                      ? "is-closed"
-                      : "is-open"
-                  }`}
-                >
-                  {(isAdmin
-                    ? currentAdminThread?.chatStatus
-                    : clientChatStatus) === "closed"
-                    ? "Chat encerrado"
-                    : "Chat aberto"}
-                </span>
-
                 {isAdmin && currentAdminThread && (
                   <>
                     <button
@@ -1073,7 +1197,7 @@ export default function Chat() {
                       onClick={() => setShowBudgetModal(true)}
                       disabled={currentAdminThread.chatStatus === "closed"}
                     >
-                      + Gerar Orçamento
+                      + Orçamento
                     </button>
 
                     {currentAdminThread.serviceStatus !== "completed" && (
@@ -1095,6 +1219,7 @@ export default function Chat() {
                     type="button"
                     className="btn-close-chat"
                     onClick={handleCloseChat}
+                    title="Encerrar conversa atual"
                   >
                     Encerrar Chat
                   </button>
@@ -1103,10 +1228,25 @@ export default function Chat() {
             </header>
 
             {/* Área de Mensagens */}
-            <div className="chat-messages-area" role="log" aria-live="polite">
+            <div
+              className="chat-messages-area"
+              role="log"
+              aria-live="polite"
+              ref={messagesContainerRef}
+              onScroll={handleMessagesScroll}
+            >
               <div className="chat-date-badge">
                 <span>Canal Oficial de Atendimento • Life Topografia</span>
               </div>
+
+              {activeMessages.length === 0 && (
+                <div className="chat-empty-messages">
+                  <p>
+                    Nenhuma mensagem nesta conversa ainda. Inicie o atendimento
+                    enviando uma mensagem ou arquivo.
+                  </p>
+                </div>
+              )}
 
               {activeMessages.map((msg) => {
                 const isUser = msg.sender === (isAdmin ? "admin" : "client");
@@ -1305,47 +1445,84 @@ export default function Chat() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Botão flutuante para descer ao fim das mensagens */}
+            {isScrolledUp && (
+              <button
+                type="button"
+                className="btn-scroll-bottom"
+                onClick={() => scrollToBottom("smooth")}
+                aria-label="Rolar para mensagens recentes"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+                <span>Recentes</span>
+                {unreadWhileScrolled > 0 && (
+                  <span className="scroll-bottom-badge">
+                    {unreadWhileScrolled}
+                  </span>
+                )}
+              </button>
+            )}
+
             {/* Menu de Ações Rápidas (Anexar PDF / Gerar Orçamento) */}
             {showQuickActions && (
-              <div className="quick-actions-drawer" role="menu">
-                {/* O Cliente e o Admin podem enviar PDF */}
-                <button
-                  type="button"
-                  className="quick-action-item"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <span className="quick-action-icon">📄</span>
-                  <div>
-                    <strong>Enviar Matrícula (PDF)</strong>
-                    <p>
-                      Certidão de matrícula, escrituras ou memorial descritivo
-                    </p>
-                  </div>
-                </button>
-
-                {/* Exclusivo para Administrador: Gerar Orçamento */}
-                {isAdmin ? (
+              <>
+                <div
+                  className="quick-actions-backdrop"
+                  onClick={() => setShowQuickActions(false)}
+                  aria-hidden="true"
+                />
+                <div className="quick-actions-drawer" role="menu">
+                  {/* O Cliente e o Admin podem enviar PDF */}
                   <button
                     type="button"
                     className="quick-action-item"
-                    onClick={() => {
-                      setShowQuickActions(false);
-                      setShowBudgetModal(true);
-                    }}
+                    onClick={() => fileInputRef.current?.click()}
                   >
-                    <span className="quick-action-icon">💼</span>
+                    <span className="quick-action-icon">📄</span>
                     <div>
-                      <strong>Gerar Proposta de Orçamento</strong>
-                      <p>Emitir proposta oficial com cobrança via SumUp®</p>
+                      <strong>Enviar Matrícula (PDF)</strong>
+                      <p>
+                        Certidão de matrícula, escrituras ou memorial descritivo
+                      </p>
                     </div>
                   </button>
-                ) : (
-                  <div className="client-permission-hint">
-                    ℹ️ Para solicitar orçamentos, envie a matrícula em PDF e
-                    converse com a equipe no chat.
-                  </div>
-                )}
-              </div>
+
+                  {/* Exclusivo para Administrador: Gerar Orçamento */}
+                  {isAdmin ? (
+                    <button
+                      type="button"
+                      className="quick-action-item"
+                      onClick={() => {
+                        setShowQuickActions(false);
+                        setShowBudgetModal(true);
+                      }}
+                    >
+                      <span className="quick-action-icon">💼</span>
+                      <div>
+                        <strong>Gerar Proposta de Orçamento</strong>
+                        <p>Emitir proposta oficial com cobrança via SumUp®</p>
+                      </div>
+                    </button>
+                  ) : (
+                    <div className="client-permission-hint">
+                      ℹ️ Para solicitar orçamentos, envie a matrícula em PDF e
+                      converse com a equipe no chat.
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             {(isAdmin ? currentAdminThread?.chatStatus : clientChatStatus) ===
