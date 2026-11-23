@@ -383,8 +383,8 @@ export async function DeleteAccount(
 
   const result = await response.json();
 
-  if(!response.ok && !result?.status) {
+  if (!response.ok && !result?.status) {
     throw new Error(result.message ?? "Erro ao excluir a conta.");
   }
-  return result?.status
+  return result?.status;
 }

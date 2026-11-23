@@ -5,7 +5,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { Link, useNavigate, useLocation, replace } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
@@ -351,14 +351,12 @@ export default function Profile({
   }
 
   async function signOut() {
-  async function signOut() {
     try {
       await SignOut("local");
       navigateTo("/");
     } catch (error) {
       console.error("Erro ao sair da conta:", error);
     }
-  }
   }
 
   function editMember(selected?: CompanyMember) {
@@ -510,10 +508,7 @@ export default function Profile({
     setPasswordError("");
     setInvalidPassword(false);
     try {
-      const result = await DeleteAccount(  
-        profile.id,
-        password,
-      );
+      const result = await DeleteAccount(profile.id, password);
       if (result === "invalid_password") {
         setInvalidPassword(true);
         setPasswordError("Senha incorreta. Sua conta não foi excluída.");
