@@ -78,7 +78,6 @@ export const Login = () => {
   const [timer, setTimer] = useState(TEMPO_REENVIO);
 
   const from = location.state?.from?.pathname || "/";
-  console.log("from:", from);
 
   useEffect(() => {
     if (etapa !== "esqueci_codigo" || timer <= 0) {
@@ -258,13 +257,24 @@ export const Login = () => {
         captchaToken,
         formaDeLogin,
       );
-      if (!resultado.data?.user) {
-        setFeedback("Credenciais inválidas. Tente novamente.");
-        throw new Error("Credenciais inválidas");
+      if (!resultado.ok) {
+        if (resultado.fieldErrors) {
+          if (resultado.fieldErrors.valor?.[0]) {
+            setFeedback("Erro nas credenciais.");
+          }
+          if (resultado.fieldErrors.password?.[0]) {
+            setFeedback("Erro nas credenciais.");
+          }
+          if (resultado.fieldErrors.captchaToken?.[0]) {
+            setFeedback("Porfavor, complete o captchaToken");
+          }
+        }
+        setFeedback(resultado.message);
+        return;
       }
       navigate(from, { replace: true });
     } catch (error) {
-      setFeedback("Erro ao fazer login. Verifique suas credenciais.");
+      setFeedback("Erro ao fazer login. Tente novamente.");
       console.error("Erro ao fazer login:", error);
     } finally {
       setCaptchaToken(null);

@@ -1,5 +1,11 @@
-import { useState, useRef, useEffect, type FormEvent, type ChangeEvent } from "react";
-import { Link, useNavigate, useLocation  } from "react-router-dom";
+import {
+  useState,
+  useRef,
+  useEffect,
+  type FormEvent,
+  type ChangeEvent,
+} from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import Logo from "../../assets/image/logo-front.webp";
@@ -352,7 +358,9 @@ export default function Chat() {
           const profileRaw = cached || storedProfileStr;
           if (profileRaw) {
             const profileData =
-              typeof profileRaw === "string" ? JSON.parse(profileRaw) : profileRaw;
+              typeof profileRaw === "string"
+                ? JSON.parse(profileRaw)
+                : profileRaw;
             const userRole = (profileData.tipo_perfil || "").toLowerCase();
             loadedName = profileData.nome_ou_razao || "Cliente";
             loadedAvatar = profileData.foto_url;
@@ -468,7 +476,8 @@ export default function Chat() {
   // Os estados de atendimento são vinculados à conversa selecionada, não globais.
   // A alternância de perfil é apenas uma visualização demonstrativa do frontend.
   const clientChatStatus = currentAdminThread?.chatStatus ?? "open";
-  const clientServiceStatus = currentAdminThread?.serviceStatus ?? "not_started";
+  const clientServiceStatus =
+    currentAdminThread?.serviceStatus ?? "not_started";
 
   const activeMessages = isAdmin
     ? currentAdminThread?.messages || []
@@ -691,7 +700,8 @@ export default function Chat() {
       !budgetAmount.trim() ||
       !activeThreadId ||
       currentAdminThread?.chatStatus === "closed"
-    ) return;
+    )
+      return;
 
     const now = new Date();
     const formattedTime = now.toLocaleTimeString("pt-BR", {
@@ -749,7 +759,8 @@ export default function Chat() {
     const targetBudget = clientMessages.find(
       (message) => message.type === "budget" && message.budget?.id === budgetId,
     );
-    if (!targetBudget?.budget || targetBudget.budget.status !== "pending") return;
+    if (!targetBudget?.budget || targetBudget.budget.status !== "pending")
+      return;
 
     const now = new Date();
     const formattedTime = now.toLocaleTimeString("pt-BR", {
@@ -860,11 +871,7 @@ export default function Chat() {
   const handleSubmitRating = (e: FormEvent) => {
     e.preventDefault();
 
-    if (
-      rating < 1 ||
-      rating > 5 ||
-      clientServiceStatus !== "completed"
-    ) return;
+    if (rating < 1 || rating > 5 || clientServiceStatus !== "completed") return;
 
     setSubmittedRating({
       score: rating,
@@ -1037,38 +1044,39 @@ export default function Chat() {
                           }
                         }}
                       >
-                      <div className="conversation-avatar-box">
-                        <div className="conversation-avatar">
-                          {thread.clientName.charAt(0)}
+                        <div className="conversation-avatar-box">
+                          <div className="conversation-avatar">
+                            {thread.clientName.charAt(0)}
+                          </div>
+                          {thread.chatStatus === "open" && (
+                            <span
+                              className="online-indicator"
+                              title="Conversa aberta"
+                            />
+                          )}
                         </div>
-                        {thread.chatStatus === "open" && (
-                          <span
-                            className="online-indicator"
-                            title="Conversa aberta"
-                          />
-                        )}
-                      </div>
 
-                      <div className="conversation-details">
-                        <div className="conversation-top-row">
-                          <span className="conversation-name">
-                            {thread.clientName}
+                        <div className="conversation-details">
+                          <div className="conversation-top-row">
+                            <span className="conversation-name">
+                              {thread.clientName}
+                            </span>
+                            <span className="conversation-time">
+                              {thread.lastMessageTime}
+                            </span>
+                          </div>
+                          <span className="conversation-role">
+                            {thread.clientType === "empresa"
+                              ? "Empresa"
+                              : "Pessoa Física"}{" "}
+                            • {thread.document}
                           </span>
-                          <span className="conversation-time">
-                            {thread.lastMessageTime}
-                          </span>
+                          <p className="conversation-preview">{previewText}</p>
                         </div>
-                        <span className="conversation-role">
-                          {thread.clientType === "empresa"
-                            ? "Empresa"
-                            : "Pessoa Física"}{" "}
-                          • {thread.document}
-                        </span>
-                        <p className="conversation-preview">{previewText}</p>
                       </div>
-                    </div>
-                  );
-                }))
+                    );
+                  })
+                )
               ) : (
                 <div className="conversation-item is-active">
                   <div className="conversation-avatar-box">
@@ -1149,7 +1157,10 @@ export default function Chat() {
 
                 <div className="active-attendant-text">
                   <div className="active-attendant-title-row">
-                    <h3 className="active-attendant-name" title={currentChatTitle}>
+                    <h3
+                      className="active-attendant-name"
+                      title={currentChatTitle}
+                    >
                       {currentChatTitle}
                     </h3>
                     <span
@@ -1172,7 +1183,10 @@ export default function Chat() {
                     </span>
                   </div>
 
-                  <span className="active-attendant-status" title={currentChatSubtitle}>
+                  <span
+                    className="active-attendant-status"
+                    title={currentChatSubtitle}
+                  >
                     {(isAdmin
                       ? currentAdminThread?.chatStatus
                       : clientChatStatus) === "closed" ? (
@@ -1624,7 +1638,8 @@ export default function Chat() {
 
         {!isAdmin && ratingSubmitted && (
           <p className="rating-success-message" role="status">
-            Obrigado pela sua avaliação! Nota registrada nesta sessão: {submittedRating?.score}/5.
+            Obrigado pela sua avaliação! Nota registrada nesta sessão:{" "}
+            {submittedRating?.score}/5.
           </p>
         )}
 

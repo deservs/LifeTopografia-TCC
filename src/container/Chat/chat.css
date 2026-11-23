@@ -1156,7 +1156,7 @@
 
 .btn-accept-budget:disabled,
 .btn-reject-budget:disabled {
-  opacity:  0.5;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 

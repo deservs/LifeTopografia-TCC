@@ -26,8 +26,16 @@ const envSchemaWithSupabase = envSchema.extend({
   SUPABASE_SECRET_KEY: z.string().min(1, 'A SUPABASE_SECRET_KEY é obrigatória'),
 })
 
+const envSchemaWithR2 = envSchemaWithSupabase.extend({
+  AWS_S3_ENDPOINT: z.string().url('O AWS_S3_ENDPOINT precisa ser uma URL válida'),
+  AWS_ACCESS_KEY_ID: z.string().min(1, 'O AWS_ACCESS_KEY_ID é obrigatório'),
+  AWS_SECRET_ACCESS_KEY: z.string().min(1, 'O AWS_SECRET_ACCESS_KEY é obrigatório'),
+  AWS_S3_BUCKET_NAME: z.string().min(1, 'O AWS_S3_BUCKET_NAME é obrigatório'),
+  AWS_REGION: z.string().default('auto'),
+})
+
 //Executa a validação
-const _env = envSchemaWithSupabase.safeParse(process.env)
+const _env = envSchemaWithR2.safeParse(process.env)
 
 //Se a validação falhar, lança um erro claro no console e para a aplicação
 if (_env.success === false) {

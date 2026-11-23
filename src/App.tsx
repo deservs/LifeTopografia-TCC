@@ -14,7 +14,7 @@ import Profile from "./container/Profile/profile";
 import Teste from "./container/Enviar-arquivos/enviar_arquivos";
 import Teste2 from "./container/Enviar-arquivos/enviar_email";
 import Erro404 from "./container/Error/erro404";
-import Chat from "./container/Chat/chat"; // <- Importe o componente do chat
+import Chat from "./container/Chat/chat";
 import FAQ from "./container/FAQ/faq";
 
 function App() {

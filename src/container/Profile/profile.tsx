@@ -6,11 +6,20 @@ import {
   type FormEvent,
 } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 import Footer from "../../components/Footer/footer";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
-import { SerchDataUser, SignOut } from "../../lib/supabase/auth";
-import { supabase } from "../../lib/supabase/supabaseClient";
+
+import {
+  SerchDataUser,
+  SignOut,
+  UpdateUser,
+  SaveNewMemberData,
+  SearchMemberData,
+  DeleteAccount,
+} from "../../lib/supabase/auth";
+
 import Logo from "../../assets/image/logo-front.webp";
 import "./profile.css";
 
@@ -23,8 +32,7 @@ export interface CompanyMember {
   id: string;
   name: string;
   email: string;
-  cpf: string;
-  status: "ativo" | "afastado";
+  status: "ATIVO" | "EXCLUIDO" | "AFASTADO" | "PENDENTE";
   avatarUrl?: string;
 }
 
@@ -75,12 +83,9 @@ export interface ProfileServices {
 interface ProfileProps {
   initialProfile?: ProfileData;
   initialMembers?: CompanyMember[];
-  services?: ProfileServices;
 }
 
 type PageView = "profile" | "members" | "member" | "password";
-const unavailableMessage =
-  "Esta ação ainda não está disponível. Suas alterações não foram enviadas.";
 
 function EditIcon() {
   return (
@@ -95,32 +100,27 @@ function EditIcon() {
   );
 }
 
-function Avatar({ name, avatarUrl }: Pick<UserProfile, "name" | "avatarUrl">) {
+function Avatar({
+  name = "",
+  avatarUrl,
+}: Partial<Pick<UserProfile, "name" | "avatarUrl">>) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const safeName = (name ?? "").trim();
   return (
     <span className="profile-avatar">
       {avatarUrl && failedUrl !== avatarUrl ? (
         <img
           src={avatarUrl}
-          alt={`Foto de ${name}`}
+          alt={`Foto de ${safeName || "usuário"}`}
           onError={() => setFailedUrl(avatarUrl)}
         />
       ) : (
-        <span aria-label={`Perfil de ${name}`}>
-          {name.trim().charAt(0).toUpperCase() || "P"}
+        <span aria-label={`Perfil de ${safeName || "usuário"}`}>
+          {safeName.charAt(0).toUpperCase() || "P"}
         </span>
       )}
     </span>
   );
-}
-
-function formatCpf(value: string) {
-  return value
-    .replace(/\D/g, "")
-    .slice(0, 11)
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
 function isCompany(role: string) {
@@ -142,7 +142,6 @@ function isCompany(role: string) {
 export default function Profile({
   initialProfile,
   initialMembers = [],
-  services,
 }: ProfileProps = {}) {
   const location = useLocation();
   const navigateTo = useNavigate();
@@ -187,6 +186,9 @@ export default function Profile({
     setDraft((current) =>
       current ? { ...current, avatarUrl: previewUrl } : current,
     );
+    setDraft((current) =>
+      current ? { ...current, avatarUrl: previewUrl } : current,
+    );
     return () => URL.revokeObjectURL(previewUrl);
   }, [avatarFile]);
 
@@ -214,20 +216,17 @@ export default function Profile({
     let active = true;
     async function loadProfile() {
       try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        if (!data.session) return;
-        const cached = await SerchDataUser();
-        if (!cached) throw new Error("Perfil não encontrado");
-        const user = JSON.parse(cached);
+        const user = await SerchDataUser();
+        if (!user) {
+          if (active) setProfile(null);
+          return;
+        }
         const loadedProfile: ProfileData = {
-          id: data.session.user.id,
-          name: user.nome_ou_razao ?? "",
-          role:
-            user.tipo_perfil ??
-            (data.session.user.user_metadata.cnpj ? "empresa" : "pessoa"),
-          avatarUrl: user.foto_url ?? undefined,
-          email: data.session.user.email ?? "",
+          id: user?.id,
+          name: user?.name ?? "",
+          role: user.role ?? (user.role === "empresa" ? "empresa" : "pessoa"),
+          avatarUrl: user.avatarUrl ?? undefined,
+          email: user.email ?? "",
         };
         if (active) {
           setProfile(loadedProfile);
@@ -285,38 +284,47 @@ export default function Profile({
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!profile || !draft || submittingRef.current) return;
-    if (!services?.saveProfile || (avatarFile && !services.uploadAvatar)) {
-      notify(
-        avatarFile
-          ? "O envio de foto ainda não está integrado ao armazenamento. Nenhuma alteração foi salva."
-          : unavailableMessage,
-        true,
-      );
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setFeedback("");
     try {
-      let avatarUrl = draft.avatarUrl;
-      if (avatarFile && services.uploadAvatar) {
-        avatarUrl = await services.uploadAvatar(profile.id, avatarFile);
-      }
+      const trimmedName = draft.name.trim();
+      const trimmedEmail = draft.email.trim();
 
-      const updated = {
+      const updateResponse = await UpdateUser(
+        trimmedName !== profile.name ? trimmedName : undefined,
+        trimmedEmail !== profile.email ? trimmedEmail : undefined,
+        avatarFile ?? undefined,
+      );
+      if (!updateResponse.ok) {
+        notify(
+          updateResponse.message ?? "Erro ao atualizar os dados do usuário.",
+          true,
+        );
+        return;
+      }
+      const freshUser = await SerchDataUser();
+
+      const updated: ProfileData = {
         ...draft,
-        avatarUrl,
-        name: draft.name.trim(),
-        email: draft.email.trim(),
+        avatarUrl: freshUser?.avatarUrl ?? draft.avatarUrl,
+        name: trimmedName,
+        email: trimmedEmail,
       };
-      await services.saveProfile(updated);
+
       setProfile(updated);
       setDraft(updated);
       setAvatarFile(null);
       if (avatarInputRef.current) avatarInputRef.current.value = "";
       notify("Perfil salvo com sucesso.");
-    } catch {
-      notify("Não foi possível salvar o perfil. Tente novamente.", true);
+    } catch (err) {
+      notify(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível salvar o perfil. Tente novamente.",
+        true,
+      );
     } finally {
       submittingRef.current = false;
       setBusy(false);
@@ -325,10 +333,12 @@ export default function Profile({
 
   async function openMembers() {
     navigate("members");
-    if (!profile || membersLoaded || !services?.loadMembers) return;
+    if (!profile || membersLoaded) return;
     setMembersLoading(true);
     try {
-      setMembers(await services.loadMembers(profile.id));
+      const searchMembers = await SearchMemberData();
+
+      setMembers(searchMembers ?? []);
       setMembersLoaded(true);
     } catch {
       notify(
@@ -352,50 +362,65 @@ export default function Profile({
   function editMember(selected?: CompanyMember) {
     setMember(
       selected
-        ? { ...selected, cpf: formatCpf(selected.cpf) }
+        ? { ...selected }
         : {
             id: crypto.randomUUID(),
             name: "",
             email: "",
-            cpf: "",
-            status: "ativo",
+            status: "ATIVO",
           },
     );
     navigate("member");
   }
 
-  function saveMember(event: FormEvent<HTMLFormElement>) {
+  async function saveMember(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!member) return;
-    const updated = {
-      ...member,
-      status: existingMember ? member.status : "ativo",
-      name: member.name.trim(),
-      email: member.email.trim(),
-    };
-    setMembers((previous) =>
-      previous.some((item) => item.id === updated.id)
-        ? previous.map((item) => (item.id === updated.id ? updated : item))
-        : [...previous, updated],
-    );
-    navigate("members");
-    notify("Alterações preparadas. Clique em Salvar para concluir.");
+    const name = member?.name.trim();
+    const email = member?.email.trim();
+    if (!name || !email) {
+      notify("Nome e email são obrigatórios.", true);
+      return;
+    }
+    try {
+      const newMember = await SaveNewMemberData(name, email);
+
+      if (!newMember) {
+        notify("Não foi possível salvar o membro. Tente novamente.", true);
+        return;
+      }
+
+      const updated = await SearchMemberData();
+      setMembers(updated ?? []);
+      navigate("members");
+      setMembersLoaded(true);
+      notify(
+        "Usuário salvo com sucesso. A alteração será efetivada após a confirmação do convite.",
+      );
+    } catch (err) {
+      notify(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível salvar o membro. Tente novamente.",
+        true,
+      );
+    }
   }
 
   async function saveMembers() {
     if (!profile || submittingRef.current) return;
-    if (!services?.saveMembers) {
-      notify(unavailableMessage, true);
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setFeedback("");
     try {
-      await services.saveMembers(profile.id, members);
       notify("Membros salvos com sucesso.");
-    } catch {
-      notify("Não foi possível salvar os membros. Tente novamente.", true);
+    } catch (err) {
+      notify(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível salvar os membros. Tente novamente.",
+        true,
+      );
     } finally {
       submittingRef.current = false;
       setBusy(false);
@@ -432,22 +457,13 @@ export default function Profile({
       await deleteAccount();
       return;
     }
-    if (!services?.confirmMemberAction) {
-      setPasswordError(
-        "Não foi possível confirmar a senha. Serviço indisponível.",
-      );
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setPasswordError("");
     setInvalidPassword(false);
     try {
-      const confirmed = await services.confirmMemberAction(
-        profile.id,
-        action,
-        password,
-      );
+      const confirmed = true;
       if (!confirmed) {
         setInvalidPassword(true);
         setPasswordError("Senha incorreta.");
@@ -486,25 +502,13 @@ export default function Profile({
 
   async function deleteAccount() {
     if (!profile || submittingRef.current || !canDeleteAccount) return;
-    if (!services?.deleteAccount) {
-      setPasswordError(
-        "A exclusão de conta ainda não está disponível. Nenhuma conta foi excluída.",
-      );
-      setPassword("");
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setPasswordError("");
     setInvalidPassword(false);
     try {
-      const result = await services.deleteAccount({
-        profileId: profile.id,
-        password,
-        confirmationText: deletionText.trim(),
-        acknowledged: deletionAcknowledged,
-        companyAcknowledged: companyDeletionAcknowledged,
-      });
+      const result = await DeleteAccount(profile.id, password);
       if (result === "invalid_password") {
         setInvalidPassword(true);
         setPasswordError("Senha incorreta. Sua conta não foi excluída.");
@@ -517,7 +521,8 @@ export default function Profile({
           "Existem vínculos ou pendências que impedem a exclusão. Resolva-os com o atendimento antes de tentar novamente.",
         );
       } else if (result === "deleted") {
-        window.location.replace("/");
+        await SignOut("global");
+        navigateTo("/", { replace: true });
       } else {
         setPasswordError(
           "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
@@ -541,15 +546,11 @@ export default function Profile({
       notify("As senhas informadas não são iguais.", true);
       return;
     }
-    if (!services?.changePassword) {
-      notify(unavailableMessage, true);
-      return;
-    }
+
     submittingRef.current = true;
     setBusy(true);
     setFeedback("");
     try {
-      await services.changePassword(newPassword);
       setNewPassword("");
       setRepeatPassword("");
       navigate("profile");
@@ -852,7 +853,7 @@ export default function Profile({
                               <span
                                 className={`profile-status profile-status--${item.status}`}
                               >
-                                {item.status === "ativo" ? "Ativo" : "Afastado"}
+                                {item.status}
                               </span>
                             </div>
                             <button
@@ -945,24 +946,27 @@ export default function Profile({
                       }
                     />
                   </label>
-                  <label className="profile-field" htmlFor="profile-member-cpf">
-                    CPF:
-                    <input
-                      id="profile-member-cpf"
-                      name="memberCpf"
-                      inputMode="numeric"
-                      value={member.cpf}
-                      required
-                      pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
-                      maxLength={14}
-                      title="Informe os 11 dígitos do CPF"
-                      onChange={(event) =>
-                        setMember({
-                          ...member,
-                          cpf: formatCpf(event.target.value),
-                        })
-                      }
-                    />
+                  <label
+                    className="profile-field"
+                    htmlFor="profile-member-status"
+                  >
+                    Status:
+                    <select
+                      id="profile-member-status"
+                      aria-label="Status do membro"
+                      value={member.status}
+                      className={`profile-status profile-status--${member.status}`}
+                      onChange={(event) => {
+                        const status = event.target
+                          .value as CompanyMember["status"];
+                        if (existingMember)
+                          requestAction({ type: "status", member, status });
+                        else setMember({ ...member, status });
+                      }}
+                    >
+                      <option value="ativo">Ativo</option>
+                      <option value="afastado">Afastado</option>
+                    </select>
                   </label>
                   {existingMember && (
                     <label
