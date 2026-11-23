@@ -82,11 +82,10 @@ export default function FAQ() {
       try {
         const cached = await SerchDataUser();
         if (cached && active) {
-          const profileData = JSON.parse(cached);
           setUserProfile({
-            name: profileData.nome_ou_razao || "Cliente",
-            role: profileData.tipo_perfil || "pessoa",
-            avatarUrl: profileData.foto_url,
+            name: cached.name || "Cliente",
+            role: cached.role || "pessoa",
+            avatarUrl: cached.avatarUrl || "",
           });
         }
       } catch (err) {
