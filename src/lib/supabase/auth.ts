@@ -5,9 +5,7 @@ import type {
   ProfileData,
   CompanyMember,
 } from "../../container/Profile/profile";
-import { env } from "../env";
 
-const API_URL = env.VITE_API_URL;
 
 export interface UserProfile {
   id: string;
@@ -132,7 +130,7 @@ export async function UpdateUser(
     throw new Error("Usuário não autenticado.");
   }
   if (file) {
-    const preResAvatar = await fetch(`${API_URL}/api/updateAvatar`, {
+    const preResAvatar = await fetch(`/api/updateAvatar`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -165,7 +163,7 @@ export async function UpdateUser(
   if (name) payload.name = name;
   if (email) payload.email = email;
   if (avatarUrl) payload.avatarUrl = avatarUrl;
-  const resposta = await fetch(`${API_URL}/api/update-profile`, {
+  const resposta = await fetch(`/api/update-profile`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -296,7 +294,7 @@ export async function SaveNewMemberData(
   if (!id) {
     throw new Error("Usuário não autenticado.");
   }
-  const resultado = await fetch(`${API_URL}/api/save-member`, {
+  const resultado = await fetch(`/api/save-member`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -330,7 +328,7 @@ export async function SearchMemberData() {
     throw new Error("Usuário não autenticado.");
   }
   const id = user.session.access_token;
-  const members = await fetch(`${API_URL}/api/get-members`, {
+  const members = await fetch(`/api/get-members`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${id}`,
@@ -369,7 +367,7 @@ export async function DeleteAccount(
     throw new Error("Usuário não autenticado.");
   }
 
-  const response = await fetch(`${API_URL}/api/delete-account`, {
+  const response = await fetch(`/api/delete-account`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
