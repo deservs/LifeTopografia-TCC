@@ -980,25 +980,6 @@ export default function Profile({
                       <option value="afastado">Afastado</option>
                     </select>
                   </label>
-                  <label className="profile-field" htmlFor="profile-member-cpf">
-                    CPF:
-                    <input
-                      id="profile-member-cpf"
-                      name="memberCpf"
-                      inputMode="numeric"
-                      value={member.cpf}
-                      required
-                      pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
-                      maxLength={14}
-                      title="Informe os 11 dígitos do CPF"
-                      onChange={(event) =>
-                        setMember({
-                          ...member,
-                          cpf: formatCpf(event.target.value),
-                        })
-                      }
-                    />
-                  </label>
                   {existingMember && (
                     <label
                       className="profile-field"
