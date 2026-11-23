@@ -67,7 +67,7 @@ export async function SignIn(
   captchaToken: string,
   loginType: "email" | "cnpj",
 ): Promise<SingInResponse> {
-  const resposta = await fetch("http://localhost:3001/api/login", {
+  const resposta = await fetch("/api/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -130,7 +130,7 @@ export async function UpdateUser(
     throw new Error("Usuário não autenticado.");
   }
   if (file) {
-    const preResAvatar = await fetch(`/api/updateAvatar`, {
+    const preResAvatar = await fetch("/api/updateAvatar", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -163,7 +163,7 @@ export async function UpdateUser(
   if (name) payload.name = name;
   if (email) payload.email = email;
   if (avatarUrl) payload.avatarUrl = avatarUrl;
-  const resposta = await fetch(`/api/update-profile`, {
+  const resposta = await fetch("/api/update-profile", {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -294,7 +294,7 @@ export async function SaveNewMemberData(
   if (!id) {
     throw new Error("Usuário não autenticado.");
   }
-  const resultado = await fetch(`/api/save-member`, {
+  const resultado = await fetch("/api/save-member", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -328,7 +328,7 @@ export async function SearchMemberData() {
     throw new Error("Usuário não autenticado.");
   }
   const id = user.session.access_token;
-  const members = await fetch(`/api/get-members`, {
+  const members = await fetch("/api/get-members", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${id}`,
@@ -367,7 +367,7 @@ export async function DeleteAccount(
     throw new Error("Usuário não autenticado.");
   }
 
-  const response = await fetch(`/api/delete-account`, {
+  const response = await fetch("/api/delete-account", {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
