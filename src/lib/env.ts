@@ -15,7 +15,7 @@ export const envSchema = z.object({
     .url("URL pública do R2 inválida"),
   VITE_API_URL: z
     .string({ message: "URL da API é obrigatória" })
-    .url("URL da API inválida"),
+    .url("URL da API inválida").optional().or(z.literal("")),
 });
 
 const _env = envSchema.safeParse(import.meta.env);
