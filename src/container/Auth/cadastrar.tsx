@@ -80,24 +80,14 @@ export const Cadastrar = () => {
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-
+    
     if (name === "cnpj") {
-      let numericValue = value.replace(/\D/g, "").substring(0, 14);
-      numericValue = numericValue
-        .replace(/^(\d{2})(\d)/, "$1.$2")
-        .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-        .replace(/\.(\d{3})(\d)/, ".$1/$2")
-        .replace(/(\d{4})(\d)/, "$1-$2");
+      let numericValue = formData.cnpj.replace(/\D/g, "");
 
-      // Limita a 14 dígitos
-      numericValue = numericValue.substring(0, 14);
-
-      numericValue = numericValue
-        .replace(/(\w{2})(\w)/, "$1.$2") // Coloca ponto entre o segundo e o terceiro dígito
-        .replace(/(\w{3})(\w)/, "$1.$2") // Coloca ponto entre o quinto e o sexto dígito
-        .replace(/(\w{3})(\w)/, "$1/$2") // Coloca barra entre o oitavo e o nono dígito
-        .replace(/(\w{4})(\w)/, "$1-$2"); // Coloca hífen entre o décimo segundo e décimo terceiro dígito
-
+        if(numericValue.length !== 14) {
+          setFormError("O CNPJ deve conter 14 dígitos.");
+          return;
+        }
       setFormData((previousData) => ({
         ...previousData,
         [name]: numericValue,
@@ -191,7 +181,7 @@ export const Cadastrar = () => {
       .catch((error) => {
         console.error("Erro ao cadastrar usuário:", error);
         setFormError(
-          "Ocorreu um erro ao cadastrar. Tente novamente mais tarde.",
+          error instanceof Error ? error.message : "Ocorreu um erro ao cadastrar. Tente novamente mais tarde.",
         );
       })
       .finally(() => {

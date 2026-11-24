@@ -1,31 +1,28 @@
 import { supabase } from "../../lib/supabase/supabaseClient";
 import type { Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
+const PUBLIC_AUTH_ROUTES = ["/login", "/cadastrar"];
 
 export default function CheckSession() {
-  const [session, setSession] = useState<Session | null>(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    const fetchSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
+    if (!PUBLIC_AUTH_ROUTES.includes(pathname)) return;
+
+    let isMounted = true;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (isMounted && session) {
+        navigate("/", { replace: true });
+      }
+    });
+    return () => {
+      isMounted = false;
     };
-    fetchSession();
-  }, []);
-
-  useEffect(() => {
-    if (
-      session &&
-      (window.location.pathname === "/login" ||
-        window.location.pathname === "/cadastrar")
-    ) {
-      navigate("/", { replace: true });
-    }
-  }, [session, navigate]);
+  }, [pathname, navigate]);
 
   return null;
 }
