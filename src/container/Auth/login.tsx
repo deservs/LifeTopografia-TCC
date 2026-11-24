@@ -349,6 +349,11 @@ export const Login = () => {
 
   const handleSubmitNewPassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if(formData.novaSenha !== formData.confirmarNovaSenha) {
+      setFeedback("As senhas informadas não são iguais.");
+      return;
+    }
+    
     const strongPasswordSchema = z
       .string()
       .min(8, "A senha deve ter pelo menos 8 caracteres.")
@@ -365,6 +370,7 @@ export const Login = () => {
       );
       return;
     }
+
 
     setFeedback("");
 

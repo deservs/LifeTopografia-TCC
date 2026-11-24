@@ -80,7 +80,14 @@ app.post("/api/signup", async (request, reply) => {
         email: z.string().email({ message: "O email fornecido não é válido." }),
         password: z
           .string()
-          .min(8, { message: "A senha deve ter pelo menos 8 caracteres." }),
+          .min(8, "A senha deve ter pelo menos 8 caracteres.")
+          .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula.")
+          .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula.")
+          .regex(/\p{N}/u, "A senha deve conter pelo menos um número.")
+          .regex(
+            /[^\p{L}\p{N}\s]/u,
+            "A senha deve conter pelo menos um símbolo.",
+          ),
         nome: z.string().min(1, { message: "O nome não pode estar vazio." }),
         cnpj: z.string().optional(),
         captchaToken: z
@@ -222,7 +229,7 @@ app.post(
       });
     }
     const { email, name } = parseResult.data;
-    const company_id = request.user.id; 
+    const company_id = request.user.id;
     try {
       const sendResetResponse = await MemberSignUp(email, name, company_id);
       if (!sendResetResponse.ok) {
@@ -296,17 +303,16 @@ app.delete(
         .send({ message: "Email do usuário não encontrado." });
     }
     try {
-
-    const passwordStatus = await CheckPassword(
-      userEmail,
-      parsedBody.data.password,
-    );
-    if (passwordStatus === "invalid_password") {
-      return reply.code(401).send({
-        status: "invalid_password",
-        message: "Senha incorreta.",
-      });
-    }
+      const passwordStatus = await CheckPassword(
+        userEmail,
+        parsedBody.data.password,
+      );
+      if (passwordStatus === "invalid_password") {
+        return reply.code(401).send({
+          status: "invalid_password",
+          message: "Senha incorreta.",
+        });
+      }
 
       const deleteResponse = await DeleteAccount(userId);
       if (deleteResponse === "forbidden") {

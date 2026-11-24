@@ -80,14 +80,16 @@ export const Cadastrar = () => {
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    
-    if (name === "cnpj") {
-      let numericValue = formData.cnpj.replace(/\D/g, "");
 
-        if(numericValue.length !== 14) {
-          setFormError("O CNPJ deve conter 14 dígitos.");
-          return;
-        }
+    if (name === "cnpj") {
+      let numericValue = value
+        .replace(/\D/g, "")
+        .slice(0, 14)
+        .replace(/^(\d{2})(\d)/, "$1.$2")
+        .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1/$2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+
       setFormData((previousData) => ({
         ...previousData,
         [name]: numericValue,
@@ -166,14 +168,14 @@ export const Cadastrar = () => {
         return;
       }
     }
-
+    const role = tipoCadastro === "empresa" ? cnpjRegex : undefined;
     /* método de criar um novo usuário */
     SignUp(
       formData.email,
       formData.senha,
       formData.nome,
-      cnpjRegex,
       captchaToken,
+      role
     )
       .then(() => {
         navigate("/login", { replace: true });
@@ -181,7 +183,9 @@ export const Cadastrar = () => {
       .catch((error) => {
         console.error("Erro ao cadastrar usuário:", error);
         setFormError(
-          error instanceof Error ? error.message : "Ocorreu um erro ao cadastrar. Tente novamente mais tarde.",
+          error instanceof Error
+            ? error.message
+            : "Ocorreu um erro ao cadastrar. Tente novamente mais tarde.",
         );
       })
       .finally(() => {
