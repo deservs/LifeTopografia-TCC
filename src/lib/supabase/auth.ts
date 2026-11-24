@@ -35,8 +35,8 @@ export async function SignUp(
   email: string,
   password: string,
   nome: string,
-  cnpj: string | null = null,
   captchaToken: string,
+  cnpj?: string,
 ) {
   const resposta = await fetch("/api/signup", {
     method: "POST",
@@ -290,31 +290,39 @@ export async function SaveNewMemberData(
   name: string,
   email: string,
 ): Promise<CompanyMember> {
-  const id = await SerchDataUser();
-  if (!id) {
+    const { data: user, error } = await supabase.auth.getSession();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  if (!user.session || !user.session.user) {
     throw new Error("Usuário não autenticado.");
   }
+  const id = user.session.access_token;
+
   const resultado = await fetch("/api/save-member", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${id}`,
     },
     body: JSON.stringify({
       name,
       email,
-      company_id: id.id,
     }),
   });
   const data = await resultado.json();
   if (!resultado.ok) {
     throw new Error(data.message ?? "Erro ao salvar dados do membro.");
   }
+  const memberData = data.data;
+
   return {
-    id: data.id,
-    name: data.name,
-    email: data.email,
-    status: data.status,
-    avatarUrl: data.avatarUrl,
+    id: memberData.id,
+    name: memberData.name,
+    email: memberData.email,
+    status: memberData.status,
+    avatarUrl: getAvatarPublicUrl(memberData.avatarUrl),
   };
 }
 

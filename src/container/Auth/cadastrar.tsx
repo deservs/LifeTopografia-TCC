@@ -82,21 +82,13 @@ export const Cadastrar = () => {
     const { name, value } = event.target;
 
     if (name === "cnpj") {
-      let numericValue = value.replace(/\D/g, "").substring(0, 14);
-      numericValue = numericValue
+      let numericValue = value
+        .replace(/\D/g, "")
+        .slice(0, 14)
         .replace(/^(\d{2})(\d)/, "$1.$2")
         .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
         .replace(/\.(\d{3})(\d)/, ".$1/$2")
         .replace(/(\d{4})(\d)/, "$1-$2");
-
-      // Limita a 14 dígitos
-      numericValue = numericValue.substring(0, 14);
-
-      numericValue = numericValue
-        .replace(/(\w{2})(\w)/, "$1.$2") // Coloca ponto entre o segundo e o terceiro dígito
-        .replace(/(\w{3})(\w)/, "$1.$2") // Coloca ponto entre o quinto e o sexto dígito
-        .replace(/(\w{3})(\w)/, "$1/$2") // Coloca barra entre o oitavo e o nono dígito
-        .replace(/(\w{4})(\w)/, "$1-$2"); // Coloca hífen entre o décimo segundo e décimo terceiro dígito
 
       setFormData((previousData) => ({
         ...previousData,
@@ -176,14 +168,14 @@ export const Cadastrar = () => {
         return;
       }
     }
-
+    const role = tipoCadastro === "empresa" ? cnpjRegex : undefined;
     /* método de criar um novo usuário */
     SignUp(
       formData.email,
       formData.senha,
       formData.nome,
-      cnpjRegex,
       captchaToken,
+      role
     )
       .then(() => {
         navigate("/login", { replace: true });
@@ -191,7 +183,9 @@ export const Cadastrar = () => {
       .catch((error) => {
         console.error("Erro ao cadastrar usuário:", error);
         setFormError(
-          "Ocorreu um erro ao cadastrar. Tente novamente mais tarde.",
+          error instanceof Error
+            ? error.message
+            : "Ocorreu um erro ao cadastrar. Tente novamente mais tarde.",
         );
       })
       .finally(() => {

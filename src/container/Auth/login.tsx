@@ -26,6 +26,7 @@ import Logo from "../../assets/image/logo-front.webp";
 import FundoHeader from "../../assets/image/background/firstcard.webp";
 
 import "./login.css";
+import { z } from "zod";
 
 type EtapaFluxo =
   "login" | "esqueci_email" | "esqueci_codigo" | "esqueci_nova_senha";
@@ -348,22 +349,34 @@ export const Login = () => {
 
   const handleSubmitNewPassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (formData.novaSenha !== formData.confirmarNovaSenha) {
+    if(formData.novaSenha !== formData.confirmarNovaSenha) {
       setFeedback("As senhas informadas não são iguais.");
       return;
     }
+    
+    const strongPasswordSchema = z
+      .string()
+      .min(8, "A senha deve ter pelo menos 8 caracteres.")
+      .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula.")
+      .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula.")
+      .regex(/\p{N}/u, "A senha deve conter pelo menos um número.")
+      .regex(/[^\p{L}\p{N}\s]/u, "A senha deve conter pelo menos um símbolo.")
+      .safeParse(formData.novaSenha);
 
-    if (formData.novaSenha.length < 6) {
-      setFeedback("A senha deve possuir pelo menos 6 caracteres.");
+    if (!strongPasswordSchema.success) {
+      setFeedback(
+        strongPasswordSchema.error.issues[0]?.message ??
+          "A senha fornecida não atende aos critérios de segurança.",
+      );
       return;
     }
+
 
     setFeedback("");
 
     try {
       setClickedButton(true);
-      await ConfirmResetPassword(formData.novaSenha);
+      await ConfirmResetPassword(strongPasswordSchema.data);
     } catch (error) {
       console.error("Erro ao confirmar a nova senha:", error);
       setClickedButton(false);
