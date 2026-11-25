@@ -13,10 +13,9 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
-import type { UserProfile } from "../../components/Sidebar/sidebar";
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
 
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar.tsx"));
-const Topbar = lazy(() => import("../../components/Topbar/topbar"));
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
 );
@@ -419,22 +418,29 @@ export const Login = () => {
         name="description"
         content="Acesse sua conta na Life Topografia para gerenciar seus projetos, chats e solicitações de orçamento."
       />
+      <div className="login-page">
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={currentUser}
+        />
 
-      <Topbar
-        isSidebarOpen={isSidebarOpen}
-        onOpenSidebar={() => setIsSidebarOpen(true)}
-      />
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
 
-      <main className="login-main-content">
-        <div className="login-title-container">
-          <h1 className="login-title">
-            {etapa === "login" ? "ENTRAR" : "ESQUECI A SENHA"}
-          </h1>
+        <main className="login-main-content">
+          <div className="login-title-container">
+            <h1 className="login-title">
+              {etapa === "login" ? "ENTRAR" : "ESQUECI A SENHA"}
+            </h1>
 
-          <div className="title-divider" aria-hidden="true">
-            <span className="line"></span>
-            <span className="rhombus"></span>
-            <span className="line"></span>
+            <div className="title-divider" aria-hidden="true">
+              <span className="line"></span>
+              <span className="rhombus"></span>
+              <span className="line"></span>
+            </div>
           </div>
 
           <div className="login-card">

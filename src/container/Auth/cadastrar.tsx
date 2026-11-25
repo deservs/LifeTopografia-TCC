@@ -13,16 +13,12 @@ import { z } from "zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
-import type { UserProfile } from "../../components/Sidebar/sidebar";
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
 
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar.tsx"));
-const Topbar = lazy(() => import("../../components/Topbar/topbar"));
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
 );
-
-import Logo from "../../assets/image/logo-front.webp";
-import FundoHeader from "../../assets/image/background/firstcard.webp";
 
 import "./cadastrar.css";
 
@@ -206,22 +202,17 @@ export const Cadastrar = () => {
         name="description"
         content="Crie sua conta na Life Topografia para solicitar orçamentos e acompanhar seus serviços topográficos."
       />
+      <div className="cadastrar-page">
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={currentUser}
+        />
 
-      <Topbar
-        isSidebarOpen={isSidebarOpen}
-        onOpenSidebar={() => setIsSidebarOpen(true)}
-      />
-
-      <main className="cadastrar-main-content">
-        <div className="cadastrar-title-container">
-          <h1 className="cadastrar-title">CADASTRE-SE</h1>
-
-          <div className="title-divider" aria-hidden="true">
-            <span className="line"></span>
-            <span className="rhombus"></span>
-            <span className="line"></span>
-          </div>
-        </header>
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
 
         <main className="cadastrar-main-content">
           <div className="cadastrar-title-container">

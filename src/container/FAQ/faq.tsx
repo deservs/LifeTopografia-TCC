@@ -1,12 +1,8 @@
-import { lazy, Suspense, useState, useEffect, useId } from "react";
+import { useState, useEffect, useId } from "react";
 import { Link } from "react-router-dom";
-import type { UserProfile } from "../../components/Sidebar/sidebar";
-
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
-  const Topbar = lazy(() => import("../../components/Topbar/topbar"));
-const Footer = lazy(() => import("../../components/Footer/footer"));
-  
-
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
+import Footer from "../../components/Footer/footer";
 import { SerchDataUser } from "../../lib/supabase/auth";
 import "./faq.css";
 
@@ -130,18 +126,16 @@ export default function FAQ() {
       />
       <div className="faq-page">
         {/* Sidebar integrada padrão */}
-        <Suspense fallback={null}>
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            user={userProfile}
-          />
-        </Suspense>
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={userProfile}
+        />
 
-      <Topbar
-        isSidebarOpen={isSidebarOpen}
-        onOpenSidebar={() => setIsSidebarOpen(true)}
-      />
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
 
         {/* Conteúdo Principal */}
         <main className="faq-main">
@@ -161,21 +155,33 @@ export default function FAQ() {
             </div>
           </div>
 
-        {/* Barra de Filtro e Controles de Acessibilidade */}
-        <div className="faq-controls-bar">
-          <div className="faq-search-box">
-            <span className="search-icon" aria-hidden="true">
-              🔍
-            </span>
-            <input
-              id={searchInputId}
-              type="search"
-              placeholder="Pesquisar por palavra-chave (ex: matrícula, orçamento, Mercado Pago, campo)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Buscar perguntas frequentes"
-            />
-            {searchTerm && (
+          {/* Barra de Filtro e Controles de Acessibilidade */}
+          <div className="faq-controls-bar">
+            <div className="faq-search-box">
+              <span className="search-icon" aria-hidden="true">
+                🔍
+              </span>
+              <input
+                id={searchInputId}
+                type="search"
+                placeholder="Pesquisar por palavra-chave (ex: matrícula, orçamento, Mercado Pago, campo)..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Buscar perguntas frequentes"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  className="faq-clear-search"
+                  onClick={() => setSearchTerm("")}
+                  aria-label="Limpar busca"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div className="faq-actions-buttons">
               <button
                 type="button"
                 className="faq-action-btn"
@@ -308,9 +314,7 @@ export default function FAQ() {
         </main>
 
         {/* Footer padrão do site */}
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        <Footer />
       </div>
     </>
   );

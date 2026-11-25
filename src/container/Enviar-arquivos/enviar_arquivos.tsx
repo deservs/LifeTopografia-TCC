@@ -291,22 +291,18 @@ export default function EnviarArquivos() {
   const validacaoAtiva = terrenoAtivo ? validacoes[terrenoAtivo.id] : null;
 
   return (
-    <div
-      style={{
-        maxWidth: "1350px",
-        margin: "0 auto",
-        padding: "24px 16px",
-        fontFamily: '"Poppins", sans-serif',
-        color: "#1f2937",
-      }}
-    >
-      {/* Cabeçalho */}
-      <header
+    <>
+      <title>Extração de Matrícula e DXF - Life Topografia</title>
+      <meta
+        name="description"
+        content="Ferramenta de extração de dados de matrícula em PDF e geração de arquivos DXF da Life Topografia."
+      />
+      <div
         style={{
           maxWidth: "1350px",
           margin: "0 auto",
           padding: "24px 16px",
-          fontFamily: "system-ui, -apple-system, sans-serif",
+          fontFamily: '"Poppins", sans-serif',
           color: "#1f2937",
         }}
       >
@@ -1652,30 +1648,13 @@ export default function EnviarArquivos() {
                                   textAlign: "left",
                                 }}
                               >
-                                <td
-                                  style={{
-                                    padding: "8px 12px",
-                                    fontWeight: "600",
-                                  }}
-                                >
-                                  {c.vertice}
-                                </td>
-                                <td
-                                  style={{
-                                    padding: "8px 12px",
-                                    fontFamily: '"Poppins", sans-serif',
-                                  }}
-                                >
-                                  {c.norte.toFixed(4)}
-                                </td>
-                                <td
-                                  style={{
-                                    padding: "8px 12px",
-                                    fontFamily: '"Poppins", sans-serif',
-                                  }}
-                                >
-                                  {c.este.toFixed(4)}
-                                </td>
+                                <th style={{ padding: "8px 12px" }}>Vértice</th>
+                                <th style={{ padding: "8px 12px" }}>
+                                  Norte (Y)
+                                </th>
+                                <th style={{ padding: "8px 12px" }}>
+                                  Este (X)
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1698,7 +1677,7 @@ export default function EnviarArquivos() {
                                     <td
                                       style={{
                                         padding: "8px 12px",
-                                        fontFamily: "monospace",
+                                        fontFamily: '"Poppins", sans-serif',
                                       }}
                                     >
                                       {c.norte.toFixed(4)}
@@ -1706,7 +1685,7 @@ export default function EnviarArquivos() {
                                     <td
                                       style={{
                                         padding: "8px 12px",
-                                        fontFamily: "monospace",
+                                        fontFamily: '"Poppins", sans-serif',
                                       }}
                                     >
                                       {c.este.toFixed(4)}
@@ -1804,7 +1783,7 @@ export default function EnviarArquivos() {
                                   <td
                                     style={{
                                       padding: "8px 12px",
-                                      fontFamily: "monospace",
+                                      fontFamily: '"Poppins", sans-serif',
                                     }}
                                   >
                                     {s.distancia !== undefined
@@ -1992,53 +1971,10 @@ export default function EnviarArquivos() {
                       Você pode ajustar o texto transcrito desta descrição se
                       houver algum erro de OCR e recalcular imediatamente:
                     </p>
-                  )}
-                </div>
-              )}
-
-              {/* SUB-ABA 3: TEXTO / EDIÇÃO */}
-              {abaAtivaDetalhe === "texto" && (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "#6b7280",
-                      margin: "0 0 8px 0",
-                    }}
-                  >
-                    Você pode ajustar o texto transcrito desta descrição se
-                    houver algum erro de OCR e recalcular imediatamente:
-                  </p>
-                  <textarea
-                    rows={10}
-                    value={terrenoAtivo.textoOriginal}
-                    onChange={(e) =>
-                      handleAtualizarTextoTerreno(
-                        terrenoAtivo.id,
-                        e.target.value,
-                      )
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      borderRadius: "6px",
-                      border: "1px solid #d1d5db",
-                      fontFamily: '"Poppins", sans-serif',
-                      fontSize: "13px",
-                      resize: "vertical",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      display: "flex",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() =>
+                    <textarea
+                      rows={10}
+                      value={terrenoAtivo.textoOriginal}
+                      onChange={(e) =>
                         handleAtualizarTextoTerreno(
                           terrenoAtivo.id,
                           e.target.value,
@@ -2049,7 +1985,7 @@ export default function EnviarArquivos() {
                         padding: "10px",
                         borderRadius: "6px",
                         border: "1px solid #d1d5db",
-                        fontFamily: "monospace",
+                        fontFamily: '"Poppins", sans-serif',
                         fontSize: "13px",
                         resize: "vertical",
                         boxSizing: "border-box",

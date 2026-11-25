@@ -9,11 +9,9 @@ import {
 } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-import type { UserProfile } from "../../components/Sidebar/sidebar";
-
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
-const Topbar = lazy(() => import("../../components/Topbar/topbar"));
-const Footer = lazy(() => import("../../components/Footer/footer"));
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
+import Footer from "../../components/Footer/footer";
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
 );
@@ -1065,9 +1063,7 @@ export default function Profile({
             </>
           )}
         </main>
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        <Footer />
       </div>
 
       {action && confirmationPerson && (

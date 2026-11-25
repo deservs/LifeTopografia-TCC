@@ -166,6 +166,9 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
             src={LogoIcon}
             alt="Life Topografia"
             className="sidebar-logo-icon"
+            width={2413}
+            height={991}
+            loading="lazy"
           />
         </div>
 
@@ -179,6 +182,9 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
                       src={userData.avatarUrl}
                       alt={`Foto de perfil de ${userData.name}`}
                       className="avatar-img"
+                      width={64}
+                      height={64}
+                      loading="lazy"
                     />
                   ) : (
                     <div className="avatar-placeholder" aria-hidden="true">

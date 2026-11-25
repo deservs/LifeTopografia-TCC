@@ -1,6 +1,4 @@
 import {
-  lazy,
-  Suspense,
   useState,
   useRef,
   useEffect,
@@ -8,11 +6,9 @@ import {
   type ChangeEvent,
 } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import type { UserProfile } from "../../components/Sidebar/sidebar";
-
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
-const Topbar = lazy(() => import("../../components/Topbar/topbar"));
-const Footer = lazy(() => import("../../components/Footer/footer"));
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
+import Footer from "../../components/Footer/footer";
 import { supabase } from "../../lib/supabase/supabaseClient";
 import { SerchDataUser } from "../../lib/supabase/auth";
 import "./chat.css";
@@ -897,11 +893,19 @@ export default function Chat() {
         name="description"
         content="Converse com a equipe da Life Topografia, envie documentos e acompanhe suas propostas de orçamento."
       />
+      <div className="chat-page">
+        {/* Sidebar integrada com o mesmo padrão do site */}
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={userProfile}
+        />
 
-      <Topbar
-        isSidebarOpen={isSidebarOpen}
-        onOpenSidebar={() => setIsSidebarOpen(true)}
-        rightContent={
+        {/* Topbar padronizada; alternância de perfil apenas visual para demonstração. */}
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+          rightContent={
           <div className="chat-role-indicator">
             <span className="role-indicator-label">Perfil Ativo:</span>
             <button
@@ -917,20 +921,8 @@ export default function Chat() {
               {isAdmin ? "🛡️ Administrador" : "👤 Cliente (Empresa/Pessoa)"}
             </button>
           </div>
-        }
-      />
-
-      {/* Conteúdo Principal */}
-      <main className="chat-main">
-        <div className="chat-title-container">
-          <div className="chat-badge-row">
-            <span
-              className={`chat-hierarchy-pill ${isAdmin ? "pill-admin" : "pill-client"}`}
-            >
-              {isAdmin ? "🛡️ Administrador" : "👤 Cliente (Empresa/Pessoa)"}
-            </button>
-          </div>
-        </header>
+          }
+        />
 
         {/* Conteúdo Principal */}
         <main className="chat-main">
@@ -1824,9 +1816,7 @@ export default function Chat() {
         </main>
 
         {/* Footer padrão do site */}
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        <Footer />
       </div>
     </>
   );
