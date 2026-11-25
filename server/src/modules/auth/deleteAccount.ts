@@ -1,5 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
-import { env } from "../../config/env.js";
 import { supabaseAdmin } from "../../Shared/database/banco.js";
 
 export async function DeleteAccount(
@@ -49,25 +47,14 @@ export async function CheckPassword(
   userId: string,
   password: string,
 ): Promise<"invalid_password" | "valid" | "error"> {
-  const authCheckClient = createClient(
-    env.VITE_SUPABASE_URL,
-    env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-      },
-    },
-  );
-  const { data: isValid, error } = await authCheckClient.rpc(
+
+  const { data: isValid, error } = await supabaseAdmin.rpc(
     "verify_user_password",
     {
       user_id: userId,
       current_password: password,
     },
   );
-
   if (error) {
     return "error";
   }
