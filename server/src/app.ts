@@ -465,17 +465,17 @@ app.delete(
   { preHandler: [getUserFromRequest] },
   async (request, reply) => {
     const parsedParams = z
-      .object({
-        id: z.string().uuid({ message: 'ID do membro inválido.' }),
-      })
-      .safeParse(request.params)
-
+    .object({
+      id: z.string().uuid({ message: 'ID do membro inválido.' }),
+    })
+    .safeParse(request.params)
+    
     const parsedBody = z
-      .object({
-        password: z.string().min(1, { message: 'A senha é obrigatória.' }),
-      })
-      .safeParse(request.body)
-
+    .object({
+      password: z.string().min(1, { message: 'A senha é obrigatória.' }),
+    })
+    .safeParse(request.body)
+    
     if (!parsedParams.success || !parsedBody.success) {
       return reply.code(400).send({
         ok: false,
@@ -496,7 +496,7 @@ app.delete(
         message: 'Email do usuário não encontrado.',
       })
     }
-
+    
     try {
       const passwordStatus = await CheckPassword(request.user.id, parsedBody.data.password)
       if (passwordStatus === 'invalid_password') {
@@ -513,7 +513,7 @@ app.delete(
           message: 'Não foi possível validar a senha atual.',
         })
       }
-
+      
       const result = await removeCompanyMember(request.user.id, parsedParams.data.id)
       if (!result.ok) {
         return reply.code(result.httpStatus).send({
