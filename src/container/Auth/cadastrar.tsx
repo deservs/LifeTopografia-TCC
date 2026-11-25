@@ -1,4 +1,11 @@
-import { useState, type ChangeEvent, type FormEvent, useRef } from "react";
+import {
+  lazy,
+  Suspense,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  useRef,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { z } from "zod";
@@ -6,10 +13,16 @@ import { z } from "zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
-import Sidebar from "../../components/Sidebar/sidebar.tsx";
-import Topbar from "../../components/Topbar/topbar";
-import PasswordInput from "../../components/PasswordInput/passwordInput";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
+
+const Sidebar = lazy(() => import("../../components/Sidebar/sidebar.tsx"));
+const Topbar = lazy(() => import("../../components/Topbar/topbar"));
+const PasswordInput = lazy(
+  () => import("../../components/PasswordInput/passwordInput"),
+);
+
+import Logo from "../../assets/image/logo-front.webp";
+import FundoHeader from "../../assets/image/background/firstcard.webp";
 
 import "./cadastrar.css";
 
@@ -168,13 +181,7 @@ export const Cadastrar = () => {
     }
     const role = tipoCadastro === "empresa" ? cnpjRegex : undefined;
     /* método de criar um novo usuário */
-    SignUp(
-      formData.email,
-      formData.senha,
-      formData.nome,
-      captchaToken,
-      role
-    )
+    SignUp(formData.email, formData.senha, formData.nome, captchaToken, role)
       .then(() => {
         navigate("/login", { replace: true });
       })
@@ -193,11 +200,11 @@ export const Cadastrar = () => {
   };
 
   return (
-    <div className="cadastrar-page">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        user={currentUser}
+    <>
+      <title>Cadastro - Life Topografia</title>
+      <meta
+        name="description"
+        content="Crie sua conta na Life Topografia para solicitar orçamentos e acompanhar seus serviços topográficos."
       />
 
       <Topbar
@@ -214,300 +221,326 @@ export const Cadastrar = () => {
             <span className="rhombus"></span>
             <span className="line"></span>
           </div>
-        </div>
+        </header>
 
-        <div className="cadastrar-card">
-          <div className="tabs-header">
-            <button
-              type="button"
-              className={`tab-btn ${tipoCadastro === "pessoa" ? "active" : ""}`}
-              onClick={() => handleTipoCadastroChange("pessoa")}
-              aria-pressed={tipoCadastro === "pessoa"}
-            >
-              <svg viewBox="0 0 24 24" className="tab-icon" aria-hidden="true">
-                <path
-                  fill="currentColor"
-                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                />
-              </svg>
+        <main className="cadastrar-main-content">
+          <div className="cadastrar-title-container">
+            <h1 className="cadastrar-title">CADASTRE-SE</h1>
 
-              <span>Pessoas</span>
-            </button>
-
-            <span className="tab-separator" aria-hidden="true">
-              |
-            </span>
-
-            <button
-              type="button"
-              className={`tab-btn ${
-                tipoCadastro === "empresa" ? "active" : ""
-              }`}
-              onClick={() => handleTipoCadastroChange("empresa")}
-              aria-pressed={tipoCadastro === "empresa"}
-            >
-              <svg viewBox="0 0 24 24" className="tab-icon" aria-hidden="true">
-                <path
-                  fill="currentColor"
-                  d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"
-                />
-              </svg>
-
-              <span>Empresas</span>
-            </button>
+            <div className="title-divider" aria-hidden="true">
+              <span className="line"></span>
+              <span className="rhombus"></span>
+              <span className="line"></span>
+            </div>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="cadastrar-form"
-            noValidate={false}
-          >
-            <div className="form-group">
-              <div className="input-icon-box">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
+          <div className="cadastrar-card">
+            <div className="tabs-header">
+              <button
+                type="button"
+                className={`tab-btn ${tipoCadastro === "pessoa" ? "active" : ""}`}
+                onClick={() => handleTipoCadastroChange("pessoa")}
+                aria-pressed={tipoCadastro === "pessoa"}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="tab-icon"
+                  aria-hidden="true"
+                >
                   <path
                     fill="currentColor"
                     d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
                   />
                 </svg>
-              </div>
 
-              <div className="input-field-wrapper">
-                <label htmlFor="nome">Nome:</label>
+                <span>Pessoas</span>
+              </button>
 
-                <input
-                  type="text"
-                  id="nome"
-                  name="nome"
-                  value={formData.nome}
-                  onChange={handleChange}
-                  autoComplete="name"
-                  required
-                />
-              </div>
-            </div>
+              <span className="tab-separator" aria-hidden="true">
+                |
+              </span>
 
-            <div className="form-group">
-              <div className="input-icon-box">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
+              <button
+                type="button"
+                className={`tab-btn ${
+                  tipoCadastro === "empresa" ? "active" : ""
+                }`}
+                onClick={() => handleTipoCadastroChange("empresa")}
+                aria-pressed={tipoCadastro === "empresa"}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="tab-icon"
+                  aria-hidden="true"
+                >
                   <path
                     fill="currentColor"
-                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-                  />
-                </svg>
-              </div>
-
-              <div className="input-field-wrapper">
-                <label htmlFor="email">Email:</label>
-
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  autoComplete="email"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <div className="input-icon-box relative-badge">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                    d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"
                   />
                 </svg>
 
-                {formData.confirmarEmail.length > 0 && (
-                  <span
-                    className={`check-badge ${
-                      formData.email === formData.confirmarEmail
-                        ? "is-valid"
-                        : "is-invalid"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {formData.email === formData.confirmarEmail ? "✓" : "✕"}
-                  </span>
-                )}
-              </div>
-
-              <div className="input-field-wrapper">
-                <label htmlFor="confirmarEmail">Confirmar Email:</label>
-
-                <input
-                  type="email"
-                  id="confirmarEmail"
-                  name="confirmarEmail"
-                  value={formData.confirmarEmail}
-                  onChange={handleChange}
-                  autoComplete="off"
-                  required
-                />
-              </div>
+                <span>Empresas</span>
+              </button>
             </div>
 
-            <div className="form-group align-start">
-              <div className="input-icon-box">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-                  />
-                </svg>
-              </div>
-
-              <div className="input-field-wrapper">
-                <label htmlFor="senha">Senha:</label>
-
-                <PasswordInput
-                  id="senha"
-                  name="senha"
-                  value={formData.senha}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                  required
-                />
-
-                {formData.senha.length > 0 && (
-                  <ul className="password-requirements">
-                    {senhaRequisitos.map((requisito) => (
-                      <li
-                        key={requisito.id}
-                        className={requisito.valido ? "is-valid" : "is-invalid"}
-                      >
-                        <span aria-hidden="true">
-                          {requisito.valido ? "✓" : "✕"}
-                        </span>
-
-                        {requisito.texto}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-
-            <div className="form-group">
-              <div className="input-icon-box relative-badge">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-                  />
-                </svg>
-
-                {formData.confirmarSenha.length > 0 && (
-                  <span
-                    className={`check-badge ${
-                      formData.senha === formData.confirmarSenha
-                        ? "is-valid"
-                        : "is-invalid"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {formData.senha === formData.confirmarSenha ? "✓" : "✕"}
-                  </span>
-                )}
-              </div>
-
-              <div className="input-field-wrapper">
-                <label htmlFor="confirmarSenha">Confirmar Senha:</label>
-
-                <PasswordInput
-                  id="confirmarSenha"
-                  visibilityLabel="confirmação de senha"
-                  name="confirmarSenha"
-                  value={formData.confirmarSenha}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
-            </div>
-
-            {tipoCadastro === "empresa" && (
-              <div className="form-group animation-fade-in">
+            <form
+              onSubmit={handleSubmit}
+              className="cadastrar-form"
+              noValidate={false}
+            >
+              <div className="form-group">
                 <div className="input-icon-box">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       fill="currentColor"
-                      d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"
+                      d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
                     />
                   </svg>
                 </div>
 
                 <div className="input-field-wrapper">
-                  <label htmlFor="cnpj">CNPJ:</label>
+                  <label htmlFor="nome">Nome:</label>
 
                   <input
                     type="text"
-                    id="cnpj"
-                    name="cnpj"
-                    value={formData.cnpj}
+                    id="nome"
+                    name="nome"
+                    value={formData.nome}
                     onChange={handleChange}
-                    placeholder="00.000.000/0001-00"
-                    autoComplete="organization"
-                    inputMode="numeric"
-                    maxLength={18}
+                    autoComplete="name"
                     required
                   />
                 </div>
               </div>
-            )}
 
-            {formError && (
-              <p className="form-feedback error" role="alert">
-                {formError}
-              </p>
-            )}
+              <div className="form-group">
+                <div className="input-icon-box">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="currentColor"
+                      d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                    />
+                  </svg>
+                </div>
 
-            <div className="captcha-container">
-              <Turnstile
-                options={{
-                  size: "flexible",
-                  theme: "light",
-                }}
-                ref={captcha}
-                siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
-                onSuccess={(token) => {
-                  setCaptchaToken(token);
-                }}
-                onExpire={() => setCaptchaToken(null)}
-              />
-            </div>
+                <div className="input-field-wrapper">
+                  <label htmlFor="email">Email:</label>
 
-            <button type="submit" className="btn-action-cadastrar">
-              <svg
-                viewBox="0 0 24 24"
-                className="btn-add-user-icon"
-                aria-hidden="true"
-              >
-                <path
-                  fill="currentColor"
-                  d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9 0c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-2.5c0-2.33-4.67-3.5-7-3.5zm9 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V20h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="input-icon-box relative-badge">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="currentColor"
+                      d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                    />
+                  </svg>
+
+                  {formData.confirmarEmail.length > 0 && (
+                    <span
+                      className={`check-badge ${
+                        formData.email === formData.confirmarEmail
+                          ? "is-valid"
+                          : "is-invalid"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {formData.email === formData.confirmarEmail ? "✓" : "✕"}
+                    </span>
+                  )}
+                </div>
+
+                <div className="input-field-wrapper">
+                  <label htmlFor="confirmarEmail">Confirmar Email:</label>
+
+                  <input
+                    type="email"
+                    id="confirmarEmail"
+                    name="confirmarEmail"
+                    value={formData.confirmarEmail}
+                    onChange={handleChange}
+                    autoComplete="off"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group align-start">
+                <div className="input-icon-box">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="currentColor"
+                      d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                    />
+                  </svg>
+                </div>
+
+                <div className="input-field-wrapper">
+                  <label htmlFor="senha">Senha:</label>
+
+                  <Suspense fallback={null}>
+                    <PasswordInput
+                      id="senha"
+                      name="senha"
+                      value={formData.senha}
+                      onChange={handleChange}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </Suspense>
+
+                  {formData.senha.length > 0 && (
+                    <ul className="password-requirements">
+                      {senhaRequisitos.map((requisito) => (
+                        <li
+                          key={requisito.id}
+                          className={
+                            requisito.valido ? "is-valid" : "is-invalid"
+                          }
+                        >
+                          <span aria-hidden="true">
+                            {requisito.valido ? "✓" : "✕"}
+                          </span>
+
+                          {requisito.texto}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="input-icon-box relative-badge">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="currentColor"
+                      d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                    />
+                  </svg>
+
+                  {formData.confirmarSenha.length > 0 && (
+                    <span
+                      className={`check-badge ${
+                        formData.senha === formData.confirmarSenha
+                          ? "is-valid"
+                          : "is-invalid"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {formData.senha === formData.confirmarSenha ? "✓" : "✕"}
+                    </span>
+                  )}
+                </div>
+
+                <div className="input-field-wrapper">
+                  <label htmlFor="confirmarSenha">Confirmar Senha:</label>
+
+                  <Suspense fallback={null}>
+                    <PasswordInput
+                      id="confirmarSenha"
+                      visibilityLabel="confirmação de senha"
+                      name="confirmarSenha"
+                      value={formData.confirmarSenha}
+                      onChange={handleChange}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </Suspense>
+                </div>
+              </div>
+
+              {tipoCadastro === "empresa" && (
+                <div className="form-group animation-fade-in">
+                  <div className="input-icon-box">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        fill="currentColor"
+                        d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="input-field-wrapper">
+                    <label htmlFor="cnpj">CNPJ:</label>
+
+                    <input
+                      type="text"
+                      id="cnpj"
+                      name="cnpj"
+                      value={formData.cnpj}
+                      onChange={handleChange}
+                      placeholder="00.000.000/0001-00"
+                      autoComplete="organization"
+                      inputMode="numeric"
+                      maxLength={18}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formError && (
+                <p className="form-feedback error" role="alert">
+                  {formError}
+                </p>
+              )}
+
+              <div className="captcha-container">
+                <Turnstile
+                  options={{
+                    size: "flexible",
+                    theme: "light",
+                  }}
+                  ref={captcha}
+                  siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                  onSuccess={(token) => {
+                    setCaptchaToken(token);
+                  }}
+                  onExpire={() => setCaptchaToken(null)}
                 />
-              </svg>
+              </div>
 
-              <span>CADASTRAR</span>
-            </button>
+              <button type="submit" className="btn-action-cadastrar">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="btn-add-user-icon"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9 0c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-2.5c0-2.33-4.67-3.5-7-3.5zm9 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V20h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+                  />
+                </svg>
 
-            <div className="ou-divider">
-              <span className="line"></span>
-              <span className="text">ou</span>
-              <span className="line"></span>
-            </div>
+                <span>CADASTRAR</span>
+              </button>
 
-            <Link to="/login" className="btn-login-redirect">
-              VOCÊ JÁ POSSUI CONTA?
-            </Link>
-          </form>
-        </div>
-      </main>
-    </div>
+              <div className="ou-divider">
+                <span className="line"></span>
+                <span className="text">ou</span>
+                <span className="line"></span>
+              </div>
+
+              <Link to="/login" className="btn-login-redirect">
+                VOCÊ JÁ POSSUI CONTA?
+              </Link>
+            </form>
+          </div>
+        </main>
+      </div>
+    </>
   );
 };
 

@@ -21,10 +21,17 @@ export default function sendEmail() {
     }
   };
   return (
-    <div>
-      <h1>Enviar Email</h1>
-      <input id="email" type="text" placeholder="Digite o email" />
-      <button onClick={handleSendEmail}>Enviar</button>
-    </div>
+    <>
+      <title>Enviar Email - Life Topografia</title>
+      <meta
+        name="description"
+        content="Envio de e-mail pela plataforma Life Topografia."
+      />
+      <div>
+        <h1>Enviar Email</h1>
+        <input id="email" type="text" placeholder="Digite o email" />
+        <button onClick={handleSendEmail}>Enviar</button>
+      </div>
+    </>
   );
 }

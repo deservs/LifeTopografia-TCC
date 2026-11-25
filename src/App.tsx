@@ -6,17 +6,18 @@ import "./App.css";
 import Home from "./container/Home/home";
 import About from "./container/About/about";
 
-import Cadastrar from "./container/Auth/cadastrar";
-import Login from "./container/Auth/login";
-import CheckSession from "./container/Auth/checar";
+const Cadastrar = lazy(() => import("./container/Auth/cadastrar"));
+const Login = lazy(() => import("./container/Auth/login"));
+const CheckSession = lazy(() => import("./container/Auth/checar"));
 
-import Pagamento from "./components/Pop-Up/Pagamento/pagamento";
-import Services from "./container/Services/services";
-import Profile from "./container/Profile/profile";
-import Teste from "./container/Enviar-arquivos/enviar_arquivos";
-import Teste2 from "./container/Enviar-arquivos/enviar_email";
-import Chat from "./container/Chat/chat";
-import FAQ from "./container/FAQ/faq";
+const Pagamento = lazy(() => import("./components/Pop-Up/Pagamento/pagamento"));
+const Services = lazy(() => import("./container/Services/services"));
+const Profile = lazy(() => import("./container/Profile/profile"));
+const Teste = lazy(() => import("./container/Enviar-arquivos/enviar_arquivos"));
+const Teste2 = lazy(() => import("./container/Enviar-arquivos/enviar_email"));
+const Erro404 = lazy(() => import("./container/Error/erro404"));
+const Chat = lazy(() => import("./container/Chat/chat"));
+const FAQ = lazy(() => import("./container/FAQ/faq"));
 
 // Carregamento sob demanda de telas secundárias/administrativas.
 const Erro404 = lazy(() => import("./container/Error/erro404"));
