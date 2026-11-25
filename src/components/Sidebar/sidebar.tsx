@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { SerchDataUser } from "../../lib/supabase/auth";
 
 import "./sidebar.css";
 import LogoIcon from "../../assets/image/logo-front.webp";
+
+const NAV_ITEMS = [
+  { to: "/", label: "INÍCIO" },
+  { to: "/sobre", label: "SOBRE NÓS" },
+  { to: "/servicos", label: "SERVIÇOS" },
+  { to: "/faq", label: "FAQ" },
+  { to: "/chat", label: "CONTATO" },
+] as const;
 
 /**
  * Dados básicos que a Sidebar precisa para exibir
@@ -31,6 +39,8 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
+  const { pathname } = useLocation();
+  const normalizedPathname = pathname.toLowerCase();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusedElementRef = useRef<HTMLElement | null>(null);
   const [perfil, setPerfil] = useState<UserProfile | null>(null);
@@ -156,6 +166,9 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
             src={LogoIcon}
             alt="Life Topografia"
             className="sidebar-logo-icon"
+            width={2413}
+            height={991}
+            loading="lazy"
           />
         </div>
 
@@ -169,6 +182,9 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
                       src={userData.avatarUrl}
                       alt={`Foto de perfil de ${userData.name}`}
                       className="avatar-img"
+                      width={64}
+                      height={64}
+                      loading="lazy"
                     />
                   ) : (
                     <div className="avatar-placeholder" aria-hidden="true">
@@ -218,35 +234,19 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
 
           <nav className="sidebar-nav" aria-label="Navegação principal">
             <ul>
-              <li>
-                <Link to="/" onClick={onClose}>
-                  INÍCIO
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/sobre" onClick={onClose}>
-                  SOBRE NÓS
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/servicos" onClick={onClose}>
-                  SERVIÇOS
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/faq" onClick={onClose}>
-                  FAQ
-                </Link>
-              </li>
-
-              <li>
-                <Link to="/chat" onClick={onClose}>
-                  CONTATO
-                </Link>
-              </li>
+              {NAV_ITEMS.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    onClick={onClose}
+                    aria-current={
+                      normalizedPathname === item.to ? "page" : undefined
+                    }
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 

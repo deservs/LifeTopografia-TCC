@@ -1,11 +1,9 @@
-import { lazy, Suspense, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
-import type { UserProfile } from "../../components/Sidebar/sidebar";
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
+import Footer from "../../components/Footer/footer";
 
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
-const Footer = lazy(() => import("../../components/Footer/footer"));
-
-import Logo from "../../assets/image/logo-front.webp";
 import Obra from "../../assets/image/cards/obra.webp";
 import Nivelamento from "../../assets/image/cards/leveling.webp";
 import Terraplanagem from "../../assets/image/cards/surfacing.webp";
@@ -305,34 +303,16 @@ export default function Services() {
         content="Conheça os serviços da Life Topografia: levantamento topográfico, georreferenciamento, nivelamento, terraplanagem e acompanhamento de obras."
       />
       <div className="services-page">
-        <Suspense fallback={null}>
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            user={currentUser}
-          />
-        </Suspense>
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={currentUser}
+        />
 
-        <header className="services-header">
-          <button
-            type="button"
-            className="services-menu-button"
-            onClick={() => setIsSidebarOpen(true)}
-            aria-label="Abrir menu"
-            aria-expanded={isSidebarOpen}
-            aria-controls="menu-drawer"
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-
-          <img
-            src={Logo}
-            alt="Life Topografia"
-            className="services-header__logo"
-          />
-        </header>
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
 
         <main className="services-main">
           <section className="services-intro">
@@ -386,9 +366,7 @@ export default function Services() {
           </section>
         </main>
 
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        <Footer />
       </div>
     </>
   );

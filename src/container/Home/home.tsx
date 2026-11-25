@@ -1,11 +1,9 @@
-import { lazy, Suspense, useState } from "react";
+import { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { Link } from "react-router-dom";
 
-import type { UserProfile } from "../../components/Sidebar/sidebar";
-
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar.tsx"));
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
 
 import Fundo1 from "../../assets/image/background/firstcard.webp";
 import Fundo2 from "../../assets/image/background/secondcard.webp";
@@ -54,13 +52,11 @@ export default function Home() {
         content="Página inicial da Life Topografia, com informações sobre a empresa e seus serviços."
       />
       <div id="initial-card">
-        <Suspense fallback={null}>
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            user={currentUser}
-          />
-        </Suspense>
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={currentUser}
+        />
 
         <main id="superposition">
           <div id="main-content">
@@ -80,7 +76,12 @@ export default function Home() {
             </div>
 
             <div id="logo">
-              <img src={Logo} alt="Life Topografia" />
+              <img
+                src={Logo}
+                alt="Life Topografia"
+                width={2413}
+                height={991}
+              />
             </div>
 
             <div id="text">
@@ -148,15 +149,37 @@ export default function Home() {
           aria-hidden="true"
         >
           <SwiperSlide>
-            <img id="bg1" src={Fundo1} alt="" loading="eager" />
+            <img
+              id="bg1"
+              src={Fundo1}
+              alt=""
+              width={1920}
+              height={1345}
+              loading="eager"
+              fetchPriority="high"
+            />
           </SwiperSlide>
 
           <SwiperSlide>
-            <img id="bg2" src={Fundo2} alt="" loading="lazy" />
+            <img
+              id="bg2"
+              src={Fundo2}
+              alt=""
+              width={1920}
+              height={1108}
+              loading="lazy"
+            />
           </SwiperSlide>
 
           <SwiperSlide>
-            <img id="bg3" src={Fundo3} alt="" loading="lazy" />
+            <img
+              id="bg3"
+              src={Fundo3}
+              alt=""
+              width={1920}
+              height={1198}
+              loading="lazy"
+            />
           </SwiperSlide>
         </Swiper>
       </div>

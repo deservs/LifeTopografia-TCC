@@ -1,11 +1,8 @@
-import { lazy, Suspense, useState, useEffect, useId } from "react";
+import { useState, useEffect, useId } from "react";
 import { Link } from "react-router-dom";
-import type { UserProfile } from "../../components/Sidebar/sidebar";
-
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
-const Footer = lazy(() => import("../../components/Footer/footer"));
-import Logo from "../../assets/image/logo-front.webp";
-import FundoHeader from "../../assets/image/background/firstcard.webp";
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
+import Footer from "../../components/Footer/footer";
 import { SerchDataUser } from "../../lib/supabase/auth";
 import "./faq.css";
 
@@ -50,7 +47,7 @@ const FAQ_DATA: FaqItem[] = [
     id: 5,
     question: "5. Quais são as formas de pagamento aceitas na plataforma?",
     answer:
-      "Após a aprovação formal do orçamento, o pagamento pode ser efetuado diretamente pelo site com total segurança via PIX ou cartão de crédito, através da integração com o processador de pagamentos homologado SumUp.",
+      "Após a aprovação formal do orçamento, o pagamento pode ser efetuado diretamente pelo site com total segurança via PIX ou cartão de crédito, através da integração com o processador de pagamentos homologado Mercado Pago.",
     category: "orcamento",
   },
   {
@@ -129,42 +126,16 @@ export default function FAQ() {
       />
       <div className="faq-page">
         {/* Sidebar integrada padrão */}
-        <Suspense fallback={null}>
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            user={userProfile}
-          />
-        </Suspense>
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={userProfile}
+        />
 
-        {/* Topbar com background padronizado, logo e menu hambúrguer */}
-        <header
-          className="faq-topbar"
-          style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${FundoHeader})`,
-          }}
-        >
-          <button
-            type="button"
-            className="faq-menu-button"
-            onClick={() => setIsSidebarOpen(true)}
-            aria-label="Abrir menu"
-            aria-expanded={isSidebarOpen}
-            aria-controls="menu-drawer"
-          >
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
-          </button>
-
-          <Link
-            to="/"
-            className="faq-topbar-logo"
-            aria-label="Ir para a página inicial"
-          >
-            <img src={Logo} alt="Life Topografia" />
-          </Link>
-        </header>
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
 
         {/* Conteúdo Principal */}
         <main className="faq-main">
@@ -193,7 +164,7 @@ export default function FAQ() {
               <input
                 id={searchInputId}
                 type="search"
-                placeholder="Pesquisar por palavra-chave (ex: matrícula, orçamento, SumUp, campo)..."
+                placeholder="Pesquisar por palavra-chave (ex: matrícula, orçamento, Mercado Pago, campo)..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 aria-label="Buscar perguntas frequentes"
@@ -343,9 +314,7 @@ export default function FAQ() {
         </main>
 
         {/* Footer padrão do site */}
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        <Footer />
       </div>
     </>
   );

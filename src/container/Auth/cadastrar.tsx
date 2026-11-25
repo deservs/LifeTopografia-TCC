@@ -13,15 +13,12 @@ import { z } from "zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
-import type { UserProfile } from "../../components/Sidebar/sidebar";
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
 
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar.tsx"));
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
 );
-
-import Logo from "../../assets/image/logo-front.webp";
-import FundoHeader from "../../assets/image/background/firstcard.webp";
 
 import "./cadastrar.css";
 
@@ -206,43 +203,16 @@ export const Cadastrar = () => {
         content="Crie sua conta na Life Topografia para solicitar orçamentos e acompanhar seus serviços topográficos."
       />
       <div className="cadastrar-page">
-        <Suspense fallback={null}>
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            user={currentUser}
-          />
-        </Suspense>
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={currentUser}
+        />
 
-        <header
-          className="cadastrar-topbar"
-          style={{
-            backgroundImage: `
-                        linear-gradient(
-                            rgba(0, 0, 0, 0.45),
-                            rgba(0, 0, 0, 0.45)
-                        ),
-                        url(${FundoHeader})
-                    `,
-          }}
-        >
-          <button
-            type="button"
-            className="btn-menu-header"
-            onClick={() => setIsSidebarOpen(true)}
-            aria-label="Abrir menu"
-            aria-expanded={isSidebarOpen}
-            aria-controls="menu-drawer"
-          >
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-          </button>
-
-          <div className="topbar-logo">
-            <img src={Logo} alt="Life Topografia" />
-          </div>
-        </header>
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
 
         <main className="cadastrar-main-content">
           <div className="cadastrar-title-container">

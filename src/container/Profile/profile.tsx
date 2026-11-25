@@ -9,10 +9,9 @@ import {
 } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-import type { UserProfile } from "../../components/Sidebar/sidebar";
-
-const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
-const Footer = lazy(() => import("../../components/Footer/footer"));
+import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
+import Footer from "../../components/Footer/footer";
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
 );
@@ -26,7 +25,6 @@ import {
   DeleteAccount,
 } from "../../lib/supabase/auth";
 
-import Logo from "../../assets/image/logo-front.webp";
 import "./profile.css";
 
 export interface ProfileData extends UserProfile {
@@ -608,30 +606,15 @@ export default function Profile({
         content="Gerencie seus dados de perfil, foto, senha e membros da empresa na Life Topografia."
       />
       <div className="profile-page">
-        <Suspense fallback={null}>
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            user={profile}
-          />
-        </Suspense>
-        <header className="profile-topbar">
-          <button
-            className="profile-menu-button"
-            type="button"
-            aria-label="Abrir menu"
-            aria-expanded={isSidebarOpen}
-            aria-controls="menu-drawer"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-          <Link to="/" className="profile-logo">
-            <img src={Logo} alt="Life Topografia — Início" />
-          </Link>
-        </header>
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          user={profile}
+        />
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
 
         <main className="profile-main" aria-busy={loading}>
           <div className="profile-title-container">
@@ -1080,9 +1063,7 @@ export default function Profile({
             </>
           )}
         </main>
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        <Footer />
       </div>
 
       {action && confirmationPerson && (

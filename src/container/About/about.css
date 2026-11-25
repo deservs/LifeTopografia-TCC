@@ -1,0 +1,299 @@
+/* =========================================================
+   PÁGINA SOBRE NÓS - LIFE TOPOGRAFIA
+   ========================================================= */
+
+.about-page {
+  --about-green: #22ad50;
+  --about-blue: #1558b6;
+  --about-card-bg: #e5e5e5;
+  --about-card-border: #d8dce3;
+
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  color: #111111;
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   CONTEÚDO PRINCIPAL E TÍTULO
+   ========================================================= */
+
+.about-main {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 14px 56px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.about-intro {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 2px;
+  text-align: center;
+}
+
+.about-title-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.about-title-divider span {
+  flex: 1;
+  height: 2px;
+  background-color: #0f172a;
+}
+
+.about-title-divider h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 5.4vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: #0f172a;
+}
+
+/* =========================================================
+   CARDS COM IMAGENS INTERNAS E QUEBRA DE TEXTO ESTILO WORD
+   ========================================================= */
+
+.about-card {
+  display: flow-root;
+  width: 100%;
+  padding: 18px 16px 22px;
+  border-radius: 24px;
+  background-color: var(--about-card-bg);
+  border: 1px solid var(--about-card-border);
+  color: #111111;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+
+.about-card__image {
+  float: left;
+  display: block;
+  height: auto;
+  margin: 0 14px 10px 0;
+  border-radius: 20px;
+  shape-outside: margin-box;
+  filter: drop-shadow(0 4px 12px rgba(15, 23, 42, 0.12));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.about-card__image--history {
+  width: clamp(108px, 36%, 155px);
+}
+
+.about-card__image--why {
+  width: clamp(104px, 34%, 145px);
+}
+
+.about-card__subtitle {
+  margin: 0 0 8px;
+  color: var(--about-green);
+  font-size: clamp(1.02rem, 3.8vw, 1.4rem);
+  font-weight: 700;
+  line-height: 1.22;
+  text-align: left;
+}
+
+.about-card__lead {
+  margin: 0;
+  font-size: clamp(0.82rem, 2.5vw, 0.96rem);
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  color: #1e293b;
+}
+
+/* =========================================================
+   LISTA DE DIFERENCIAIS (NOSSA HISTÓRIA)
+   ========================================================= */
+
+.about-check-list {
+  clear: both;
+  list-style: none;
+  margin: 14px 0;
+  padding: 4px 0 0;
+}
+
+.about-check-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 9px;
+  font-size: clamp(0.78rem, 2.2vw, 0.9rem);
+  font-weight: 500;
+  line-height: 1.42;
+  color: #1f2937;
+}
+
+.about-check-list__item:last-child {
+  margin-bottom: 0;
+}
+
+.about-check-list__icon {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: #374151;
+}
+
+.about-check-list__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.about-card__closing {
+  margin: 0;
+  font-size: clamp(0.83rem, 2.5vw, 0.96rem);
+  font-weight: 600;
+  line-height: 1.48;
+  text-align: justify;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  color: #111111;
+}
+
+/* =========================================================
+   PILARES (POR QUE ESCOLHER)
+   ========================================================= */
+
+.about-pillars-list {
+  clear: both;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 4px 0 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.about-pillar {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.about-pillar__icon {
+  width: 38px;
+  height: 38px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: var(--about-blue);
+}
+
+.about-pillar__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.about-pillar__body {
+  min-width: 0;
+}
+
+.about-pillar__body h3 {
+  margin: 0 0 3px;
+  font-size: clamp(0.88rem, 2.4vw, 1rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0f172a;
+}
+
+.about-pillar__body p {
+  margin: 0;
+  font-size: clamp(0.78rem, 2.1vw, 0.86rem);
+  font-weight: 400;
+  line-height: 1.44;
+  color: #1f2937;
+}
+
+/* =========================================================
+   TABLET E DESKTOP
+   ========================================================= */
+
+@media screen and (min-width: 680px) {
+  .about-main {
+    padding: 42px 28px 68px;
+    gap: 36px;
+  }
+
+  .about-card {
+    padding: 26px 28px;
+    border-radius: 26px;
+  }
+
+  .about-card__image {
+    margin: 0 22px 14px 0;
+    border-radius: 22px;
+  }
+
+  .about-card__image--history {
+    width: clamp(175px, 26%, 225px);
+  }
+
+  .about-card__image--why {
+    width: clamp(165px, 24%, 210px);
+  }
+
+  .about-check-list {
+    clear: none;
+    padding-top: 0;
+  }
+
+  .about-pillars-list {
+    clear: none;
+    padding-top: 0;
+    overflow: hidden;
+  }
+}
+
+@media screen and (min-width: 860px) {
+  .about-card {
+    padding: 30px 32px;
+  }
+
+  .about-card__image {
+    margin: 0 26px 14px 0;
+  }
+
+  .about-pillars-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 22px;
+  }
+}
+
+/* =========================================================
+   TELAS ULTRA-ESTREITAS
+   ========================================================= */
+
+@media screen and (max-width: 340px) {
+  .about-main {
+    padding: 20px 10px 42px;
+  }
+
+  .about-card {
+    padding: 15px 12px 18px;
+    border-radius: 20px;
+  }
+
+  .about-card__image {
+    margin: 0 10px 8px 0;
+    border-radius: 16px;
+  }
+
+  .about-card__image--history,
+  .about-card__image--why {
+    width: 96px;
+  }
+}
