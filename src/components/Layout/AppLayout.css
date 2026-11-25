@@ -1,0 +1,84 @@
+.app-layout {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout__body {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout__body > * {
+  flex: 1;
+  min-height: 0;
+}
+
+.route-guard-status {
+  min-height: 50vh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  color: #0b50bd;
+  font-weight: 600;
+  text-align: center;
+}
+
+.route-guard-card {
+  width: min(100% - 32px, 520px);
+  margin: 48px auto;
+  padding: 28px 24px;
+  border-radius: 16px;
+  border: 1px solid #fecaca;
+  background-color: #fef2f2;
+  color: #0f172a;
+  text-align: center;
+}
+
+.route-guard-card h1 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+  color: #b91c1c;
+}
+
+.route-guard-card p {
+  margin: 0 0 20px;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.route-guard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.route-guard-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.route-guard-btn--primary {
+  background-color: #0b50bd;
+  color: #ffffff;
+}
+
+.route-guard-btn--secondary {
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #0f172a;
+}

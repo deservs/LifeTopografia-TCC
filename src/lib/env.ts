@@ -13,6 +13,10 @@ export const envSchema = z.object({
   VITE_R2_PUBLIC_URL: z
     .string({ message: "URL pública do R2 é obrigatória" })
     .url("URL pública do R2 inválida"),
+  VITE_TURNSTILE_SITE_KEY: z
+    .string({ message: "Chave do Turnstile é obrigatória" })
+    .min(1, "Chave do Turnstile é obrigatória")
+    .default("0x4AAAAAAFabYKAT6aVT3YYq"),
 });
 
 const _env = envSchema.safeParse(import.meta.env);
@@ -38,5 +42,5 @@ export const env = _env.success
       VITE_SUPABASE_PUBLISHABLE_KEY: "placeholder-anon-key",
       VITE_MERCADO_PAGO_PUBLIC_KEY: "placeholder-public-key",
       VITE_R2_PUBLIC_URL: "https://placeholder-r2-url.com",
-      VITE_API_URL: "http://localhost:3001",
+      VITE_TURNSTILE_SITE_KEY: "0x4AAAAAAFabYKAT6aVT3YYq",
     };

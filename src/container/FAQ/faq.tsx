@@ -1,9 +1,5 @@
-import { useState, useEffect, useId } from "react";
+import { useState, useId } from "react";
 import { Link } from "react-router-dom";
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
-import Footer from "../../components/Footer/footer";
-import { SerchDataUser } from "../../lib/supabase/auth";
 import "./faq.css";
 
 interface FaqItem {
@@ -67,35 +63,10 @@ const FAQ_DATA: FaqItem[] = [
 ];
 
 export default function FAQ() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [openItemIds, setOpenItemIds] = useState<number[]>([1]); // Primeira pergunta aberta por padrão
   const [searchTerm, setSearchTerm] = useState("");
 
   const searchInputId = useId();
-
-  // Carrega os dados do perfil autenticado para manter a Sidebar integrada
-  useEffect(() => {
-    let active = true;
-    async function loadUserData() {
-      try {
-        const cached = await SerchDataUser();
-        if (cached && active) {
-          setUserProfile({
-            name: cached.name || "Cliente",
-            role: cached.role || "pessoa",
-            avatarUrl: cached.avatarUrl || "",
-          });
-        }
-      } catch (err) {
-        console.warn("Usuário não autenticado na página FAQ:", err);
-      }
-    }
-    void loadUserData();
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const toggleItem = (id: number) => {
     setOpenItemIds((prev) =>
@@ -125,18 +96,6 @@ export default function FAQ() {
         content="Perguntas frequentes sobre serviços de topografia, orçamentos, segurança e funcionamento da plataforma Life Topografia."
       />
       <div className="faq-page">
-        {/* Sidebar integrada padrão */}
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          user={userProfile}
-        />
-
-        <Topbar
-          isSidebarOpen={isSidebarOpen}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-        />
-
         {/* Conteúdo Principal */}
         <main className="faq-main">
           {/* Cabeçalho de Título com Divisória Oficial */}
@@ -312,9 +271,6 @@ export default function FAQ() {
             </div>
           </div>
         </main>
-
-        {/* Footer padrão do site */}
-        <Footer />
       </div>
     </>
   );

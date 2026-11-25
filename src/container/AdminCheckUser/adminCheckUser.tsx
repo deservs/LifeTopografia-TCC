@@ -8,10 +8,7 @@ import {
 } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
-import Footer from "../../components/Footer/footer";
-import { SerchDataUser } from "../../lib/supabase/auth";
+import { useLayout } from "../../components/Layout/AppLayout";
 
 import {
   fetchAdminCompanyMembers,
@@ -101,9 +98,7 @@ export default function AdminCheckUser() {
   const searchInputId = useId();
   const pageSizeSelectId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [sidebarUser, setSidebarUser] = useState<UserProfile | null>(null);
+  const { setTopbarRightContent } = useLayout();
 
   const [users, setUsers] = useState<AdminUserItem[]>([]);
   const [pagination, setPagination] = useState<AdminUsersPagination>({
@@ -131,26 +126,15 @@ export default function AdminCheckUser() {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
 
-  // Preenche apenas a exibição da Sidebar; a autorização real ocorre no servidor.
+  // Registra o badge administrativo na Topbar compartilhada.
   useEffect(() => {
-    let active = true;
-    SerchDataUser()
-      .then((profile) => {
-        if (active && profile) {
-          setSidebarUser({
-            name: profile.name,
-            role: profile.role,
-            avatarUrl: profile.avatarUrl,
-          });
-        }
-      })
-      .catch(() => {
-        if (active) setSidebarUser(null);
-      });
+    setTopbarRightContent(
+      <span className="admin-users-topbar-badge">Área Admin</span>,
+    );
     return () => {
-      active = false;
+      setTopbarRightContent(null);
     };
-  }, []);
+  }, [setTopbarRightContent]);
 
   // Debounce da busca para evitar requisições excessivas durante a digitação.
   useEffect(() => {
@@ -362,20 +346,6 @@ export default function AdminCheckUser() {
 
   return (
     <div className="admin-users-page">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        user={sidebarUser}
-      />
-
-      <Topbar
-        isSidebarOpen={isSidebarOpen}
-        onOpenSidebar={() => setIsSidebarOpen(true)}
-        rightContent={
-          <span className="admin-users-topbar-badge">Área Admin</span>
-        }
-      />
-
       <main className="admin-users-main" aria-busy={loading}>
         <section className="admin-users-hero">
           <div className="admin-users-badge-row">
@@ -780,8 +750,6 @@ export default function AdminCheckUser() {
           </section>
         )}
       </main>
-
-      <Footer />
 
       <dialog
         ref={dialogRef}

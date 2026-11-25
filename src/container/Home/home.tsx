@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { Link } from "react-router-dom";
 
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import { useLayout } from "../../components/Layout/AppLayout";
 
 import Fundo1 from "../../assets/image/background/firstcard.webp";
 import Fundo2 from "../../assets/image/background/secondcard.webp";
@@ -18,21 +17,12 @@ import "./home.css";
  *
  * Responsabilidades deste componente:
  * - apresentar a identidade visual principal;
- * - controlar a abertura da Sidebar;
+ * - acionar a abertura da Sidebar compartilhada;
  * - exibir o carrossel de imagens de fundo;
  * - disponibilizar o acesso à solicitação de orçamento.
- *
- * A autenticação e os dados reais do usuário serão integrados
- * posteriormente pelo backend.
  */
 export default function Home() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  /*
-   * Enquanto a autenticação não estiver conectada,
-   * a Sidebar recebe null e apresenta as opções de acesso.
-   */
-  const currentUser: UserProfile | null = null;
+  const { isSidebarOpen, openSidebar } = useLayout();
 
   /*
    * O carrossel é apenas decorativo.
@@ -52,19 +42,13 @@ export default function Home() {
         content="Página inicial da Life Topografia, com informações sobre a empresa e seus serviços."
       />
       <div id="initial-card">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          user={currentUser}
-        />
-
         <main id="superposition">
           <div id="main-content">
             <div id="barra-lateral">
               <button
                 type="button"
                 className="btn-menu"
-                onClick={() => setIsSidebarOpen(true)}
+                onClick={openSidebar}
                 aria-label="Abrir menu"
                 aria-expanded={isSidebarOpen}
                 aria-controls="menu-drawer"

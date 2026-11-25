@@ -5,12 +5,9 @@ import {
   type FormEvent,
   type ChangeEvent,
 } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
-import Footer from "../../components/Footer/footer";
-import { supabase } from "../../lib/supabase/supabaseClient";
-import { SerchDataUser } from "../../lib/supabase/auth";
+import { Link } from "react-router-dom";
+import { useLayout } from "../../components/Layout/AppLayout";
+import { useAuth } from "../../context/AuthContext";
 import "./chat.css";
 
 export interface MessageFile {
@@ -245,16 +242,13 @@ const INITIAL_ADMIN_THREADS: ChatThread[] = [
 ];
 
 export default function Chat() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Estados de sessão e autenticação
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const { user } = useAuth();
+  const { setTopbarRightContent } = useLayout();
 
   // Papel do usuário: admin ou cliente (pessoa/empresa)
-  const [activeRole, setActiveRole] = useState<"client" | "admin">("client");
+  const [activeRole, setActiveRole] = useState<"client" | "admin">(() =>
+    user?.role === "ADMIN" ? "admin" : "client",
+  );
 
   // Estado do chat para Clientes
   const [clientMessages, setClientMessages] = useState<ChatMessage[]>(
@@ -325,93 +319,38 @@ export default function Chat() {
     }
   };
 
-  /**
-   * 1. PROTEÇÃO DE ACESSO:
-   * Sem uma sessão ativa no Supabase, redireciona imediatamente para /login.
-   */
+  // Sincroniza papel inicial com o usuário autenticado no AuthContext
   useEffect(() => {
-    let isMounted = true;
+    setActiveRole(user?.role === "ADMIN" ? "admin" : "client");
+  }, [user?.role]);
 
-    async function checkAuthAndLoadProfile() {
-      try {
-        const storedProfileStr = localStorage.getItem("userProfile");
-
-        // Aguarda a resposta real do Supabase. Um timeout artificial poderia
-        // interpretar uma conexão lenta como ausência de sessão e redirecionar
-        // uma pessoa autenticada para o login.
-        const { data, error } = await supabase.auth.getSession();
-
-        if ((error || !data?.session) && !storedProfileStr) {
-          // Usuário não autenticado: redireciona imediatamente para a tela de login
-          navigate("/login", { replace: true, state: { from: location } });
-          return;
-        }
-
-        // Busca os dados do perfil autenticado
-        let loadedRole: "client" | "admin" = "client";
-        let loadedName = "Cliente";
-        let loadedAvatar: string | undefined;
-
-        try {
-          const cached = await SerchDataUser();
-          const profileRaw = cached || storedProfileStr;
-          if (profileRaw) {
-            const profileData =
-              typeof profileRaw === "string"
-                ? JSON.parse(profileRaw)
-                : profileRaw;
-            const userRole = (profileData.tipo_perfil || "").toLowerCase();
-            loadedName = profileData.nome_ou_razao || "Cliente";
-            loadedAvatar = profileData.foto_url;
-
-            if (userRole === "admin" || userRole === "administrador") {
-              loadedRole = "admin";
-            } else {
-              loadedRole = "client";
-            }
-          } else if (data?.session) {
-            // Checa metadados da sessão caso não haja perfil salvo
-            const metaRole = (
-              data.session.user.user_metadata?.role ||
-              data.session.user.user_metadata?.tipo_perfil ||
-              ""
-            ).toLowerCase();
-            if (metaRole === "admin" || metaRole === "administrador") {
-              loadedRole = "admin";
-            }
-            loadedName =
-              data.session.user.user_metadata?.nome_ou_razao ||
-              data.session.user.email?.split("@")[0] ||
-              "Cliente";
-          }
-        } catch (profileErr) {
-          console.warn(
-            "Aviso ao carregar dados complementares do perfil:",
-            profileErr,
-          );
-        }
-
-        if (isMounted) {
-          setUserProfile({
-            name: loadedName,
-            role: loadedRole === "admin" ? "admin" : "pessoa",
-            avatarUrl: loadedAvatar,
-          });
-          setActiveRole(loadedRole);
-          setIsCheckingAuth(false);
-        }
-      } catch (err) {
-        console.error("Erro na verificação de autenticação:", err);
-        navigate("/login", { replace: true });
-      }
-    }
-
-    void checkAuthAndLoadProfile();
+  // Configura o seletor de perfil demonstrativo na Topbar compartilhada
+  useEffect(() => {
+    setTopbarRightContent(
+      <div className="chat-role-indicator">
+        <span className="role-indicator-label">Perfil Ativo:</span>
+        <button
+          type="button"
+          className={`role-toggle-btn ${activeRole === "admin" ? "is-admin" : "is-client"}`}
+          onClick={() => {
+            setActiveRole((previous) =>
+              previous === "admin" ? "client" : "admin",
+            );
+            setMobileView("chat");
+          }}
+          title="Alternar visão entre Cliente e Administrador para testes de hierarquia"
+        >
+          {activeRole === "admin"
+            ? "🛡️ Administrador"
+            : "👤 Cliente (Empresa/Pessoa)"}
+        </button>
+      </div>,
+    );
 
     return () => {
-      isMounted = false;
+      setTopbarRightContent(null);
     };
-  }, [navigate, location]);
+  }, [activeRole, setTopbarRightContent]);
 
   // Limpa controles temporários ao trocar de perfil ou atendimento para evitar
   // que uma mensagem, orçamento ou avaliação seja enviada ao cliente errado.
@@ -456,17 +395,6 @@ export default function Chat() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  // Se ainda estiver validando a sessão, exibe tela padronizada de checagem
-  if (isCheckingAuth) {
-    return (
-      <div className="chat-auth-checking">
-        <div className="chat-auth-spinner" />
-        <h2>Autenticando acesso...</h2>
-        <p>Verificando credenciais e permissões na Life Topografia.</p>
-      </div>
-    );
-  }
 
   const isAdmin = activeRole === "admin";
 
@@ -514,8 +442,8 @@ export default function Chat() {
       id: `msg-${Date.now()}`,
       sender: isAdmin ? "admin" : "client",
       senderName: isAdmin
-        ? userProfile?.name || "Life Topografia (Admin)"
-        : userProfile?.name || "Você",
+        ? user?.name || "Life Topografia (Admin)"
+        : user?.name || "Você",
       text,
       time: formattedTime,
       type: "text",
@@ -579,8 +507,8 @@ export default function Chat() {
       id: `file-${Date.now()}`,
       sender: isAdmin ? "admin" : "client",
       senderName: isAdmin
-        ? userProfile?.name || "Life Topografia (Admin)"
-        : userProfile?.name || "Você",
+        ? user?.name || "Life Topografia (Admin)"
+        : user?.name || "Você",
       time: formattedTime,
       type: "file",
       file: {
@@ -789,7 +717,7 @@ export default function Chat() {
       const statusMsg: ChatMessage = {
         id: `dec-${Date.now()}`,
         sender: "client",
-        senderName: userProfile?.name || "Você",
+        senderName: user?.name || "Você",
         text: responseText,
         time: formattedTime,
         type: "text",
@@ -894,36 +822,6 @@ export default function Chat() {
         content="Converse com a equipe da Life Topografia, envie documentos e acompanhe suas propostas de orçamento."
       />
       <div className="chat-page">
-        {/* Sidebar integrada com o mesmo padrão do site */}
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          user={userProfile}
-        />
-
-        {/* Topbar padronizada; alternância de perfil apenas visual para demonstração. */}
-        <Topbar
-          isSidebarOpen={isSidebarOpen}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-          rightContent={
-          <div className="chat-role-indicator">
-            <span className="role-indicator-label">Perfil Ativo:</span>
-            <button
-              type="button"
-              className={`role-toggle-btn ${isAdmin ? "is-admin" : "is-client"}`}
-              onClick={() => {
-                const nextRole = isAdmin ? "client" : "admin";
-                setActiveRole(nextRole);
-                setMobileView("chat");
-              }}
-              title="Alternar visão entre Cliente e Administrador para testes de hierarquia"
-            >
-              {isAdmin ? "🛡️ Administrador" : "👤 Cliente (Empresa/Pessoa)"}
-            </button>
-          </div>
-          }
-        />
-
         {/* Conteúdo Principal */}
         <main className="chat-main">
           <div className="chat-title-container">
@@ -1814,9 +1712,6 @@ export default function Chat() {
             </div>
           )}
         </main>
-
-        {/* Footer padrão do site */}
-        <Footer />
       </div>
     </>
   );

@@ -1,46 +1,57 @@
-import { supabaseAdmin } from '../../Shared/database/banco.js'
-import { env } from '../../config/env.js'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
+import { env } from "../../config/env.js";
+import { supabaseAdmin } from "../../Shared/database/banco.js";
 
 export async function DeleteAccount(
   userId: string,
-): Promise<'invalid_password' | 'forbidden' | 'blocked' | 'deleted'> {
+  jwt: string,
+): Promise<"forbidden" | "blocked" | "deleted" | "error"> {
   const { data: userData, error: userError } = await supabaseAdmin
-    .from('perfis')
-    .update({ status: 'EXCLUIDO' })
-    .eq('id', userId)
-    .select('id')
-    .single()
+    .from("perfis")
+    .update({ status: "EXCLUIDO" })
+    .eq("id", userId)
+    .select("id")
+    .maybeSingle();
 
-  if (userError || !userData) {
-    console.error('Erro ao atualizar status do usuário:', userError)
-    return 'forbidden'
+  if (userError) {
+    console.error("Erro ao atualizar status do usuário:", userError);
+    return "error";
   }
-  const { error: singoutError } = await supabaseAdmin.auth.admin.signOut(
+
+  if (!userData) {
+    return "forbidden";
+  }
+
+  const { error: signoutError } = await supabaseAdmin.auth.admin.signOut(
+    jwt,
+    "global",
+  );
+  if (signoutError) {
+    console.error("Erro ao desconectar usuário:", signoutError);
+    return "error";
+  }
+
+  const { error: banError } = await supabaseAdmin.auth.admin.updateUserById(
     userId,
-    'global',
-  )
-  if (singoutError) {
-    console.error('Erro ao desconectar usuário:', singoutError)
-    return 'forbidden'
-  }
-  const { error: banError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-    ban_duration: '876000h',
-  })
+    {
+      ban_duration: "876000h",
+    },
+  );
   if (banError) {
-    console.error('Erro ao banir usuário:', banError)
-    return 'forbidden'
+    console.error("Erro ao banir usuário:", banError);
+    return "error";
   }
-  return 'deleted'
+
+  return "deleted";
 }
 
 export async function CheckPassword(
-  email: string,
+  userId: string,
   password: string,
-): Promise<'invalid_password' | 'valid'> {
+): Promise<"invalid_password" | "valid" | "error"> {
   const authCheckClient = createClient(
-    env.VITE_SUPABASE_URL!,
-    env.SUPABASE_SECRET_KEY!,
+    env.VITE_SUPABASE_URL,
+    env.VITE_SUPABASE_PUBLISHABLE_KEY,
     {
       auth: {
         persistSession: false,
@@ -48,11 +59,22 @@ export async function CheckPassword(
         detectSessionInUrl: false,
       },
     },
-  )
-  const { error } = await authCheckClient.auth.signInWithPassword({
-    email,
-    password,
-  })
+  );
+  const { data: isValid, error } = await supabaseAdmin.rpc(
+    "verify_user_password",
+    {
+      user_id: userId,
+      current_password: password,
+    },
+  );
 
-  return error ? 'invalid_password' : 'valid'
+  if (error) {
+    return "error";
+  }
+
+  if (!isValid) {
+    return "invalid_password";
+  }
+
+  return "valid";
 }

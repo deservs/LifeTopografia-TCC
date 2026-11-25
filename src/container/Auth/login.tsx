@@ -13,8 +13,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
+import { useAuth } from "../../context/AuthContext";
+import { env } from "../../lib/env";
 
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
@@ -24,7 +24,6 @@ import {
   ConfirmResetPassword,
   ConfirmOTP,
   SignIn,
-  SignOut,
 } from "../../lib/supabase/auth.ts";
 
 import "./login.css";
@@ -50,11 +49,10 @@ const TEMPO_REENVIO = 60;
 export const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setPasswordRecovery, signOut } = useAuth();
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [inviCaptcha, setInviCaptcha] = useState(false);
-  const currentUser: UserProfile | null = null;
 
   // Refs separadas para cada Turnstile
   const captchaLoginRef = useRef<TurnstileInstance | null>(null);
@@ -261,18 +259,15 @@ export const Login = () => {
         formaDeLogin,
       );
       if (!resultado.ok) {
-        if (resultado.fieldErrors) {
-          if (resultado.fieldErrors.valor?.[0]) {
-            setFeedback("Erro nas credenciais.");
-          }
-          if (resultado.fieldErrors.password?.[0]) {
-            setFeedback("Erro nas credenciais.");
-          }
-          if (resultado.fieldErrors.captchaToken?.[0]) {
-            setFeedback("Porfavor, complete o captchaToken");
-          }
+        if (resultado.fieldErrors?.valor?.[0]) {
+          setFeedback(resultado.fieldErrors.valor[0]);
+        } else if (resultado.fieldErrors?.password?.[0]) {
+          setFeedback(resultado.fieldErrors.password[0]);
+        } else if (resultado.fieldErrors?.captchaToken?.[0]) {
+          setFeedback("Por favor, complete o captcha.");
+        } else {
+          setFeedback(resultado.message);
         }
-        setFeedback(resultado.message);
         return;
       }
       navigate(from, { replace: true });
@@ -331,11 +326,13 @@ export const Login = () => {
     }
 
     setFeedback("");
+    setPasswordRecovery(true);
     try {
       await ConfirmOTP(codigoCompleto, formData.emailRecuperacao);
       setClickedButton(false);
       setEtapa("esqueci_nova_senha");
     } catch (error) {
+      setPasswordRecovery(false);
       console.error("Erro ao confirmar o código:", error);
       setFeedback(
         "Erro ao confirmar o código. Verifique se o código informado está correto.",
@@ -385,7 +382,7 @@ export const Login = () => {
       return;
     }
     try {
-      await SignOut("global");
+      await signOut("global");
       setEtapa("login");
     } catch (error) {
       setLogoutFail(true);
@@ -395,7 +392,7 @@ export const Login = () => {
 
   const handleTryLogout = async () => {
     try {
-      await SignOut("global");
+      await signOut("global");
       setLogoutFail(false);
       setEtapa("login");
     } catch (error) {
@@ -419,17 +416,6 @@ export const Login = () => {
         content="Acesse sua conta na Life Topografia para gerenciar seus projetos, chats e solicitações de orçamento."
       />
       <div className="login-page">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          user={currentUser}
-        />
-
-        <Topbar
-          isSidebarOpen={isSidebarOpen}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-        />
-
         <main className="login-main-content">
           <div className="login-title-container">
             <h1 className="login-title">
@@ -585,7 +571,7 @@ export const Login = () => {
                         theme: "light",
                       }}
                       ref={captchaLoginRef}
-                      siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                      siteKey={env.VITE_TURNSTILE_SITE_KEY}
                       onSuccess={(token) => {
                         setCaptchaToken(token);
                       }}
@@ -656,7 +642,7 @@ export const Login = () => {
                       theme: "light",
                     }}
                     ref={captchaEmailRef}
-                    siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                    siteKey={env.VITE_TURNSTILE_SITE_KEY}
                     onSuccess={(token) => {
                       setCaptchaToken(token);
                     }}
@@ -802,9 +788,20 @@ export const Login = () => {
                         />
                       </svg>
 
-                      <span className="check-badge" aria-hidden="true">
-                        ✓
-                      </span>
+                      {formData.confirmarNovaSenha.length > 0 && (
+                        <span
+                          className={`check-badge ${
+                            formData.novaSenha === formData.confirmarNovaSenha
+                              ? "is-valid"
+                              : "is-invalid"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {formData.novaSenha === formData.confirmarNovaSenha
+                            ? "✓"
+                            : "✕"}
+                        </span>
+                      )}
                     </div>
 
                     <div className="input-field-wrapper">
@@ -846,7 +843,7 @@ export const Login = () => {
                     disabled={clickedButton}
                     onClick={async () => {
                       try {
-                        await SignOut("local");
+                        await signOut("local");
                         setEtapa("login");
                       } catch (error) {
                         console.error("Erro ao deslogar o usuário:", error);
@@ -891,7 +888,7 @@ export const Login = () => {
                   theme: "light",
                 }}
                 ref={captchaInviRef}
-                siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                siteKey={env.VITE_TURNSTILE_SITE_KEY}
                 onSuccess={(token) => {
                   setCaptchaToken(token);
                   void handleReenviarCodigo(token);

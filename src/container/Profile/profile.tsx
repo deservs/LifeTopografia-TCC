@@ -7,85 +7,42 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
-import Footer from "../../components/Footer/footer";
+import ChangePasswordForm from "../../components/ChangePasswordForm/ChangePasswordForm";
+import { useAuth } from "../../context/AuthContext";
+import {
+  DeleteAccount,
+  RemoveCompanyMember,
+  SaveNewMemberData,
+  SearchMemberData,
+  UpdateMemberStatus,
+  UpdateUser,
+} from "../../lib/supabase/auth";
+import {
+  isCompanyRole,
+  type CompanyMember,
+  type UserProfile,
+} from "../../types/auth.types";
+
+import "./profile.css";
+
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
 );
 
-import {
-  SerchDataUser,
-  SignOut,
-  UpdateUser,
-  SaveNewMemberData,
-  SearchMemberData,
-  DeleteAccount,
-} from "../../lib/supabase/auth";
-
-import "./profile.css";
-
-export interface ProfileData extends UserProfile {
-  id: string;
-  email: string;
-}
-
-export interface CompanyMember {
-  id: string;
-  name: string;
-  email: string;
-  status: "ATIVO" | "EXCLUIDO" | "AFASTADO" | "PENDENTE";
-  avatarUrl?: string;
-}
-
 export type MemberAction =
-  | { type: "status"; member: CompanyMember; status: CompanyMember["status"] }
+  | {
+      type: "status";
+      member: CompanyMember;
+      status: Extract<CompanyMember["status"], "ATIVO" | "AFASTADO">;
+    }
   | { type: "remove"; member: CompanyMember };
 
 type ConfirmationAction = MemberAction | { type: "delete_account" };
 
-export interface AccountDeletionRequest {
-  profileId: string;
-  password: string;
-  confirmationText: string;
-  acknowledged: boolean;
-  companyAcknowledged: boolean;
-}
-
-/**
- * Contrato de integração do frontend. A confirmação deve validar a senha da
- * conta responsável e executar a operação no servidor; false indica senha
- * incorreta. Não validar senhas nem autorizar operações no navegador.
- * Os callbacks de gravação só devem resolver após a confirmação do serviço.
- */
-export interface ProfileServices {
-  loadMembers?: (profileId: string) => Promise<CompanyMember[]>;
-  saveProfile?: (profile: ProfileData) => Promise<void>;
-  /** Faz upload da foto e retorna a URL que será salva no perfil. */
-  uploadAvatar?: (profileId: string, file: File) => Promise<string>;
-  saveMembers?: (profileId: string, members: CompanyMember[]) => Promise<void>;
-  confirmMemberAction?: (
-    profileId: string,
-    action: MemberAction,
-    password: string,
-  ) => Promise<boolean>;
-  changePassword?: (password: string) => Promise<void>;
-  /**
-   * O servidor deve revalidar a senha, a identidade e a autorização do responsável,
-   * conferir vínculos/pendências e aplicar a exclusão de forma atômica. As confirmações
-   * do navegador não concedem permissão. Excluir uma empresa não exclui as contas
-   * pessoais de seus membros. Só retornar deleted após excluir a conta e invalidar
-   * suas sessões, incluindo a sessão local; nunca usar credenciais administrativas no frontend.
-   */
-  deleteAccount?: (
-    request: AccountDeletionRequest,
-  ) => Promise<"deleted" | "invalid_password" | "forbidden" | "blocked">;
-}
-
 interface ProfileProps {
-  initialProfile?: ProfileData;
+  initialProfile?: UserProfile;
   initialMembers?: CompanyMember[];
 }
 
@@ -127,37 +84,25 @@ function Avatar({
   );
 }
 
-function isCompany(role: string) {
-  return [
-    "empresa",
-    "pj",
-    "pessoa juridica",
-    "pessoa_juridica",
-    "pessoa-juridica",
-  ].includes(
-    role
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .trim()
-      .toLowerCase(),
-  );
-}
-
 export default function Profile({
   initialProfile,
   initialMembers = [],
 }: ProfileProps = {}) {
   const location = useLocation();
   const navigateTo = useNavigate();
-  const [profile, setProfile] = useState<ProfileData | null>(
-    initialProfile ?? null,
+  const {
+    user: authUser,
+    status: authStatus,
+    refreshProfile,
+    signOut: authSignOut,
+  } = useAuth();
+
+  const [profile, setProfile] = useState<UserProfile | null>(
+    initialProfile ?? authUser ?? null,
   );
-  const [draft, setDraft] = useState<ProfileData | null>(
-    initialProfile ?? null,
+  const [draft, setDraft] = useState<UserProfile | null>(
+    initialProfile ?? authUser ?? null,
   );
-  const [loading, setLoading] = useState(!initialProfile);
-  const [loadError, setLoadError] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [view, setView] = useState<PageView>("profile");
   const [members, setMembers] = useState<CompanyMember[]>(initialMembers);
   const [membersLoaded, setMembersLoaded] = useState(false);
@@ -171,8 +116,6 @@ export default function Profile({
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [invalidPassword, setInvalidPassword] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
   const [feedback, setFeedback] = useState("");
   const [feedbackIsError, setFeedbackIsError] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -183,13 +126,23 @@ export default function Profile({
   const previousViewRef = useRef(view);
   const submittingRef = useRef(false);
 
+  const loading = !initialProfile && authStatus === "loading";
+
+  useEffect(() => {
+    if (initialProfile) {
+      setProfile(initialProfile);
+      setDraft(initialProfile);
+      return;
+    }
+    if (authStatus === "loading") return;
+    setProfile(authUser);
+    setDraft(authUser);
+  }, [authStatus, authUser, initialProfile]);
+
   // Gera uma prévia local e libera a URL temporária quando ela deixa de ser usada.
   useEffect(() => {
     if (!avatarFile) return;
     const previewUrl = URL.createObjectURL(avatarFile);
-    setDraft((current) =>
-      current ? { ...current, avatarUrl: previewUrl } : current,
-    );
     setDraft((current) =>
       current ? { ...current, avatarUrl: previewUrl } : current,
     );
@@ -214,40 +167,6 @@ export default function Profile({
     setFeedback("");
     setAvatarFile(file);
   }
-
-  useEffect(() => {
-    if (initialProfile) return;
-    let active = true;
-    async function loadProfile() {
-      try {
-        const user = await SerchDataUser();
-        if (!user) {
-          if (active) setProfile(null);
-          return;
-        }
-        const loadedProfile: ProfileData = {
-          id: user?.id,
-          name: user?.name ?? "",
-          role: user.role ?? (user.role === "empresa" ? "empresa" : "pessoa"),
-          avatarUrl: user.avatarUrl ?? undefined,
-          email: user.email ?? "",
-        };
-        if (active) {
-          setProfile(loadedProfile);
-          setDraft(loadedProfile);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar perfil:", error);
-        if (active) setLoadError(true);
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-    void loadProfile();
-    return () => {
-      active = false;
-    };
-  }, [initialProfile]);
 
   useEffect(() => {
     if (previousViewRef.current !== view) headingRef.current?.focus();
@@ -280,9 +199,9 @@ export default function Profile({
     setFeedbackIsError(error);
   }
 
-  function navigate(view: PageView) {
+  function navigate(nextView: PageView) {
     setFeedback("");
-    setView(view);
+    setView(nextView);
   }
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
@@ -308,13 +227,14 @@ export default function Profile({
         );
         return;
       }
-      const freshUser = await SerchDataUser();
 
-      const updated: ProfileData = {
-        ...draft,
+      const freshUser = await refreshProfile();
+
+      const updated: UserProfile = {
+        ...(freshUser ?? draft),
         avatarUrl: freshUser?.avatarUrl ?? draft.avatarUrl,
-        name: trimmedName,
-        email: trimmedEmail,
+        name: freshUser?.name || trimmedName,
+        email: freshUser?.email || trimmedEmail,
       };
 
       setProfile(updated);
@@ -341,12 +261,13 @@ export default function Profile({
     setMembersLoading(true);
     try {
       const searchMembers = await SearchMemberData();
-
       setMembers(searchMembers ?? []);
       setMembersLoaded(true);
-    } catch {
+    } catch (err) {
       notify(
-        "Não foi possível carregar os membros. Volte ao perfil e tente novamente.",
+        err instanceof Error
+          ? err.message
+          : "Não foi possível carregar os membros. Volte ao perfil e tente novamente.",
         true,
       );
     } finally {
@@ -356,10 +277,11 @@ export default function Profile({
 
   async function signOut() {
     try {
-      await SignOut("local");
+      await authSignOut("local");
       navigateTo("/");
     } catch (error) {
       console.error("Erro ao sair da conta:", error);
+      notify("Não foi possível encerrar a sessão. Tente novamente.", true);
     }
   }
 
@@ -379,12 +301,18 @@ export default function Profile({
 
   async function saveMember(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submittingRef.current) return;
+
     const name = member?.name.trim();
     const email = member?.email.trim();
     if (!name || !email) {
       notify("Nome e email são obrigatórios.", true);
       return;
     }
+
+    submittingRef.current = true;
+    setBusy(true);
+    setFeedback("");
     try {
       const newMember = await SaveNewMemberData(name, email);
 
@@ -405,24 +333,6 @@ export default function Profile({
         err instanceof Error
           ? err.message
           : "Não foi possível salvar o membro. Tente novamente.",
-        true,
-      );
-    }
-  }
-
-  async function saveMembers() {
-    if (!profile || submittingRef.current) return;
-
-    submittingRef.current = true;
-    setBusy(true);
-    setFeedback("");
-    try {
-      notify("Membros salvos com sucesso.");
-    } catch (err) {
-      notify(
-        err instanceof Error
-          ? err.message
-          : "Não foi possível salvar os membros. Tente novamente.",
         true,
       );
     } finally {
@@ -467,19 +377,44 @@ export default function Profile({
     setPasswordError("");
     setInvalidPassword(false);
     try {
-      const confirmed = true;
-      if (!confirmed) {
-        setInvalidPassword(true);
-        setPasswordError("Senha incorreta.");
-        return;
-      }
       if (action.type === "remove") {
+        const result = await RemoveCompanyMember(action.member.id, password);
+        if (result === "invalid_password") {
+          setInvalidPassword(true);
+          setPasswordError("Senha incorreta.");
+          return;
+        }
+        if (result === "forbidden") {
+          setPasswordError(
+            "Você não tem permissão para remover este membro.",
+          );
+          return;
+        }
+
         setMembers((previous) =>
           previous.filter((item) => item.id !== action.member.id),
         );
+        setAction(null);
         navigate("members");
         notify("Membro removido com sucesso.");
       } else {
+        const result = await UpdateMemberStatus(
+          action.member.id,
+          action.status,
+          password,
+        );
+        if (result === "invalid_password") {
+          setInvalidPassword(true);
+          setPasswordError("Senha incorreta.");
+          return;
+        }
+        if (result === "forbidden") {
+          setPasswordError(
+            "Você não tem permissão para alterar o status deste membro.",
+          );
+          return;
+        }
+
         setMembers((previous) =>
           previous.map((item) =>
             item.id === action.member.id
@@ -490,12 +425,14 @@ export default function Profile({
         setMember((previous) =>
           previous ? { ...previous, status: action.status } : previous,
         );
+        setAction(null);
         notify("Status alterado com sucesso.");
       }
-      setAction(null);
-    } catch {
+    } catch (err) {
       setPasswordError(
-        "Não foi possível confirmar a alteração. Tente novamente.",
+        err instanceof Error
+          ? err.message
+          : "Não foi possível confirmar a alteração. Tente novamente.",
       );
     } finally {
       setPassword("");
@@ -525,7 +462,7 @@ export default function Profile({
           "Existem vínculos ou pendências que impedem a exclusão. Resolva-os com o atendimento antes de tentar novamente.",
         );
       } else if (result === "deleted") {
-        await SignOut("global");
+        await authSignOut("global");
         navigateTo("/", { replace: true });
       } else {
         setPasswordError(
@@ -543,31 +480,7 @@ export default function Profile({
     }
   }
 
-  async function changePassword(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (submittingRef.current) return;
-    if (newPassword !== repeatPassword) {
-      notify("As senhas informadas não são iguais.", true);
-      return;
-    }
-
-    submittingRef.current = true;
-    setBusy(true);
-    setFeedback("");
-    try {
-      setNewPassword("");
-      setRepeatPassword("");
-      navigate("profile");
-      notify("Senha alterada com sucesso.");
-    } catch {
-      notify("Não foi possível alterar a senha. Tente novamente.", true);
-    } finally {
-      submittingRef.current = false;
-      setBusy(false);
-    }
-  }
-
-  const company = !!profile && isCompany(profile.role);
+  const company = !!profile && isCompanyRole(profile.role);
   const deletingAccount = action?.type === "delete_account";
   const confirmationPerson = deletingAccount ? profile : action?.member;
   const deletionPhrase = company
@@ -606,16 +519,6 @@ export default function Profile({
         content="Gerencie seus dados de perfil, foto, senha e membros da empresa na Life Topografia."
       />
       <div className="profile-page">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          user={profile}
-        />
-        <Topbar
-          isSidebarOpen={isSidebarOpen}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-        />
-
         <main className="profile-main" aria-busy={loading}>
           <div className="profile-title-container">
             <h1 ref={headingRef} tabIndex={-1}>
@@ -634,11 +537,7 @@ export default function Profile({
             </p>
           ) : !profile || !draft ? (
             <section className="profile-card profile-empty">
-              <p role={loadError ? "alert" : undefined}>
-                {loadError
-                  ? "Não foi possível carregar seu perfil. Tente novamente mais tarde."
-                  : "Entre na sua conta para acessar seu perfil."}
-              </p>
+              <p>Entre na sua conta para acessar seu perfil.</p>
               <Link
                 className="profile-primary-button"
                 to="/login"
@@ -655,8 +554,6 @@ export default function Profile({
                   className="profile-back-button"
                   disabled={busy || membersLoading}
                   onClick={() => {
-                    setNewPassword("");
-                    setRepeatPassword("");
                     navigate(view === "member" ? "members" : "profile");
                   }}
                 >
@@ -847,7 +744,7 @@ export default function Profile({
                             <div className="profile-member-summary">
                               <span>{item.name}</span>
                               <span
-                                className={`profile-status profile-status--${item.status}`}
+                                className={`profile-status profile-status--${item.status.toLowerCase()}`}
                               >
                                 {item.status}
                               </span>
@@ -880,14 +777,6 @@ export default function Profile({
                     </>
                   )}
                   {feedbackNode}
-                  <button
-                    className="profile-primary-button"
-                    type="button"
-                    disabled={busy || membersLoading}
-                    onClick={() => void saveMembers()}
-                  >
-                    {busy ? "SALVANDO…" : "SALVAR"}
-                  </button>
                 </section>
               )}
 
@@ -918,6 +807,7 @@ export default function Profile({
                         required
                         maxLength={160}
                         pattern=".*\S.*"
+                        disabled={busy}
                         onChange={(event) =>
                           setMember({ ...member, name: event.target.value })
                         }
@@ -937,32 +827,11 @@ export default function Profile({
                       value={member.email}
                       required
                       maxLength={254}
+                      disabled={busy || existingMember}
                       onChange={(event) =>
                         setMember({ ...member, email: event.target.value })
                       }
                     />
-                  </label>
-                  <label
-                    className="profile-field"
-                    htmlFor="profile-member-status"
-                  >
-                    Status:
-                    <select
-                      id="profile-member-status"
-                      aria-label="Status do membro"
-                      value={member.status}
-                      className={`profile-status profile-status--${member.status}`}
-                      onChange={(event) => {
-                        const status = event.target
-                          .value as CompanyMember["status"];
-                        if (existingMember)
-                          requestAction({ type: "status", member, status });
-                        else setMember({ ...member, status });
-                      }}
-                    >
-                      <option value="ativo">Ativo</option>
-                      <option value="afastado">Afastado</option>
-                    </select>
                   </label>
                   {existingMember && (
                     <label
@@ -974,19 +843,24 @@ export default function Profile({
                         id="profile-member-status"
                         aria-label="Status do membro"
                         value={member.status}
-                        className={`profile-status profile-status--${member.status}`}
+                        className={`profile-status profile-status--${member.status.toLowerCase()}`}
                         disabled={busy}
                         onChange={(event) => {
-                          const status = event.currentTarget
-                            .value as CompanyMember["status"];
-
-                          if (status !== member.status) {
-                            requestAction({ type: "status", member, status });
+                          const nextStatus = event.currentTarget.value as Extract<
+                            CompanyMember["status"],
+                            "ATIVO" | "AFASTADO"
+                          >;
+                          if (nextStatus !== member.status) {
+                            requestAction({
+                              type: "status",
+                              member,
+                              status: nextStatus,
+                            });
                           }
                         }}
                       >
-                        <option value="ativo">Ativo</option>
-                        <option value="afastado">Afastado</option>
+                        <option value="ATIVO">Ativo</option>
+                        <option value="AFASTADO">Afastado</option>
                       </select>
                     </label>
                   )}
@@ -994,76 +868,36 @@ export default function Profile({
                     <button
                       type="button"
                       className="profile-remove-button"
+                      disabled={busy}
                       onClick={() => requestAction({ type: "remove", member })}
                     >
                       Remover funcionário
                     </button>
                   )}
                   {feedbackNode}
-                  <button className="profile-primary-button" type="submit">
-                    SALVAR
-                  </button>
+                  {!existingMember && (
+                    <button
+                      className="profile-primary-button"
+                      type="submit"
+                      disabled={busy}
+                    >
+                      {busy ? "SALVANDO…" : "SALVAR"}
+                    </button>
+                  )}
                 </form>
               )}
 
               {view === "password" && (
-                <form
-                  className="profile-card profile-form"
-                  onSubmit={changePassword}
-                >
-                  <div className="profile-field">
-                    <label htmlFor="profile-new-password">Nova senha:</label>
-                    <Suspense fallback={null}>
-                      <PasswordInput
-                        id="profile-new-password"
-                        visibilityLabel="nova senha"
-                        autoComplete="new-password"
-                        minLength={8}
-                        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9\s]).{8,}"
-                        title="Use ao menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um símbolo"
-                        value={newPassword}
-                        required
-                        disabled={busy}
-                        onChange={(event) => setNewPassword(event.target.value)}
-                      />
-                    </Suspense>
-                  </div>
-                  <p className="profile-password-hint">
-                    Use ao menos 8 caracteres, uma letra maiúscula, uma
-                    minúscula, um número e um símbolo.
-                  </p>
-                  <div className="profile-field">
-                    <label htmlFor="profile-repeat-password">
-                      Confirmar senha:
-                    </label>
-                    <Suspense fallback={null}>
-                      <PasswordInput
-                        id="profile-repeat-password"
-                        visibilityLabel="confirmação de senha"
-                        autoComplete="new-password"
-                        value={repeatPassword}
-                        required
-                        disabled={busy}
-                        onChange={(event) =>
-                          setRepeatPassword(event.target.value)
-                        }
-                      />
-                    </Suspense>
-                  </div>
-                  {feedbackNode}
-                  <button
-                    className="profile-primary-button"
-                    type="submit"
-                    disabled={busy}
-                  >
-                    {busy ? "SALVANDO…" : "SALVAR"}
-                  </button>
-                </form>
+                <ChangePasswordForm
+                  onSuccess={(message) => {
+                    navigate("profile");
+                    notify(message);
+                  }}
+                />
               )}
             </>
           )}
         </main>
-        <Footer />
       </div>
 
       {action && confirmationPerson && (
@@ -1129,11 +963,15 @@ export default function Profile({
             ) : (
               <>
                 Insira a senha para alterar o status de{" "}
-                <span className={`profile-status--${action.member.status}`}>
+                <span
+                  className={`profile-status--${action.member.status.toLowerCase()}`}
+                >
                   {action.member.status}
                 </span>{" "}
                 para{" "}
-                <span className={`profile-status--${action.status}`}>
+                <span
+                  className={`profile-status--${action.status.toLowerCase()}`}
+                >
                   {action.status}
                 </span>
                 .

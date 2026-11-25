@@ -1,4 +1,4 @@
-.erro404-overlay {
+.notice-modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 1200;
@@ -10,7 +10,7 @@
   backdrop-filter: blur(7px);
 }
 
-.erro404-card {
+.notice-modal-card {
   position: relative;
   width: min(100%, 480px);
   max-height: calc(100dvh - 40px);
@@ -22,10 +22,10 @@
   color: #111827;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
   text-align: center;
-  animation: erro404-enter 0.25s ease-out both;
+  animation: notice-modal-enter 0.25s ease-out both;
 }
 
-.erro404-card::before {
+.notice-modal-card::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
@@ -33,7 +33,7 @@
   background: linear-gradient(90deg, #0b50bd 0%, #00a2ff 75%, #00c853 100%);
 }
 
-.erro404-symbol {
+.notice-modal-symbol {
   display: grid;
   place-items: center;
   width: 150px;
@@ -41,19 +41,19 @@
   margin: 0 auto;
   color: #0b50bd;
 }
-.erro404-symbol img {
+.notice-modal-symbol img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   filter: brightness(0);
 }
 
-.erro404-symbol svg {
+.notice-modal-symbol svg {
   width: 54px;
   height: 54px;
 }
 
-.erro404-code {
+.notice-modal-code {
   display: block;
   margin-bottom: 8px;
   color: #0b50bd;
@@ -62,7 +62,7 @@
   letter-spacing: 0.16em;
 }
 
-#erro404-title {
+#notice-modal-title {
   margin: 0 0 12px;
   color: #0b132b;
   font-size: clamp(1.65rem, 5vw, 2.1rem);
@@ -70,7 +70,7 @@
   line-height: 1.2;
 }
 
-#erro404-description {
+#notice-modal-description {
   max-width: 360px;
   margin: 0 auto 28px;
   color: #42516b;
@@ -78,7 +78,7 @@
   line-height: 1.6;
 }
 
-.erro404-action {
+.notice-modal-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -100,27 +100,27 @@
     box-shadow 0.2s ease;
 }
 
-.erro404-action:hover {
+.notice-modal-action:hover {
   background: #083d93;
   box-shadow: 0 6px 16px rgba(11, 80, 189, 0.25);
   transform: translateY(-2px);
 }
 
-.erro404-action:active {
+.notice-modal-action:active {
   transform: translateY(0);
 }
 
-.erro404-action:focus-visible {
+.notice-modal-action:focus-visible {
   outline: 3px solid #00a2ff;
   outline-offset: 3px;
 }
 
-.erro404-action span {
+.notice-modal-action span {
   font-size: 1.3rem;
   line-height: 1;
 }
 
-@keyframes erro404-enter {
+@keyframes notice-modal-enter {
   from {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
@@ -133,18 +133,18 @@
 }
 
 @media (max-width: 480px) {
-  .erro404-overlay {
+  .notice-modal-overlay {
     padding: 16px;
   }
 
-  .erro404-card {
+  .notice-modal-card {
     max-height: calc(100dvh - 32px);
     padding: 30px 24px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .erro404-card {
+  .notice-modal-card {
     animation: none;
   }
 }

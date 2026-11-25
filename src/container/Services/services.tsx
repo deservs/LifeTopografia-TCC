@@ -1,9 +1,5 @@
 import { useState, type ReactNode } from "react";
 
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
-import Footer from "../../components/Footer/footer";
-
 import Obra from "../../assets/image/cards/obra.webp";
 import Nivelamento from "../../assets/image/cards/leveling.webp";
 import Terraplanagem from "../../assets/image/cards/surfacing.webp";
@@ -287,14 +283,6 @@ function ServiceCard({ service }: { service: ServiceCardData }) {
 }
 
 export default function Services() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  /*
-   * A autenticação ainda será conectada ao backend.
-   * Até lá, a Sidebar permanece no estado de visitante.
-   */
-  const currentUser: UserProfile | null = null;
-
   return (
     <>
       <title>Serviços - Life Topografia</title>
@@ -303,17 +291,6 @@ export default function Services() {
         content="Conheça os serviços da Life Topografia: levantamento topográfico, georreferenciamento, nivelamento, terraplanagem e acompanhamento de obras."
       />
       <div className="services-page">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          user={currentUser}
-        />
-
-        <Topbar
-          isSidebarOpen={isSidebarOpen}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-        />
-
         <main className="services-main">
           <section className="services-intro">
             <div className="services-title-divider" aria-hidden="true">
@@ -365,8 +342,6 @@ export default function Services() {
             </div>
           </section>
         </main>
-
-        <Footer />
       </div>
     </>
   );

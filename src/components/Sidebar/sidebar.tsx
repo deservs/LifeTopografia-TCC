@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { SerchDataUser } from "../../lib/supabase/auth";
+import { useAuth } from "../../context/AuthContext";
+import { formatRoleLabel } from "../../types/auth.types";
 
 import "./sidebar.css";
 import LogoIcon from "../../assets/image/logo-front.webp";
@@ -14,60 +15,21 @@ const NAV_ITEMS = [
   { to: "/chat", label: "CONTATO" },
 ] as const;
 
-/**
- * Dados básicos que a Sidebar precisa para exibir
- * as informações do usuário autenticado.
- *
- * Esses dados poderão posteriormente ser preenchidos
- * pela resposta da API de autenticação do backend.
- */
-export interface UserProfile {
-  name: string;
-  role: string;
-  avatarUrl?: string;
-}
-
 interface SidebarProps {
   /** Define se o menu lateral está aberto ou fechado. */
   isOpen: boolean;
 
   /** Função responsável por fechar o menu lateral. */
   onClose: () => void;
-
-  /** Dados do usuário atualmente autenticado, quando disponíveis. */
-  user?: UserProfile | null;
 }
 
-export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
+export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { pathname } = useLocation();
+  const { user } = useAuth();
   const normalizedPathname = pathname.toLowerCase();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusedElementRef = useRef<HTMLElement | null>(null);
-  const [perfil, setPerfil] = useState<UserProfile | null>(null);
 
-  /**
-   * Busca os dados do usuário autenticado.
-   */
-  useEffect(() => {
-    SerchDataUser()
-      .then((response) => {
-        if (!response) {
-          setPerfil(null);
-          return;
-        }
-        setPerfil({
-          name: response.name,
-          role: response.role,
-          avatarUrl: response.avatarUrl,
-        });
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar dados do usuário:", error);
-        setPerfil(null);
-      });
-  }, []);
-
-  const userData = user ?? perfil;
   /**
    * Controla o teclado enquanto o drawer está aberto.
    *
@@ -136,6 +98,8 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
     };
   }, [isOpen, onClose]);
 
+  const displayName = user?.name.trim() || "Cliente";
+
   return (
     <>
       <div
@@ -174,13 +138,13 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
 
         <div id="conteudo-sidebar">
           <div className="sidebar-profile">
-            {userData ? (
+            {user ? (
               <div className="user-box">
                 <div className="avatar-container">
-                  {userData.avatarUrl ? (
+                  {user.avatarUrl ? (
                     <img
-                      src={userData.avatarUrl}
-                      alt={`Foto de perfil de ${userData.name}`}
+                      src={user.avatarUrl}
+                      alt={`Foto de perfil de ${displayName}`}
                       className="avatar-img"
                       width={64}
                       height={64}
@@ -188,15 +152,15 @@ export const Sidebar = ({ isOpen, onClose, user }: SidebarProps) => {
                     />
                   ) : (
                     <div className="avatar-placeholder" aria-hidden="true">
-                      {userData.name.charAt(0).toUpperCase()}
+                      {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
 
                 <div className="profile-details">
-                  <h2 className="user-name">{userData.name}</h2>
+                  <h2 className="user-name">{displayName}</h2>
 
-                  <span className="user-role">{userData.role}</span>
+                  <span className="user-role">{formatRoleLabel(user.role)}</span>
 
                   <Link to="/perfil" className="account-link" onClick={onClose}>
                     Acessar perfil
