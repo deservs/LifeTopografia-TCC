@@ -1,12 +1,7 @@
-import { PaddleOCR } from "@paddleocr/paddleocr-js";
-import {
-  PdfpageToImage,
-  getPdfPageCount,
-  extrairTextoNativoPaginas,
-  normalizarPageRanges,
-  type PageRange,
-} from "../utils/pdfConversor/pdfConvert";
-import { extrairInformacoes } from "../utils/pdfConversor/textSanitizer";
+type MotorOcr = Awaited<
+  ReturnType<(typeof import("@paddleocr/paddleocr-js"))["PaddleOCR"]["create"]>
+>;
+import type { PageRange } from "../utils/pdfConversor/pdfConvert";
 import { useCallback, useRef, useState, useEffect } from "react";
 
 export type StatusProcesso = "idle" | "carregando" | "sucesso" | "erro";
@@ -36,9 +31,7 @@ export default function useOcrPipeline(): OcrPipelineResult {
   const [metodoExtracao, setMetodoExtracao] = useState<MetodoExtracao>(null);
   const [textExtraido, setTextExtraido] = useState<string | null>(null);
 
-  const ocrEngineRef = useRef<Awaited<
-    ReturnType<typeof PaddleOCR.create>
-  > | null>(null);
+  const ocrEngineRef = useRef<MotorOcr | null>(null);
   const statusRef = useRef(false);
 
   const limparMotor = useCallback(async () => {
@@ -76,6 +69,18 @@ export default function useOcrPipeline(): OcrPipelineResult {
       dados: File,
       opcoes: OpcoesPipelineOcr,
     ): Promise<string | undefined> => {
+      const [
+        {
+          getPdfPageCount,
+          extrairTextoNativoPaginas,
+          PdfpageToImage,
+          normalizarPageRanges,
+        },
+        { extrairInformacoes },
+      ] = await Promise.all([
+        import("../utils/pdfConversor/pdfConvert"),
+        import("../utils/pdfConversor/textSanitizer"),
+      ]);
       if (statusRef.current) {
         console.warn("Processo já em andamento. Aguarde a conclusão.");
         return;
@@ -170,7 +175,13 @@ export default function useOcrPipeline(): OcrPipelineResult {
 
         let ocrEngineInstance = ocrEngineRef.current;
         if (!ocrEngineInstance) {
-          ocrEngineInstance = await PaddleOCR.create({
+          const modulo = await import("@paddleocr/paddleocr-js");
+          if (!modulo.PaddleOCR) {
+            throw new Error(
+              "Falha ao carregar o módulo PaddleOCR. Verifique a instalação e os caminhos dos modelos.",
+            );
+          }
+          ocrEngineInstance = await modulo.PaddleOCR.create({
             lang: "pt",
             ocrVersion: "PP-OCRv6",
             worker: true,

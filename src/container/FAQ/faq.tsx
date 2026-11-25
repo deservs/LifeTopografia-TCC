@@ -1,7 +1,9 @@
-import { useState, useEffect, useId } from "react";
+import { lazy, Suspense, useState, useEffect, useId } from "react";
 import { Link } from "react-router-dom";
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Footer from "../../components/Footer/footer";
+import type { UserProfile } from "../../components/Sidebar/sidebar";
+
+const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
+const Footer = lazy(() => import("../../components/Footer/footer"));
 import Logo from "../../assets/image/logo-front.webp";
 import FundoHeader from "../../assets/image/background/firstcard.webp";
 import { SerchDataUser } from "../../lib/supabase/auth";
@@ -119,219 +121,232 @@ export default function FAQ() {
   );
 
   return (
-    <div className="faq-page">
-      {/* Sidebar integrada padrão */}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        user={userProfile}
+    <>
+      <title>FAQ - Life Topografia</title>
+      <meta
+        name="description"
+        content="Perguntas frequentes sobre serviços de topografia, orçamentos, segurança e funcionamento da plataforma Life Topografia."
       />
+      <div className="faq-page">
+        {/* Sidebar integrada padrão */}
+        <Suspense fallback={null}>
+          <Sidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            user={userProfile}
+          />
+        </Suspense>
 
-      {/* Topbar com background padronizado, logo e menu hambúrguer */}
-      <header
-        className="faq-topbar"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${FundoHeader})`,
-        }}
-      >
-        <button
-          type="button"
-          className="faq-menu-button"
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="Abrir menu"
-          aria-expanded={isSidebarOpen}
-          aria-controls="menu-drawer"
+        {/* Topbar com background padronizado, logo e menu hambúrguer */}
+        <header
+          className="faq-topbar"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${FundoHeader})`,
+          }}
         >
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </button>
+          <button
+            type="button"
+            className="faq-menu-button"
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Abrir menu"
+            aria-expanded={isSidebarOpen}
+            aria-controls="menu-drawer"
+          >
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+          </button>
 
-        <Link
-          to="/"
-          className="faq-topbar-logo"
-          aria-label="Ir para a página inicial"
-        >
-          <img src={Logo} alt="Life Topografia" />
-        </Link>
-      </header>
+          <Link
+            to="/"
+            className="faq-topbar-logo"
+            aria-label="Ir para a página inicial"
+          >
+            <img src={Logo} alt="Life Topografia" />
+          </Link>
+        </header>
 
-      {/* Conteúdo Principal */}
-      <main className="faq-main">
-        {/* Cabeçalho de Título com Divisória Oficial */}
-        <div className="faq-title-container">
-          <span className="faq-badge">Central de Ajuda &amp; Dúvidas</span>
-          <h1 className="faq-title">PERGUNTAS FREQUENTES</h1>
-          <p className="faq-subtitle">
-            Entenda como funciona a plataforma Life Topografia, o fluxo de envio
-            de matrículas em PDF, emissão de orçamentos, execução presencial em
-            campo e segurança das informações.
-          </p>
-          <div className="title-divider" aria-hidden="true">
-            <span className="line" />
-            <span className="rhombus" />
-            <span className="line" />
-          </div>
-        </div>
-
-        {/* Barra de Filtro e Controles de Acessibilidade */}
-        <div className="faq-controls-bar">
-          <div className="faq-search-box">
-            <span className="search-icon" aria-hidden="true">
-              🔍
-            </span>
-            <input
-              id={searchInputId}
-              type="search"
-              placeholder="Pesquisar por palavra-chave (ex: matrícula, orçamento, SumUp, campo)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Buscar perguntas frequentes"
-            />
-            {searchTerm && (
-              <button
-                type="button"
-                className="faq-clear-search"
-                onClick={() => setSearchTerm("")}
-                aria-label="Limpar busca"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          <div className="faq-actions-buttons">
-            <button
-              type="button"
-              className="faq-action-btn"
-              onClick={expandAll}
-              title="Expandir todas as respostas"
-            >
-              Expandir todas
-            </button>
-            <button
-              type="button"
-              className="faq-action-btn"
-              onClick={collapseAll}
-              title="Recolher todas as respostas"
-            >
-              Recolher todas
-            </button>
-          </div>
-        </div>
-
-        {/* CONTAINER AZUL PRINCIPAL DO FAQ (CONFORME DESIGN SOLICITADO) */}
-        <section
-          className="faq-accordion-card"
-          aria-label="Lista de Perguntas Frequentes"
-        >
-          <header className="faq-card-header">
-            <div className="faq-card-header-info">
-              <h2>Perguntas Frequentes (FAQ) – Life Topografia</h2>
-              <span className="faq-card-count">
-                {filteredFaq.length} de {FAQ_DATA.length} perguntas
-              </span>
+        {/* Conteúdo Principal */}
+        <main className="faq-main">
+          {/* Cabeçalho de Título com Divisória Oficial */}
+          <div className="faq-title-container">
+            <span className="faq-badge">Central de Ajuda &amp; Dúvidas</span>
+            <h1 className="faq-title">PERGUNTAS FREQUENTES</h1>
+            <p className="faq-subtitle">
+              Entenda como funciona a plataforma Life Topografia, o fluxo de
+              envio de matrículas em PDF, emissão de orçamentos, execução
+              presencial em campo e segurança das informações.
+            </p>
+            <div className="title-divider" aria-hidden="true">
+              <span className="line" />
+              <span className="rhombus" />
+              <span className="line" />
             </div>
-          </header>
+          </div>
 
-          <div className="faq-items-list" role="region" aria-live="polite">
-            {filteredFaq.length > 0 ? (
-              filteredFaq.map((item) => {
-                const isOpen = openItemIds.includes(item.id);
-                const buttonId = `faq-btn-${item.id}`;
-                const panelId = `faq-panel-${item.id}`;
-
-                return (
-                  <article
-                    key={item.id}
-                    className={`faq-item ${isOpen ? "is-open" : ""}`}
-                  >
-                    <button
-                      id={buttonId}
-                      type="button"
-                      className="faq-question-btn"
-                      onClick={() => toggleItem(item.id)}
-                      aria-expanded={isOpen}
-                      aria-controls={panelId}
-                    >
-                      <span className="faq-question-text">{item.question}</span>
-                      <span
-                        className={`faq-chevron-icon ${isOpen ? "is-rotated" : ""}`}
-                        aria-hidden="true"
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2.5"
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </span>
-                    </button>
-
-                    <div
-                      id={panelId}
-                      role="region"
-                      aria-labelledby={buttonId}
-                      className="faq-answer-wrapper"
-                      style={{
-                        display: isOpen ? "block" : "none",
-                      }}
-                    >
-                      <div className="faq-answer-inner">
-                        <p>{item.answer}</p>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })
-            ) : (
-              <div className="faq-empty-state">
-                <span className="empty-icon">🔎</span>
-                <h3>Nenhuma pergunta encontrada</h3>
-                <p>
-                  Não encontramos respostas correspondentes ao termo "
-                  {searchTerm}".
-                </p>
+          {/* Barra de Filtro e Controles de Acessibilidade */}
+          <div className="faq-controls-bar">
+            <div className="faq-search-box">
+              <span className="search-icon" aria-hidden="true">
+                🔍
+              </span>
+              <input
+                id={searchInputId}
+                type="search"
+                placeholder="Pesquisar por palavra-chave (ex: matrícula, orçamento, SumUp, campo)..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Buscar perguntas frequentes"
+              />
+              {searchTerm && (
                 <button
                   type="button"
-                  className="btn-reset-search"
+                  className="faq-clear-search"
                   onClick={() => setSearchTerm("")}
+                  aria-label="Limpar busca"
                 >
-                  Ver todas as perguntas
+                  ✕
                 </button>
+              )}
+            </div>
+
+            <div className="faq-actions-buttons">
+              <button
+                type="button"
+                className="faq-action-btn"
+                onClick={expandAll}
+                title="Expandir todas as respostas"
+              >
+                Expandir todas
+              </button>
+              <button
+                type="button"
+                className="faq-action-btn"
+                onClick={collapseAll}
+                title="Recolher todas as respostas"
+              >
+                Recolher todas
+              </button>
+            </div>
+          </div>
+
+          {/* CONTAINER AZUL PRINCIPAL DO FAQ (CONFORME DESIGN SOLICITADO) */}
+          <section
+            className="faq-accordion-card"
+            aria-label="Lista de Perguntas Frequentes"
+          >
+            <header className="faq-card-header">
+              <div className="faq-card-header-info">
+                <h2>Perguntas Frequentes (FAQ) – Life Topografia</h2>
+                <span className="faq-card-count">
+                  {filteredFaq.length} de {FAQ_DATA.length} perguntas
+                </span>
               </div>
-            )}
-          </div>
-        </section>
+            </header>
 
-        {/* Card Inferior: Suporte & Contato */}
-        <div className="faq-contact-card">
-          <div className="faq-contact-text">
-            <h3>Ainda tem dúvidas sobre o seu projeto?</h3>
-            <p>
-              Nossa equipe técnica e agrimensores estão prontos para analisar
-              suas necessidades e elaborar o orçamento sob medida.
-            </p>
-          </div>
-          <div className="faq-contact-actions">
-            <Link to="/chat" className="btn-faq-chat">
-              Falar com a Equipe no Chat →
-            </Link>
-            <Link to="/servicos" className="btn-faq-services">
-              Conhecer Nossos Serviços
-            </Link>
-          </div>
-        </div>
-      </main>
+            <div className="faq-items-list" role="region" aria-live="polite">
+              {filteredFaq.length > 0 ? (
+                filteredFaq.map((item) => {
+                  const isOpen = openItemIds.includes(item.id);
+                  const buttonId = `faq-btn-${item.id}`;
+                  const panelId = `faq-panel-${item.id}`;
 
-      {/* Footer padrão do site */}
-      <Footer />
-    </div>
+                  return (
+                    <article
+                      key={item.id}
+                      className={`faq-item ${isOpen ? "is-open" : ""}`}
+                    >
+                      <button
+                        id={buttonId}
+                        type="button"
+                        className="faq-question-btn"
+                        onClick={() => toggleItem(item.id)}
+                        aria-expanded={isOpen}
+                        aria-controls={panelId}
+                      >
+                        <span className="faq-question-text">
+                          {item.question}
+                        </span>
+                        <span
+                          className={`faq-chevron-icon ${isOpen ? "is-rotated" : ""}`}
+                          aria-hidden="true"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2.5"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </span>
+                      </button>
+
+                      <div
+                        id={panelId}
+                        role="region"
+                        aria-labelledby={buttonId}
+                        className="faq-answer-wrapper"
+                        style={{
+                          display: isOpen ? "block" : "none",
+                        }}
+                      >
+                        <div className="faq-answer-inner">
+                          <p>{item.answer}</p>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })
+              ) : (
+                <div className="faq-empty-state">
+                  <span className="empty-icon">🔎</span>
+                  <h3>Nenhuma pergunta encontrada</h3>
+                  <p>
+                    Não encontramos respostas correspondentes ao termo "
+                    {searchTerm}".
+                  </p>
+                  <button
+                    type="button"
+                    className="btn-reset-search"
+                    onClick={() => setSearchTerm("")}
+                  >
+                    Ver todas as perguntas
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Card Inferior: Suporte & Contato */}
+          <div className="faq-contact-card">
+            <div className="faq-contact-text">
+              <h3>Ainda tem dúvidas sobre o seu projeto?</h3>
+              <p>
+                Nossa equipe técnica e agrimensores estão prontos para analisar
+                suas necessidades e elaborar o orçamento sob medida.
+              </p>
+            </div>
+            <div className="faq-contact-actions">
+              <Link to="/chat" className="btn-faq-chat">
+                Falar com a Equipe no Chat →
+              </Link>
+              <Link to="/servicos" className="btn-faq-services">
+                Conhecer Nossos Serviços
+              </Link>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer padrão do site */}
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      </div>
+    </>
   );
 }

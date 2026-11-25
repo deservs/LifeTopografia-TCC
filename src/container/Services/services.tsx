@@ -1,8 +1,9 @@
-import { useState, type ReactNode } from "react";
+import { lazy, Suspense, useState, type ReactNode } from "react";
 
-import Sidebar from "../../components/Sidebar/sidebar";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
-import Footer from "../../components/Footer/footer";
+
+const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
+const Footer = lazy(() => import("../../components/Footer/footer"));
 
 import Logo from "../../assets/image/logo-front.webp";
 import Obra from "../../assets/image/cards/obra.webp";
@@ -297,84 +298,98 @@ export default function Services() {
   const currentUser: UserProfile | null = null;
 
   return (
-    <div className="services-page">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        user={currentUser}
+    <>
+      <title>Serviços - Life Topografia</title>
+      <meta
+        name="description"
+        content="Conheça os serviços da Life Topografia: levantamento topográfico, georreferenciamento, nivelamento, terraplanagem e acompanhamento de obras."
       />
+      <div className="services-page">
+        <Suspense fallback={null}>
+          <Sidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            user={currentUser}
+          />
+        </Suspense>
 
-      <header className="services-header">
-        <button
-          type="button"
-          className="services-menu-button"
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="Abrir menu"
-          aria-expanded={isSidebarOpen}
-          aria-controls="menu-drawer"
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-
-        <img
-          src={Logo}
-          alt="Life Topografia"
-          className="services-header__logo"
-        />
-      </header>
-
-      <main className="services-main">
-        <section className="services-intro">
-          <div className="services-title-divider" aria-hidden="true">
+        <header className="services-header">
+          <button
+            type="button"
+            className="services-menu-button"
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Abrir menu"
+            aria-expanded={isSidebarOpen}
+            aria-controls="menu-drawer"
+          >
             <span />
-            <h1>Serviços</h1>
             <span />
-          </div>
+            <span />
+          </button>
 
-          <p>
-            Serviços essenciais para garantir precisão, alinhamento e segurança
-            na execução de obras de pequeno, médio ou grande porte.
-          </p>
-        </section>
+          <img
+            src={Logo}
+            alt="Life Topografia"
+            className="services-header__logo"
+          />
+        </header>
 
-        <section className="services-featured" aria-label="Principais serviços">
-          {services.map((service) => (
-            <ServiceCard key={service.title} service={service} />
-          ))}
-        </section>
-
-        <section className="technical-services">
-          <div className="technical-services__heading">
-            <h2>Levantamento Técnico</h2>
+        <main className="services-main">
+          <section className="services-intro">
+            <div className="services-title-divider" aria-hidden="true">
+              <span />
+              <h1>Serviços</h1>
+              <span />
+            </div>
 
             <p>
-              Serviços topográficos para regularização, documentação, cálculos
-              de área e volume, entre outros fins legais e técnicos.
+              Serviços essenciais para garantir precisão, alinhamento e
+              segurança na execução de obras de pequeno, médio ou grande porte.
             </p>
-          </div>
+          </section>
 
-          <div className="technical-services__list">
-            {technicalServices.map((service) => (
-              <article className="technical-service" key={service.title}>
-                <div className="technical-service__icon">{service.icon}</div>
-
-                <h3>{service.title}</h3>
-
-                <div
-                  className="technical-service__divider"
-                  aria-hidden="true"
-                />
-
-                <p>{service.description}</p>
-              </article>
+          <section
+            className="services-featured"
+            aria-label="Principais serviços"
+          >
+            {services.map((service) => (
+              <ServiceCard key={service.title} service={service} />
             ))}
-          </div>
-        </section>
-      </main>
+          </section>
 
-      <Footer />
-    </div>
+          <section className="technical-services">
+            <div className="technical-services__heading">
+              <h2>Levantamento Técnico</h2>
+
+              <p>
+                Serviços topográficos para regularização, documentação, cálculos
+                de área e volume, entre outros fins legais e técnicos.
+              </p>
+            </div>
+
+            <div className="technical-services__list">
+              {technicalServices.map((service) => (
+                <article className="technical-service" key={service.title}>
+                  <div className="technical-service__icon">{service.icon}</div>
+
+                  <h3>{service.title}</h3>
+
+                  <div
+                    className="technical-service__divider"
+                    aria-hidden="true"
+                  />
+
+                  <p>{service.description}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </main>
+
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      </div>
+    </>
   );
 }

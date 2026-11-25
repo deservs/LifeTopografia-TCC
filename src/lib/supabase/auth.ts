@@ -6,7 +6,6 @@ import type {
   CompanyMember,
 } from "../../container/Profile/profile";
 
-
 export interface UserProfile {
   id: string;
   name: string;
@@ -290,7 +289,7 @@ export async function SaveNewMemberData(
   name: string,
   email: string,
 ): Promise<CompanyMember> {
-    const { data: user, error } = await supabase.auth.getSession();
+  const { data: user, error } = await supabase.auth.getSession();
 
   if (error) {
     throw new Error(error.message);

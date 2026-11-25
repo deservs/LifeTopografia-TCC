@@ -18,9 +18,16 @@ export default function Pagamento() {
   initMercadoPago(apiKey);
 
   return (
-    <div className="card">
-      <CardNumber placeholder="sdadsada" />
-      <ExpirationDate placeholder="sdadsada" />
-    </div>
+    <>
+      <title>Pagamento - Life Topografia</title>
+      <meta
+        name="description"
+        content="Realize o pagamento do seu serviço com segurança na Life Topografia."
+      />
+      <div className="card">
+        <CardNumber placeholder="sdadsada" />
+        <ExpirationDate placeholder="sdadsada" />
+      </div>
+    </>
   );
 }
