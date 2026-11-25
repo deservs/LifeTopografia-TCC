@@ -81,7 +81,8 @@ ALTER TABLE "public"."servicos"
 CREATE TYPE "public"."status_perfil_enum" AS ENUM (
   'ATIVO',
   'EXCLUIDO',
-  'AFASTADO'
+  'AFASTADO',
+  'PENDENTE'
 );
 
 CREATE TYPE "public"."status_projeto_enum" AS ENUM (
@@ -139,7 +140,7 @@ CREATE TYPE "public"."tipo_perfil_enum" AS ENUM (
   'EMPRESA',
   'ADMIN',
   'AUXILIAR',
-  'PESSOA_JURIDICA'
+  'MEMBRO_EMPRESA'
 );
 
 ALTER TABLE "public"."perfis"
@@ -163,42 +164,91 @@ ALTER TABLE "public"."perfis"
 ALTER TABLE "public"."perfis"
   ADD COLUMN "status" public.status_perfil_enum DEFAULT 'ATIVO'::public.status_perfil_enum;
 
+CREATE OR REPLACE FUNCTION public.handle_company_soft_delete()
+  RETURNS TRIGGER
+  LANGUAGE plpgsql
+  SECURITY DEFINER
+  SET search_path TO 'public'
+  AS $function$
+BEGIN
+  -- Dispara apenas quando o status muda para 'EXCLUIDO'
+  IF NEW.status = 'EXCLUIDO' AND (OLD.status IS DISTINCT FROM 'EXCLUIDO') THEN
+    -- Verifica se o perfil excluído é uma empresa (caso tipo_perfil seja EMPRESA/PESSOA_JURIDICA ou possua CNPJ)
+    IF NEW.tipo_perfil IN ('EMPRESA', 'PESSOA_JURIDICA') OR NEW.cnpj IS NOT NULL THEN
+      UPDATE public.perfis
+      SET status = 'EXCLUIDO'
+      WHERE id IN (
+        SELECT membro_id
+        FROM public.membros_empresa
+        WHERE empresa_id = NEW.id
+      )
+      AND status IS DISTINCT FROM 'EXCLUIDO';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$function$;
+
 CREATE OR REPLACE FUNCTION public.handle_new_user()
   RETURNS TRIGGER
   LANGUAGE plpgsql
   SECURITY DEFINER
   SET search_path TO 'public'
   AS $function$
-DECLARE 
-  tipo public.tipo_perfil_enum;
-  metadata jsonb;
+DECLARE
+  v_tipo_perfil text;
+  v_status text;
+  v_nome text;
+  v_cnpj text;
+  v_company_id uuid;
 BEGIN
-  -- Captura os metadados com segurança
-  metadata := NEW.raw_user_meta_data;
-  
-  IF metadata IS NULL THEN
-    metadata := '{}'::jsonb;
+  -- Extrai os metadados enviados no signUp ou inviteUserByEmail
+  v_nome := COALESCE(NEW.raw_user_meta_data->>'nome_ou_razao', '');
+  v_cnpj := NULLIF(regexp_replace(COALESCE(NEW.raw_user_meta_data->>'cnpj', ''), '\D', '', 'g'), '');
+
+  -- Identifica se é convite de membro (tem company_id), empresa (tem cnpj) ou pessoa física
+  IF NEW.raw_user_meta_data->>'company_id' IS NOT NULL THEN
+    v_tipo_perfil := 'MEMBRO_EMPRESA';
+    v_status := 'PENDENTE';
+    v_company_id := (NEW.raw_user_meta_data->>'company_id')::uuid;
+  ELSIF v_cnpj IS NOT NULL THEN
+    v_tipo_perfil := 'EMPRESA';
+    v_status := 'ATIVO';
+  ELSE
+    v_tipo_perfil := 'PESSOA_FISICA';
+    v_status := 'ATIVO';
   END IF;
 
-  -- Define o tipo de perfil com base no CNPJ
-  IF metadata ->> 'cnpj' IS NULL OR metadata ->> 'cnpj' = '' THEN 
-    tipo := 'PESSOA_FISICA'; 
-  ELSE 
-    tipo := 'EMPRESA'; 
-  END IF;
-
-  -- Insere na tabela public.perfis
-  INSERT INTO public.perfis 
-  (id, tipo_perfil, nome_ou_razao, email, cnpj, foto_url, status) 
+  -- Cria o registro na tabela public.perfis
+  INSERT INTO public.perfis (
+    id,
+    email,
+    nome_ou_razao,
+    tipo_perfil,
+    cnpj,
+    status
+  )
   VALUES (
-    NEW.id, 
-    tipo, 
-    COALESCE(metadata ->> 'nome_ou_razao', 'Usuário'), 
-    NEW.email, 
-    metadata ->> 'cnpj', 
-    metadata ->> 'foto_url', 
-    'ATIVO'
+    NEW.id,
+    LOWER(NEW.email),
+    v_nome,
+    v_tipo_perfil::tipo_perfil_enum,
+    v_cnpj,
+    v_status::status_perfil_enum
   );
+
+  -- Se for um funcionário convidado por uma empresa, cria o vínculo em membros_empresa
+  IF v_tipo_perfil = 'MEMBRO_EMPRESA' AND v_company_id IS NOT NULL THEN
+    INSERT INTO public.membros_empresa (
+      empresa_id,
+      funcionario_id
+    )
+    VALUES (
+      v_company_id,
+      NEW.id
+    );
+  END IF;
 
   RETURN NEW;
 END;
@@ -222,6 +272,54 @@ BEGIN
   RETURN NEW; 
 END;
 $function$;
+
+CREATE OR REPLACE FUNCTION public.trg_protect_perfis_sensitive_columns()
+  RETURNS TRIGGER
+  LANGUAGE plpgsql
+  SET search_path TO 'public'
+  AS $function$
+DECLARE
+  jwt_role text;
+BEGIN
+  jwt_role := coalesce(current_setting('request.jwt.claim.role', true), '');
+  IF (current_user IN ('authenticated', 'anon') OR jwt_role IN ('authenticated', 'anon'))
+     AND current_user <> 'service_role' THEN
+    IF NEW.tipo_perfil IS DISTINCT FROM OLD.tipo_perfil
+       OR NEW.status IS DISTINCT FROM OLD.status
+       OR NEW.cnpj IS DISTINCT FROM OLD.cnpj THEN
+      RAISE EXCEPTION 'Alteração direta de tipo_perfil, status ou cnpj não permitida.'
+        USING ERRCODE = '42501';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.verify_user_password (
+  user_id          uuid,
+  current_password text
+)
+  RETURNS boolean
+  LANGUAGE plpgsql
+  SECURITY DEFINER
+  SET search_path TO 'public', 'extensions'
+  AS $function$
+DECLARE
+  stored_hash text;
+BEGIN
+  SELECT encrypted_password INTO stored_hash
+  FROM auth.users
+  WHERE id = user_id;
+
+  IF stored_hash IS NULL THEN
+    RETURN false;
+  END IF;
+
+  RETURN stored_hash = crypt(current_password, stored_hash);
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION "public"."verify_user_password"(uuid, text) FROM PUBLIC, "anon", "authenticated";
 
 ALTER TABLE "public"."arquivos_chat"
   ADD CONSTRAINT "arquivos_chat_conversa_id_fkey" FOREIGN KEY (conversa_id) REFERENCES public.conversas(id) ON DELETE CASCADE;
@@ -267,10 +365,20 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
+CREATE TRIGGER on_company_soft_delete
+  AFTER UPDATE OF status ON public.perfis
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_company_soft_delete();
+
 CREATE TRIGGER trigger_anonimizar_perfil
   BEFORE UPDATE ON public.perfis
   FOR EACH ROW
   EXECUTE FUNCTION public.trg_anonimizar_perfil();
+
+CREATE TRIGGER trigger_protect_perfis_sensitive_columns
+  BEFORE UPDATE ON public.perfis
+  FOR EACH ROW
+  EXECUTE FUNCTION public.trg_protect_perfis_sensitive_columns();
 
 CREATE POLICY "Baixar arquivos da própria conversa" ON "public"."arquivos_chat"
   FOR SELECT
@@ -359,8 +467,9 @@ CREATE POLICY "Criar proprio perfil" ON "public"."perfis"
 
 CREATE POLICY "Editar próprio perfil" ON "public"."perfis"
   FOR UPDATE
-  TO PUBLIC
-  USING ((id = auth.uid()));
+  TO "authenticated"
+  USING ((( SELECT auth.uid() AS uid) = id))
+  WITH CHECK ((( SELECT auth.uid() AS uid) = id));
 
 CREATE POLICY "Ler próprio perfil ou Admin" ON "public"."perfis"
   FOR SELECT
@@ -394,6 +503,14 @@ CREATE POLICY "Give users access to own folder 8r0e7n_2" ON "storage"."objects"
   TO PUBLIC
   USING (((bucket_id = 'foto_usuario'::text) AND (( SELECT (auth.uid())::text AS uid) = (storage.foldername(name))[1])));
 
+GRANT EXECUTE ON FUNCTION "public"."handle_company_soft_delete"() TO PUBLIC, "anon", "authenticated";
+
+REVOKE ALL ON FUNCTION "public"."handle_company_soft_delete"() FROM "postgres";
+
+GRANT EXECUTE ON FUNCTION "public"."handle_company_soft_delete"() TO "postgres";
+
+GRANT EXECUTE ON FUNCTION "public"."handle_company_soft_delete"() TO "service_role";
+
 GRANT EXECUTE ON FUNCTION "public"."handle_new_user"() TO PUBLIC, "anon", "authenticated";
 
 REVOKE ALL ON FUNCTION "public"."handle_new_user"() FROM "postgres";
@@ -409,6 +526,20 @@ REVOKE ALL ON FUNCTION "public"."trg_anonimizar_perfil"() FROM "postgres";
 GRANT EXECUTE ON FUNCTION "public"."trg_anonimizar_perfil"() TO "postgres";
 
 GRANT EXECUTE ON FUNCTION "public"."trg_anonimizar_perfil"() TO "service_role";
+
+GRANT EXECUTE ON FUNCTION "public"."trg_protect_perfis_sensitive_columns"() TO PUBLIC, "anon", "authenticated";
+
+REVOKE ALL ON FUNCTION "public"."trg_protect_perfis_sensitive_columns"() FROM "postgres";
+
+GRANT EXECUTE ON FUNCTION "public"."trg_protect_perfis_sensitive_columns"() TO "postgres";
+
+GRANT EXECUTE ON FUNCTION "public"."trg_protect_perfis_sensitive_columns"() TO "service_role";
+
+REVOKE ALL ON FUNCTION "public"."verify_user_password"(uuid, text) FROM "postgres";
+
+GRANT EXECUTE ON FUNCTION "public"."verify_user_password"(uuid, text) TO "postgres";
+
+GRANT EXECUTE ON FUNCTION "public"."verify_user_password"(uuid, text) TO "service_role";
 
 REVOKE ALL ON SEQUENCE "public"."membros_empresa_id_seq" FROM "anon";
 
@@ -482,7 +613,25 @@ GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON
 
 GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON TABLE "public"."mensagens" TO "service_role";
 
-GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON TABLE "public"."perfis" TO "anon", "authenticated";
+REVOKE ALL ON TABLE "public"."perfis" FROM "anon";
+
+GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE ON TABLE "public"."perfis" TO "anon";
+
+REVOKE ALL ON TABLE "public"."perfis" FROM "authenticated";
+
+REVOKE ALL ("email") ON TABLE "public"."perfis" FROM "authenticated";
+
+GRANT UPDATE ("email") ON TABLE "public"."perfis" TO "authenticated";
+
+REVOKE ALL ("foto_url") ON TABLE "public"."perfis" FROM "authenticated";
+
+GRANT UPDATE ("foto_url") ON TABLE "public"."perfis" TO "authenticated";
+
+REVOKE ALL ("nome_ou_razao") ON TABLE "public"."perfis" FROM "authenticated";
+
+GRANT UPDATE ("nome_ou_razao") ON TABLE "public"."perfis" TO "authenticated";
+
+GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE ON TABLE "public"."perfis" TO "authenticated";
 
 REVOKE ALL ON TABLE "public"."perfis" FROM "postgres";
 

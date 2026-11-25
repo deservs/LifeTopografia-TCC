@@ -31,18 +31,28 @@ export default async function getUserFromRequest(
 ): Promise<void> {
   const authHeader = request.headers.authorization
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return reply.status(401).send({ ok: false, message: 'JWT não fornecido.' })
+    return reply.status(401).send({
+      ok: false,
+      code: 'UNAUTHENTICATED',
+      message: 'JWT não fornecido.',
+    })
   }
   const token = authHeader.slice(7).trim()
   if (!token) {
-    return reply.status(401).send({ ok: false, message: 'JWT inválido.' })
+    return reply.status(401).send({
+      ok: false,
+      code: 'UNAUTHENTICATED',
+      message: 'JWT inválido.',
+    })
   }
   const userResponse = await getUser(token)
   if (!userResponse.ok) {
     request.log.warn(userResponse.message)
-    return reply
-      .status(401)
-      .send({ ok: false, message: 'Sessão inválida ou expirada.' })
+    return reply.status(401).send({
+      ok: false,
+      code: 'UNAUTHENTICATED',
+      message: 'Sessão inválida ou expirada.',
+    })
   }
   request.user = userResponse.user
 }

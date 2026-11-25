@@ -1,9 +1,9 @@
-import { MercadoPagoConfig, PaymentMethods } from 'mercadopago'
+import { MercadoPagoConfig, PaymentMethod } from 'mercadopago'
 
 const client = new MercadoPagoConfig({ accessToken: 'access_token' })
-const paymentMethods = new PaymentMethods(client)
+const paymentMethods = new PaymentMethod(client)
 
 paymentMethods
   .get()
   .then((result) => console.log(result))
-  .catch((error) => console.log(error))
+  .catch((error: unknown) => console.log(error))

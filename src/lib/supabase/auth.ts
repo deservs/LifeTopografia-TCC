@@ -1,24 +1,14 @@
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "./supabaseClient";
+import { apiRequest, type ApiFieldErrors } from "../apiClient";
+import {
+  normalizeProfileStatus,
+  type CompanyMember,
+  type ProfileStatus,
+} from "../../types/auth.types";
 import { getAvatarPublicUrl } from "../../utils/users/urlConversor";
-import type {
-  ProfileData,
-  CompanyMember,
-} from "../../container/Profile/profile";
+import { supabase } from "./supabaseClient";
 
-export interface UserProfile {
-  id: string;
-  name: string;
-  role: string;
-  avatarUrl?: string;
-}
-
-export type LoginFieldErrors = {
-  valor?: string[];
-  type?: string[];
-  password?: string[];
-  captchaToken?: string[];
-};
+export type LoginFieldErrors = ApiFieldErrors;
 
 export type SingInResponse =
   | { ok: true; session: Session; user: User }
@@ -29,7 +19,16 @@ export type UpdateUserResponse = {
   message?: string;
 };
 
-/* função que irá registrar um novo usuário */
+interface MemberRowDto {
+  id: string;
+  nome_ou_razao?: string;
+  name?: string;
+  email?: string;
+  status?: string;
+  foto_url?: string | null;
+}
+
+/* Registra um novo usuário */
 export async function SignUp(
   email: string,
   password: string,
@@ -37,65 +36,69 @@ export async function SignUp(
   captchaToken: string,
   cnpj?: string,
 ) {
-  const resposta = await fetch("/api/signup", {
+  const response = await apiRequest<{ message: string }>("/api/signup", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+    auth: false,
+    body: {
       email,
       password,
       nome,
       cnpj,
       captchaToken,
-    }),
+    },
   });
-  const data = await resposta.json();
-  if (!resposta.ok) {
+
+  if (!response.ok) {
     throw new Error(
-      data.message ?? "Erro ao registrar usuário. Verifique suas credenciais.",
+      response.message ??
+        "Erro ao registrar usuário. Verifique suas credenciais.",
     );
   }
-  return data;
+
+  return response.data;
 }
 
-/* função que irá fazer login de um usuário existente */
+/* Faz login de um usuário existente */
 export async function SignIn(
   valor: string,
   password: string,
   captchaToken: string,
   loginType: "email" | "cnpj",
 ): Promise<SingInResponse> {
-  const resposta = await fetch("/api/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await apiRequest<{ session: Session; user: User }>(
+    "/api/login",
+    {
+      method: "POST",
+      auth: false,
+      body: {
+        valor,
+        type: loginType,
+        captchaToken,
+        password,
+      },
     },
-    body: JSON.stringify({
-      valor,
-      type: loginType,
-      captchaToken,
-      password,
-    }),
-  });
-  const login = await resposta.json();
-  if (!resposta.ok) {
+  );
+
+  if (!response.ok) {
     return {
       ok: false,
-      message: login.message ?? "Erro ao fazer login.",
-      fieldErrors: login.errors,
+      message: response.message ?? "Erro ao fazer login.",
+      fieldErrors: response.fieldErrors,
     };
   }
+
   const { data, error } = await supabase.auth.setSession({
-    access_token: login.data.access_token,
-    refresh_token: login.data.refresh_token,
+    access_token: response.data.session.access_token,
+    refresh_token: response.data.session.refresh_token,
   });
+
   if (error || !data.session || !data.user) {
     return {
       ok: false,
       message: "Falha ao obter a sessão do usuário após o login.",
     };
   }
+
   return {
     ok: true,
     session: data.session,
@@ -103,16 +106,15 @@ export async function SignIn(
   };
 }
 
-/* função que irá fazer logout de um usuário autenticado */
+/* Faz logout do usuário autenticado */
 export async function SignOut(escopo: "global" | "local") {
   const { error } = await supabase.auth.signOut({ scope: escopo });
   if (error) {
     throw new Error(error.message);
   }
-  localStorage.removeItem("userProfile");
 }
 
-/* função que irá atualizar os dados do usuário */
+/* Atualiza os dados do usuário */
 export async function UpdateUser(
   name?: string,
   email?: string,
@@ -120,32 +122,26 @@ export async function UpdateUser(
 ): Promise<UpdateUserResponse> {
   let avatarUrl: string | undefined;
 
-  const { data: user, error } = await supabase.auth.getSession();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-  if (!user.session || !user.session.user) {
-    throw new Error("Usuário não autenticado.");
-  }
   if (file) {
-    const preResAvatar = await fetch("/api/updateAvatar", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `Bearer ${user.session?.access_token}`,
+    const preDataAvatar = await apiRequest<{ uploadUrl: string; key: string }>(
+      "/api/updateAvatar",
+      {
+        method: "PUT",
+        body: {
+          avatarType: file.type,
+          avatarSize: file.size,
+        },
       },
-      body: JSON.stringify({
-        avatarType: file.type,
-        avatarSize: file.size,
-      }),
-    });
-    const preDataAvatar = await preResAvatar.json();
-    if (!preResAvatar.ok || !preDataAvatar?.data?.uploadUrl) {
+    );
+
+    if (!preDataAvatar.ok || !preDataAvatar.data.uploadUrl) {
       throw new Error(
-        preDataAvatar.message ?? "Erro ao gerar URL para upload da imagem.",
+        preDataAvatar.ok
+          ? "Erro ao gerar URL para upload da imagem."
+          : preDataAvatar.message,
       );
     }
+
     const uploadImagem = await fetch(preDataAvatar.data.uploadUrl, {
       method: "PUT",
       headers: {
@@ -153,41 +149,47 @@ export async function UpdateUser(
       },
       body: file,
     });
+
     if (!uploadImagem.ok) {
       throw new Error("Erro ao fazer upload da imagem.");
     }
+
     avatarUrl = preDataAvatar.data.key;
   }
+
   const payload: { name?: string; email?: string; avatarUrl?: string } = {};
   if (name) payload.name = name;
   if (email) payload.email = email;
   if (avatarUrl) payload.avatarUrl = avatarUrl;
-  const resposta = await fetch("/api/update-profile", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: `Bearer ${user.session?.access_token}`,
+
+  const response = await apiRequest<{ message: string }>(
+    "/api/update-profile",
+    {
+      method: "PATCH",
+      body: payload,
     },
-    body: JSON.stringify(payload),
-  });
-  const data = await resposta.json();
-  if (!resposta.ok) {
-    throw new Error(data.message ?? "Erro ao atualizar os dados do usuário.");
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      response.message ?? "Erro ao atualizar os dados do usuário.",
+    );
   }
-  localStorage.removeItem("userProfile");
+
   return {
     ok: true,
-    message: "Dados do usuário atualizados com sucesso.",
+    message:
+      response.data.message ?? "Dados do usuário atualizados com sucesso.",
   };
 }
 
-/* função que irá enviar um código para o email do usuário */
+/* Envia código de recuperação de senha para o email */
 export async function SendResetPassword(
   email: string,
   captchaToken: string,
 ): Promise<boolean> {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    captchaToken: captchaToken,
+    captchaToken,
   });
   if (error) {
     throw new Error(error.message);
@@ -195,11 +197,11 @@ export async function SendResetPassword(
   return true;
 }
 
-/* função que irá confirmar o código inserido pelo usuário */
+/* Confirma o código OTP inserido pelo usuário */
 export async function ConfirmOTP(accessToken: string, email: string) {
   const { data, error } = await supabase.auth.verifyOtp({
     token: accessToken,
-    email: email,
+    email,
     type: "recovery",
   });
   if (error) {
@@ -208,188 +210,143 @@ export async function ConfirmOTP(accessToken: string, email: string) {
   return data;
 }
 
-/* função que irá alterar a senha do usuário */
+/* Altera a senha do usuário autenticado */
 export async function ConfirmResetPassword(newPassword: string) {
   const { data, error } = await supabase.auth.updateUser({
     password: newPassword,
+    data: { password_defined: true },
   });
   if (error) {
     throw new Error(error.message);
   }
+  await supabase.auth.signOut({scope: "others"});
   return data;
-}
-
-/*Busca os dados do usuário autenticado.*/
-export async function SerchDataUser(): Promise<ProfileData | null> {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw new Error(error.message);
-
-  if (!data.session) {
-    localStorage.removeItem("userProfile");
-    return null;
-  }
-
-  const sessionUser = data.session.user;
-  let cachedRaw = localStorage.getItem("userProfile");
-  let user = cachedRaw ? safeJsonParse(cachedRaw) : null;
-
-  if (!user || user.id !== sessionUser.id) {
-    localStorage.removeItem("userProfile");
-    await SaveUserData(sessionUser.id);
-    cachedRaw = localStorage.getItem("userProfile");
-    user = cachedRaw ? safeJsonParse(cachedRaw) : null;
-  }
-
-  if (!user) return null;
-
-  return {
-    id: sessionUser.id,
-    name: user.nome_ou_razao ?? "",
-    role:
-      user.tipo_perfil ??
-      (sessionUser.user_metadata?.cnpj ? "empresa" : "pessoa"),
-    avatarUrl: getAvatarPublicUrl(user.foto_url),
-    email: sessionUser.email ?? "",
-  };
-}
-
-function safeJsonParse(raw: string) {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-async function SaveUserData(user: string) {
-  if (localStorage.getItem("userProfile")) {
-    return; // Se os dados do usuário já estiverem no localStorage, não faz nada
-  } else {
-    try {
-      const { data, error } = await supabase
-        .from("perfis")
-        .select("id, nome_ou_razao, tipo_perfil, foto_url")
-        .eq("id", user)
-        .single();
-      if (error) {
-        throw new Error(error.message);
-      }
-      if (!data) {
-        throw new Error("Usuário não encontrado.");
-      }
-      return localStorage.setItem("userProfile", JSON.stringify(data));
-    } catch (error) {
-      console.error("Erro ao salvar dados do usuário:", error);
-      throw error;
-    }
-  }
 }
 
 export async function SaveNewMemberData(
   name: string,
   email: string,
 ): Promise<CompanyMember> {
-  const { data: user, error } = await supabase.auth.getSession();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-  if (!user.session || !user.session.user) {
-    throw new Error("Usuário não autenticado.");
-  }
-  const id = user.session.access_token;
-
-  const resultado = await fetch("/api/save-member", {
+  const response = await apiRequest<{
+    id: string;
+    name: string;
+    email: string;
+    status: ProfileStatus;
+    avatarUrl?: string;
+  }>("/api/save-member", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${id}`,
-    },
-    body: JSON.stringify({
-      name,
-      email,
-    }),
+    body: { name, email },
   });
-  const data = await resultado.json();
-  if (!resultado.ok) {
-    throw new Error(data.message ?? "Erro ao salvar dados do membro.");
+
+  if (!response.ok) {
+    throw new Error(response.message ?? "Erro ao salvar dados do membro.");
   }
-  const memberData = data.data;
 
   return {
-    id: memberData.id,
-    name: memberData.name,
-    email: memberData.email,
-    status: memberData.status,
-    avatarUrl: getAvatarPublicUrl(memberData.avatarUrl),
+    id: response.data.id,
+    name: response.data.name,
+    email: response.data.email,
+    status: normalizeProfileStatus(response.data.status),
+    avatarUrl: getAvatarPublicUrl(response.data.avatarUrl),
   };
 }
 
-export async function SearchMemberData() {
-  const { data: user, error } = await supabase.auth.getSession();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-  if (!user.session || !user.session.user) {
-    throw new Error("Usuário não autenticado.");
-  }
-  const id = user.session.access_token;
-  const members = await fetch("/api/get-members", {
+export async function SearchMemberData(): Promise<CompanyMember[]> {
+  const response = await apiRequest<MemberRowDto[]>("/api/get-members", {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${id}`,
-    },
   });
 
-  const json = await members.json();
-
-  if (!members.ok || !json.members?.ok) {
-    throw new Error(
-      json.members?.message ??
-        json.message ??
-        "Erro ao buscar dados dos membros.",
-    );
+  if (!response.ok) {
+    throw new Error(response.message ?? "Erro ao buscar dados dos membros.");
   }
 
-  return (json.members?.data ?? []).map((item: any) => ({
+  return (response.data ?? []).map((item) => ({
     id: item.id,
     name: item.name ?? item.nome_ou_razao ?? "",
     email: item.email ?? "",
-    status: item.status,
+    status: normalizeProfileStatus(item.status),
     avatarUrl: getAvatarPublicUrl(item.foto_url),
-  })) as CompanyMember[];
+  }));
+}
+
+export async function UpdateMemberStatus(
+  memberId: string,
+  status: Extract<ProfileStatus, "ATIVO" | "AFASTADO">,
+  password: string,
+): Promise<"updated" | "invalid_password" | "forbidden"> {
+  const response = await apiRequest<{ id: string; status: ProfileStatus }>(
+    `/api/members/${encodeURIComponent(memberId)}/status`,
+    {
+      method: "PATCH",
+      body: { status, password },
+    },
+  );
+
+  if (!response.ok) {
+    if (response.code === "INVALID_PASSWORD" || response.status === 401) {
+      return "invalid_password";
+    }
+    if (response.code === "FORBIDDEN" || response.status === 403) {
+      return "forbidden";
+    }
+    throw new Error(response.message);
+  }
+
+  return "updated";
+}
+
+export async function RemoveCompanyMember(
+  memberId: string,
+  password: string,
+): Promise<"removed" | "invalid_password" | "forbidden"> {
+  const response = await apiRequest<{ id: string; removed: boolean }>(
+    `/api/members/${encodeURIComponent(memberId)}`,
+    {
+      method: "DELETE",
+      body: { password },
+    },
+  );
+
+  if (!response.ok) {
+    if (response.code === "INVALID_PASSWORD" || response.status === 401) {
+      return "invalid_password";
+    }
+    if (response.code === "FORBIDDEN" || response.status === 403) {
+      return "forbidden";
+    }
+    throw new Error(response.message);
+  }
+
+  return "removed";
 }
 
 export async function DeleteAccount(
   memberId: string,
   password: string,
 ): Promise<"invalid_password" | "forbidden" | "blocked" | "deleted"> {
-  const { data: user, error } = await supabase.auth.getSession();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-  if (!user.session || !user.session.user) {
-    throw new Error("Usuário não autenticado.");
-  }
-
-  const response = await fetch("/api/delete-account", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${user.session.access_token}`,
+  const response = await apiRequest<{ status: "deleted" }>(
+    "/api/delete-account",
+    {
+      method: "DELETE",
+      body: {
+        memberId,
+        password,
+      },
     },
-    body: JSON.stringify({
-      memberId,
-      password,
-    }),
-  });
+  );
 
-  const result = await response.json();
-
-  if (!response.ok && !result?.status) {
-    throw new Error(result.message ?? "Erro ao excluir a conta.");
+  if (!response.ok) {
+    if (response.code === "INVALID_PASSWORD" || response.status === 401) {
+      return "invalid_password";
+    }
+    if (response.code === "BLOCKED") {
+      return "blocked";
+    }
+    if (response.code === "FORBIDDEN" || response.status === 403) {
+      return "forbidden";
+    }
+    throw new Error(response.message ?? "Erro ao excluir a conta.");
   }
-  return result?.status;
+
+  return response.data.status;
 }

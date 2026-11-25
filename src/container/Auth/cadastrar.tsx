@@ -6,15 +6,15 @@ import {
   type FormEvent,
   useRef,
 } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { z } from "zod";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { SignUp } from "../../lib/supabase/auth.ts";
+import { env } from "../../lib/env";
+import { SignUp } from "../../lib/supabase/auth";
 
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
+import NoticeModal from "../../components/Pop-Up/NoticeModal/noticeModal";
 
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
@@ -34,15 +34,11 @@ interface FormData {
 }
 
 export const Cadastrar = () => {
-  const navigate = useNavigate();
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formError, setFormError] = useState("");
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
 
   const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
-
-  // Mantido como ponto de integração para a autenticação futura.
-  const currentUser: UserProfile | null = null;
 
   const [tipoCadastro, setTipoCadastro] = useState<TipoCadastro>("pessoa");
 
@@ -157,29 +153,13 @@ export const Cadastrar = () => {
       setFormError("Informe o CNPJ da empresa.");
       return;
     }
-    const cnpjRegex = formData.cnpj.replace(/[^a-zA-Z0-9]/g, "");
-    if (tipoCadastro === "empresa") {
-      try {
-        const response = await fetch(
-          `https://brasilapi.com.br/api/cnpj/v1/${cnpjRegex}`,
-        );
-        if (!response.ok) {
-          setFormError("Ocorreu um erro ao buscar o CNPJ.");
-          throw new Error("Erro ao buscar CNPJ");
-        }
-      } catch (error) {
-        console.error("Erro ao buscar CNPJ:", error);
-        setFormError(
-          "Ocorreu um erro ao buscar o CNPJ. Verifique se o CNPJ é válido e tente novamente.",
-        );
-        return;
-      }
-    }
+    
+    const cnpjRegex = formData.cnpj.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
     const role = tipoCadastro === "empresa" ? cnpjRegex : undefined;
     /* método de criar um novo usuário */
     SignUp(formData.email, formData.senha, formData.nome, captchaToken, role)
       .then(() => {
-        navigate("/login", { replace: true });
+        setShowNoticeModal(true);
       })
       .catch((error) => {
         console.error("Erro ao cadastrar usuário:", error);
@@ -203,17 +183,6 @@ export const Cadastrar = () => {
         content="Crie sua conta na Life Topografia para solicitar orçamentos e acompanhar seus serviços topográficos."
       />
       <div className="cadastrar-page">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          user={currentUser}
-        />
-
-        <Topbar
-          isSidebarOpen={isSidebarOpen}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-        />
-
         <main className="cadastrar-main-content">
           <div className="cadastrar-title-container">
             <h1 className="cadastrar-title">CADASTRE-SE</h1>
@@ -495,7 +464,7 @@ export const Cadastrar = () => {
                     theme: "light",
                   }}
                   ref={captcha}
-                  siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                  siteKey={env.VITE_TURNSTILE_SITE_KEY}
                   onSuccess={(token) => {
                     setCaptchaToken(token);
                   }}
@@ -531,8 +500,17 @@ export const Cadastrar = () => {
           </div>
         </main>
       </div>
+      {showNoticeModal && (
+        <NoticeModal
+          buttonText="IR PARA O LOGIN"
+          buttonLink="login"
+          code="VERIFICAÇÃO PENDENTE"
+          popupTitle="Confirme seu e-mail."
+          message={`Enviamos um link de ativação para ${formData.email}. O acesso à conta só será liberado após a confirmação (cheque também o spam).`}
+        />
+      )}
     </>
   );
-};
+}
 
 export default Cadastrar;

@@ -1,8 +1,4 @@
-import { useState, type ReactNode } from "react";
-
-import Sidebar from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
-import Footer from "../../components/Footer/footer";
+import type { ReactNode } from "react";
 
 import HistoryImage from "../../assets/image/cards/history-part.webp";
 import WhyChooseImage from "../../assets/image/cards/why-choose.webp";
@@ -106,20 +102,8 @@ function CheckCircleIcon() {
 }
 
 export default function About() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   return (
     <div className="about-page">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
-
-      <Topbar
-        isSidebarOpen={isSidebarOpen}
-        onOpenSidebar={() => setIsSidebarOpen(true)}
-      />
-
       <main className="about-main">
         <div className="about-intro">
           <div className="about-title-divider">
@@ -210,8 +194,6 @@ export default function About() {
           </ul>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

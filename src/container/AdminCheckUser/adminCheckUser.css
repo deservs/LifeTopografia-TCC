@@ -457,6 +457,12 @@
   border: 1px solid var(--acu-green-border);
 }
 
+.admin-users-bond-badge.is-pending {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
 .admin-users-bond-badge.is-removed {
   background-color: var(--acu-danger-soft);
   color: var(--acu-danger);
@@ -842,6 +848,10 @@
   color: var(--acu-green-text);
 }
 
+.admin-users-dialog-summary .is-pending strong {
+  color: #b45309;
+}
+
 .admin-users-dialog-summary .is-removed strong {
   color: var(--acu-danger);
 }
@@ -876,6 +886,11 @@
   border: 1px solid var(--acu-border);
   border-radius: 12px;
   background-color: #ffffff;
+}
+
+.admin-users-member-item.is-pending {
+  background-color: #fffdf5;
+  border-color: #fde68a;
 }
 
 .admin-users-member-item.is-removed {

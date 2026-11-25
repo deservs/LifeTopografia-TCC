@@ -13,8 +13,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
+import { useAuth } from "../../hook/useAuth";
+import { env } from "../../lib/env";
 
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
@@ -24,11 +24,9 @@ import {
   ConfirmResetPassword,
   ConfirmOTP,
   SignIn,
-  SignOut,
 } from "../../lib/supabase/auth.ts";
 
 import "./login.css";
-import { z } from "zod";
 
 type EtapaFluxo =
   "login" | "esqueci_email" | "esqueci_codigo" | "esqueci_nova_senha";
@@ -50,11 +48,10 @@ const TEMPO_REENVIO = 60;
 export const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setPasswordRecovery, signOut } = useAuth();
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [inviCaptcha, setInviCaptcha] = useState(false);
-  const currentUser: UserProfile | null = null;
 
   // Refs separadas para cada Turnstile
   const captchaLoginRef = useRef<TurnstileInstance | null>(null);
@@ -261,18 +258,15 @@ export const Login = () => {
         formaDeLogin,
       );
       if (!resultado.ok) {
-        if (resultado.fieldErrors) {
-          if (resultado.fieldErrors.valor?.[0]) {
-            setFeedback("Erro nas credenciais.");
-          }
-          if (resultado.fieldErrors.password?.[0]) {
-            setFeedback("Erro nas credenciais.");
-          }
-          if (resultado.fieldErrors.captchaToken?.[0]) {
-            setFeedback("Porfavor, complete o captchaToken");
-          }
+        if (resultado.fieldErrors?.valor?.[0]) {
+          setFeedback(resultado.fieldErrors.valor[0]);
+        } else if (resultado.fieldErrors?.password?.[0]) {
+          setFeedback(resultado.fieldErrors.password[0]);
+        } else if (resultado.fieldErrors?.captchaToken?.[0]) {
+          setFeedback("Por favor, complete o captcha.");
+        } else {
+          setFeedback(resultado.message);
         }
-        setFeedback(resultado.message);
         return;
       }
       navigate(from, { replace: true });
@@ -331,11 +325,13 @@ export const Login = () => {
     }
 
     setFeedback("");
+    setPasswordRecovery(true);
     try {
       await ConfirmOTP(codigoCompleto, formData.emailRecuperacao);
       setClickedButton(false);
       setEtapa("esqueci_nova_senha");
     } catch (error) {
+      setPasswordRecovery(false);
       console.error("Erro ao confirmar o código:", error);
       setFeedback(
         "Erro ao confirmar o código. Verifique se o código informado está correto.",
@@ -349,27 +345,47 @@ export const Login = () => {
      */
   };
 
+  const senhaRequisitos = [
+    {
+      id: "comprimento",
+      texto: "Pelo menos 8 caracteres",
+      valido: formData.novaSenha.length >= 8,
+    },
+    {
+      id: "letra minuscula",
+      texto: "Pelo menos uma letra minúscula",
+      valido: /[a-z]/.test(formData.novaSenha),
+    },
+    {
+      id: "letra maiuscula",
+      texto: "Pelo menos uma letra maiúscula",
+      valido: /[A-Z]/.test(formData.novaSenha),
+    },
+    {
+      id: "numero",
+      texto: "Pelo menos um número",
+      valido: /\p{N}/u.test(formData.novaSenha),
+    },
+    {
+      id: "simbolo",
+      texto: "Pelo menos um símbolo (!@#$...)",
+      valido: /[^\p{L}\p{N}\s]/u.test(formData.novaSenha),
+    },
+  ];
+
+  const senhaValida = senhaRequisitos.every((requisito) => requisito.valido);
+
   const handleSubmitNewPassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (formData.novaSenha !== formData.confirmarNovaSenha) {
-      setFeedback("As senhas informadas não são iguais.");
+    if (!senhaValida) {
+      setFeedback(
+        "A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula, um número e um símbolo.",
+      );
       return;
     }
 
-    const strongPasswordSchema = z
-      .string()
-      .min(8, "A senha deve ter pelo menos 8 caracteres.")
-      .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula.")
-      .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula.")
-      .regex(/\p{N}/u, "A senha deve conter pelo menos um número.")
-      .regex(/[^\p{L}\p{N}\s]/u, "A senha deve conter pelo menos um símbolo.")
-      .safeParse(formData.novaSenha);
-
-    if (!strongPasswordSchema.success) {
-      setFeedback(
-        strongPasswordSchema.error.issues[0]?.message ??
-          "A senha fornecida não atende aos critérios de segurança.",
-      );
+    if (formData.novaSenha !== formData.confirmarNovaSenha) {
+      setFeedback("As senhas informadas não são iguais.");
       return;
     }
 
@@ -377,7 +393,7 @@ export const Login = () => {
 
     try {
       setClickedButton(true);
-      await ConfirmResetPassword(strongPasswordSchema.data);
+      await ConfirmResetPassword(formData.novaSenha);
     } catch (error) {
       console.error("Erro ao confirmar a nova senha:", error);
       setClickedButton(false);
@@ -385,7 +401,7 @@ export const Login = () => {
       return;
     }
     try {
-      await SignOut("global");
+      await signOut("global");
       setEtapa("login");
     } catch (error) {
       setLogoutFail(true);
@@ -395,7 +411,7 @@ export const Login = () => {
 
   const handleTryLogout = async () => {
     try {
-      await SignOut("global");
+      await signOut("global");
       setLogoutFail(false);
       setEtapa("login");
     } catch (error) {
@@ -419,17 +435,6 @@ export const Login = () => {
         content="Acesse sua conta na Life Topografia para gerenciar seus projetos, chats e solicitações de orçamento."
       />
       <div className="login-page">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          user={currentUser}
-        />
-
-        <Topbar
-          isSidebarOpen={isSidebarOpen}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-        />
-
         <main className="login-main-content">
           <div className="login-title-container">
             <h1 className="login-title">
@@ -585,7 +590,7 @@ export const Login = () => {
                         theme: "light",
                       }}
                       ref={captchaLoginRef}
-                      siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                      siteKey={env.VITE_TURNSTILE_SITE_KEY}
                       onSuccess={(token) => {
                         setCaptchaToken(token);
                       }}
@@ -656,7 +661,7 @@ export const Login = () => {
                       theme: "light",
                     }}
                     ref={captchaEmailRef}
-                    siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                    siteKey={env.VITE_TURNSTILE_SITE_KEY}
                     onSuccess={(token) => {
                       setCaptchaToken(token);
                     }}
@@ -766,7 +771,11 @@ export const Login = () => {
                   onSubmit={handleSubmitNewPassword}
                   className="login-form animation-fade-in"
                 >
-                  <div className="form-group">
+                  <div
+                    className={`form-group${
+                      formData.novaSenha.length > 0 ? " align-start" : ""
+                    }`}
+                  >
                     <div className="input-icon-box">
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path
@@ -787,9 +796,29 @@ export const Login = () => {
                           value={formData.novaSenha}
                           onChange={handleChange}
                           autoComplete="new-password"
+                          disabled={clickedButton}
                           required
                         />
                       </Suspense>
+
+                      {formData.novaSenha.length > 0 && (
+                        <ul className="password-requirements">
+                          {senhaRequisitos.map((requisito) => (
+                            <li
+                              key={requisito.id}
+                              className={
+                                requisito.valido ? "is-valid" : "is-invalid"
+                              }
+                            >
+                              <span aria-hidden="true">
+                                {requisito.valido ? "✓" : "✕"}
+                              </span>
+
+                              {requisito.texto}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </div>
 
@@ -802,9 +831,20 @@ export const Login = () => {
                         />
                       </svg>
 
-                      <span className="check-badge" aria-hidden="true">
-                        ✓
-                      </span>
+                      {formData.confirmarNovaSenha.length > 0 && (
+                        <span
+                          className={`check-badge ${
+                            formData.novaSenha === formData.confirmarNovaSenha
+                              ? "is-valid"
+                              : "is-invalid"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {formData.novaSenha === formData.confirmarNovaSenha
+                            ? "✓"
+                            : "✕"}
+                        </span>
+                      )}
                     </div>
 
                     <div className="input-field-wrapper">
@@ -820,6 +860,7 @@ export const Login = () => {
                           value={formData.confirmarNovaSenha}
                           onChange={handleChange}
                           autoComplete="new-password"
+                          disabled={clickedButton}
                           required
                         />
                       </Suspense>
@@ -846,7 +887,7 @@ export const Login = () => {
                     disabled={clickedButton}
                     onClick={async () => {
                       try {
-                        await SignOut("local");
+                        await signOut("local");
                         setEtapa("login");
                       } catch (error) {
                         console.error("Erro ao deslogar o usuário:", error);
@@ -891,7 +932,7 @@ export const Login = () => {
                   theme: "light",
                 }}
                 ref={captchaInviRef}
-                siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                siteKey={env.VITE_TURNSTILE_SITE_KEY}
                 onSuccess={(token) => {
                   setCaptchaToken(token);
                   void handleReenviarCodigo(token);

@@ -46,7 +46,7 @@
 
 export type AccountKind = "PESSOA_FISICA" | "EMPRESA";
 
-export type MemberBondStatus = "ATIVO" | "REMOVIDO";
+export type MemberBondStatus = "ATIVO" | "PENDENTE" | "REMOVIDO";
 
 export interface AdminCompanyMember {
   id: string;

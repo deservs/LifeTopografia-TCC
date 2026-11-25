@@ -13,37 +13,8 @@ import type {
 } from "./adminCheckUser.types";
 
 /**
- * ============================================================================
- * GUIA DE INTEGRAÇÃO PARA O BACKEND (NÃO IMPLEMENTADO NESTE REPOSITÓRIO AINDA)
- * ============================================================================
- *
- * TODO [BACKEND] - 1. Registrar rota em `server/src/app.ts`:
- *   - Criar módulo dedicado em `server/src/modules/admin/listUsers.ts`.
- *   - Registrar `app.get("/api/admin/users", { preHandler: [getUserFromRequest] }, ...)`
- *     usando o middleware `getUserFromRequest` (`server/src/Shared/middleware/getUser.ts`).
- *
- * TODO [BACKEND] - 2. Autorização estrita no servidor:
- *   - Consultar `public.perfis` pelo `request.user.id` usando `supabaseAdmin`
- *     (`server/src/Shared/database/banco.ts`) e verificar `tipo_perfil === 'ADMIN'`.
- *   - Importante: a policy RLS atual em `public.perfis` restringe leitura a
- *     `id = auth.uid()`, portanto a consulta administrativa deve usar `supabaseAdmin`.
- *   - Retornar HTTP 403 (`{ ok: false, message: "..." }`) caso não seja ADMIN.
- *
- * TODO [BACKEND] - 3. Dados, paginação, Cloudflare R2 e membros (PJ):
- *   - Paginar via `page` e `limit` (ex.: `.range(from, to)` com `{ count: 'exact' }`),
- *     suportando filtros opcionais `search` (nome/email/cnpj) e `type` (`PESSOA_FISICA` | `EMPRESA`).
- *   - Se as imagens do Cloudflare R2 forem privadas ou precisarem de URL pública/assinada,
- *     resolver no backend ou retornar a chave `foto_url` (o frontend também usa `getAvatarPublicUrl`).
- *   - Para contas com CNPJ / `EMPRESA`: retornar `members` diretamente em cada item
- *     (ou implementar a sub-rota `GET /api/admin/users/:companyId/members`).
- *   - Diferente de `server/src/modules/auth/searchMembers.ts` (que filtra
- *     `.neq('perfis.status', 'EXCLUIDO')`), a auditoria admin DEVE incluir vínculos
- *     ativos (`ATIVO`) e removidos (`EXCLUIDO` / `REMOVIDO` / `INATIVO`).
- *
- * TODO [AMBIENTE DEV] - Proxy do Vite (`vite.config.ts`):
- *   - Em produção (`vercel.json`), `/api/(.*)` já aponta para o Fastify.
- *   - Em desenvolvimento local (`npm run dev`), configure `server.proxy['/api']`
- *     apontando para `http://localhost:3001` no `vite.config.ts`.
+ * Serviço de consulta administrativa de usuários e membros de empresa.
+ * Integra com `GET /api/admin/users` e `GET /api/admin/users/:companyId/members`.
  */
 
 type UnknownRecord = Record<string, unknown>;
@@ -143,8 +114,22 @@ export function normalizeMemberBondStatus(rawStatus: unknown): {
     token === "DESVINCULADO" ||
     token === "CANCELADO";
 
+  if (isRemoved) {
+    return {
+      bondStatus: "REMOVIDO",
+      rawStatus: token,
+    };
+  }
+
+  if (token === "PENDENTE") {
+    return {
+      bondStatus: "PENDENTE",
+      rawStatus: "PENDENTE",
+    };
+  }
+
   return {
-    bondStatus: isRemoved ? "REMOVIDO" : "ATIVO",
+    bondStatus: "ATIVO",
     rawStatus: token || "ATIVO",
   };
 }
@@ -317,7 +302,6 @@ export async function fetchAdminUsers(
   }
 
   try {
-    // TODO [BACKEND]: Implementar GET /api/admin/users no servidor Fastify (`server/src/app.ts`).
     const response = await fetch(`/api/admin/users?${query.toString()}`, {
       method: "GET",
       headers: {
@@ -407,8 +391,6 @@ export async function fetchAdminCompanyMembers(
   }
 
   try {
-    // TODO [BACKEND]: Caso não embuta `members` diretamente em GET /api/admin/users,
-    // implementar GET /api/admin/users/:companyId/members retornando ativos e removidos.
     const response = await fetch(
       `/api/admin/users/${encodeURIComponent(companyId)}/members`,
       {

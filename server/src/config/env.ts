@@ -5,6 +5,10 @@ import { z } from 'zod'
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().default(3001), // Coerce converte string para number
+  FRONTEND_URL: z
+    .string()
+    .url('A FRONTEND_URL precisa ser uma URL válida')
+    .default('http://localhost:5173'),
   DATABASE_URL: z.string().url('A DATABASE_URL precisa ser uma URL válida').optional(),
   JWT_SECRET: z.string().min(1, 'O JWT_SECRET é obrigatório').optional(),
   RESEND_API_KEY: z.string().min(1, 'O RESEND_API_KEY é obrigatório').optional(),
