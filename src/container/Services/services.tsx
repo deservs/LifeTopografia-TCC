@@ -2,9 +2,9 @@ import { useState, type ReactNode } from "react";
 
 import Sidebar from "../../components/Sidebar/sidebar";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
 import Footer from "../../components/Footer/footer";
 
-import Logo from "../../assets/image/logo-front.webp";
 import Obra from "../../assets/image/cards/obra.webp";
 import Nivelamento from "../../assets/image/cards/leveling.webp";
 import Terraplanagem from "../../assets/image/cards/surfacing.webp";
@@ -304,26 +304,10 @@ export default function Services() {
         user={currentUser}
       />
 
-      <header className="services-header">
-        <button
-          type="button"
-          className="services-menu-button"
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="Abrir menu"
-          aria-expanded={isSidebarOpen}
-          aria-controls="menu-drawer"
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-
-        <img
-          src={Logo}
-          alt="Life Topografia"
-          className="services-header__logo"
-        />
-      </header>
+      <Topbar
+        isSidebarOpen={isSidebarOpen}
+        onOpenSidebar={() => setIsSidebarOpen(true)}
+      />
 
       <main className="services-main">
         <section className="services-intro">

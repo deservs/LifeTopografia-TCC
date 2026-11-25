@@ -1,0 +1,145 @@
+/* =========================================================
+   CABEÇALHO COMPARTILHADO (TOPBAR - PADRÃO SERVICES)
+   ========================================================= */
+
+.topbar {
+  position: relative;
+  width: 100%;
+  height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.18)),
+    url("../../assets/image/background/firstcard.webp");
+  background-size: cover;
+  background-position: center 42%;
+  z-index: 10;
+}
+
+.topbar__logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.topbar__logo {
+  display: block;
+  width: 155px;
+  height: auto;
+  object-fit: contain;
+}
+
+.topbar__menu-button {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.topbar__menu-button span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 4px;
+  background-color: #ffffff;
+}
+
+.topbar__right {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+
+/* =========================================================
+   TABLET E DESKTOP
+   ========================================================= */
+
+@media screen and (min-width: 600px) {
+  .topbar {
+    height: 90px;
+  }
+
+  .topbar__logo {
+    width: 185px;
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .topbar {
+    height: 105px;
+  }
+
+  .topbar__logo {
+    width: 215px;
+  }
+
+  .topbar__menu-button {
+    left: 25px;
+  }
+
+  .topbar__right {
+    right: 25px;
+  }
+}
+
+/* =========================================================
+   TELAS ESTREITAS COM CONTEÚDO À DIREITA
+   ========================================================= */
+
+@media screen and (max-width: 639px) {
+  .topbar--with-right {
+    justify-content: space-between;
+    padding: 0 12px 0 62px;
+  }
+
+  .topbar--with-right .topbar__right {
+    position: static;
+    transform: none;
+  }
+
+  .topbar--with-right .topbar__logo {
+    width: 132px;
+  }
+}
+
+/* =========================================================
+   TELAS MUITO PEQUENAS
+   ========================================================= */
+
+@media screen and (max-width: 380px) {
+  .topbar {
+    height: 70px;
+  }
+
+  .topbar__logo {
+    width: 145px;
+  }
+}
+
+/* =========================================================
+   ACESSIBILIDADE
+   ========================================================= */
+
+.topbar__menu-button:focus-visible,
+.topbar__logo-link:focus-visible {
+  outline: 3px solid #00a2ff;
+  outline-offset: 3px;
+  border-radius: 6px;
+}

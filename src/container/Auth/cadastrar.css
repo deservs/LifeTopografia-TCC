@@ -19,76 +19,6 @@
 }
 
 /* =========================================================
-   BARRA SUPERIOR
-   ========================================================= */
-
-.cadastrar-topbar {
-  position: relative;
-
-  width: 100%;
-  height: 85px;
-  flex-shrink: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0 20px;
-
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.btn-menu-header {
-  position: absolute;
-  left: 20px;
-
-  width: 44px;
-  height: 44px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  padding: 10px;
-
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-
-  transition: background-color 0.2s ease;
-}
-
-.btn-menu-header:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-}
-
-.btn-menu-header:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-
-.btn-menu-header span {
-  width: 100%;
-  height: 3.5px;
-
-  background-color: #ffffff;
-  border-radius: 4px;
-}
-
-.topbar-logo img {
-  display: block;
-
-  width: auto;
-  height: 48px;
-
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
-}
-
-/* =========================================================
    CONTEÚDO PRINCIPAL
    ========================================================= */
 
@@ -625,18 +555,6 @@
    ========================================================= */
 
 @media screen and (max-width: 380px) {
-  .cadastrar-topbar {
-    height: 76px;
-  }
-
-  .btn-menu-header {
-    left: 12px;
-  }
-
-  .topbar-logo img {
-    height: 42px;
-  }
-
   .cadastrar-main-content {
     padding: 20px 12px;
   }
@@ -677,7 +595,6 @@
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  .btn-menu-header,
   .tab-btn,
   .input-field-wrapper input,
   .btn-action-cadastrar,

@@ -296,7 +296,7 @@ export default function EnviarArquivos() {
         maxWidth: "1350px",
         margin: "0 auto",
         padding: "24px 16px",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: '"Poppins", sans-serif',
         color: "#1f2937",
       }}
     >
@@ -1647,7 +1647,7 @@ export default function EnviarArquivos() {
                                 <td
                                   style={{
                                     padding: "8px 12px",
-                                    fontFamily: "monospace",
+                                    fontFamily: '"Poppins", sans-serif',
                                   }}
                                 >
                                   {c.norte.toFixed(4)}
@@ -1655,7 +1655,7 @@ export default function EnviarArquivos() {
                                 <td
                                   style={{
                                     padding: "8px 12px",
-                                    fontFamily: "monospace",
+                                    fontFamily: '"Poppins", sans-serif',
                                   }}
                                 >
                                   {c.este.toFixed(4)}
@@ -1752,7 +1752,7 @@ export default function EnviarArquivos() {
                                 <td
                                   style={{
                                     padding: "8px 12px",
-                                    fontFamily: "monospace",
+                                    fontFamily: '"Poppins", sans-serif',
                                   }}
                                 >
                                   {s.distancia !== undefined
@@ -1954,7 +1954,7 @@ export default function EnviarArquivos() {
                       padding: "10px",
                       borderRadius: "6px",
                       border: "1px solid #d1d5db",
-                      fontFamily: "monospace",
+                      fontFamily: '"Poppins", sans-serif',
                       fontSize: "13px",
                       resize: "vertical",
                       boxSizing: "border-box",

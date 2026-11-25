@@ -12,6 +12,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
+import Topbar from "../../components/Topbar/topbar";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
 import {
@@ -21,9 +22,6 @@ import {
   SignIn,
   SignOut,
 } from "../../lib/supabase/auth.ts";
-
-import Logo from "../../assets/image/logo-front.webp";
-import FundoHeader from "../../assets/image/background/firstcard.webp";
 
 import "./login.css";
 import { z } from "zod";
@@ -418,35 +416,10 @@ export const Login = () => {
         user={currentUser}
       />
 
-      <header
-        className="login-topbar"
-        style={{
-          backgroundImage: `
-                        linear-gradient(
-                            rgba(0, 0, 0, 0.45),
-                            rgba(0, 0, 0, 0.45)
-                        ),
-                        url(${FundoHeader})
-                    `,
-        }}
-      >
-        <button
-          type="button"
-          className="btn-menu-header"
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="Abrir menu"
-          aria-expanded={isSidebarOpen}
-          aria-controls="menu-drawer"
-        >
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </button>
-
-        <div className="topbar-logo">
-          <img src={Logo} alt="Life Topografia" />
-        </div>
-      </header>
+      <Topbar
+        isSidebarOpen={isSidebarOpen}
+        onOpenSidebar={() => setIsSidebarOpen(true)}
+      />
 
       <main className="login-main-content">
         <div className="login-title-container">

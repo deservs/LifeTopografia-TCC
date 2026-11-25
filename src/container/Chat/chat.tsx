@@ -7,9 +7,8 @@ import {
 } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
 import Footer from "../../components/Footer/footer";
-import Logo from "../../assets/image/logo-front.webp";
-import FundoHeader from "../../assets/image/background/firstcard.webp";
 import { supabase } from "../../lib/supabase/supabaseClient";
 import { SerchDataUser } from "../../lib/supabase/auth";
 import "./chat.css";
@@ -896,51 +895,27 @@ export default function Chat() {
         user={userProfile}
       />
 
-      {/* Topbar com background padronizado, logo e menu hambúrguer */}
-      <header
-        className="chat-topbar"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${FundoHeader})`,
-        }}
-      >
-        <button
-          type="button"
-          className="chat-menu-button"
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="Abrir menu"
-          aria-expanded={isSidebarOpen}
-          aria-controls="menu-drawer"
-        >
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </button>
-
-        <Link
-          to="/"
-          className="chat-topbar-logo"
-          aria-label="Ir para a página inicial"
-        >
-          <img src={Logo} alt="Life Topografia" />
-        </Link>
-
-        {/* Alternância apenas visual para demonstração; não concede permissões reais. */}
-        <div className="chat-role-indicator">
-          <span className="role-indicator-label">Perfil Ativo:</span>
-          <button
-            type="button"
-            className={`role-toggle-btn ${isAdmin ? "is-admin" : "is-client"}`}
-            onClick={() => {
-              const nextRole = isAdmin ? "client" : "admin";
-              setActiveRole(nextRole);
-              setMobileView("chat");
-            }}
-            title="Alternar visão entre Cliente e Administrador para testes de hierarquia"
-          >
-            {isAdmin ? "🛡️ Administrador" : "👤 Cliente (Empresa/Pessoa)"}
-          </button>
-        </div>
-      </header>
+      <Topbar
+        isSidebarOpen={isSidebarOpen}
+        onOpenSidebar={() => setIsSidebarOpen(true)}
+        rightContent={
+          <div className="chat-role-indicator">
+            <span className="role-indicator-label">Perfil Ativo:</span>
+            <button
+              type="button"
+              className={`role-toggle-btn ${isAdmin ? "is-admin" : "is-client"}`}
+              onClick={() => {
+                const nextRole = isAdmin ? "client" : "admin";
+                setActiveRole(nextRole);
+                setMobileView("chat");
+              }}
+              title="Alternar visão entre Cliente e Administrador para testes de hierarquia"
+            >
+              {isAdmin ? "🛡️ Administrador" : "👤 Cliente (Empresa/Pessoa)"}
+            </button>
+          </div>
+        }
+      />
 
       {/* Conteúdo Principal */}
       <main className="chat-main">

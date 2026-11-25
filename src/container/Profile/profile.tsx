@@ -8,6 +8,7 @@ import {
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
+import Topbar from "../../components/Topbar/topbar";
 import Footer from "../../components/Footer/footer";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
 
@@ -20,7 +21,6 @@ import {
   DeleteAccount,
 } from "../../lib/supabase/auth";
 
-import Logo from "../../assets/image/logo-front.webp";
 import "./profile.css";
 
 export interface ProfileData extends UserProfile {
@@ -602,23 +602,10 @@ export default function Profile({
           onClose={() => setIsSidebarOpen(false)}
           user={profile}
         />
-        <header className="profile-topbar">
-          <button
-            className="profile-menu-button"
-            type="button"
-            aria-label="Abrir menu"
-            aria-expanded={isSidebarOpen}
-            aria-controls="menu-drawer"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-          <Link to="/" className="profile-logo">
-            <img src={Logo} alt="Life Topografia — Início" />
-          </Link>
-        </header>
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
 
         <main className="profile-main" aria-busy={loading}>
           <div className="profile-title-container">

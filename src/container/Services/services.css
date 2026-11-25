@@ -17,76 +17,6 @@
 }
 
 /* =========================================================
-   CABEÇALHO
-   ========================================================= */
-
-.services-header {
-  position: relative;
-
-  width: 100%;
-  height: 74px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.18)),
-    url("../../assets/image/background/firstcard.webp");
-
-  background-size: cover;
-  background-position: center 42%;
-}
-
-.services-header__logo {
-  display: block;
-
-  width: 155px;
-  height: auto;
-
-  object-fit: contain;
-}
-
-.services-menu-button {
-  position: absolute;
-  top: 50%;
-  left: 10px;
-
-  width: 44px;
-  height: 44px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-
-  padding: 8px;
-
-  border: none;
-  border-radius: 6px;
-
-  background: rgba(0, 0, 0, 0.2);
-
-  transform: translateY(-50%);
-
-  cursor: pointer;
-
-  z-index: 2;
-}
-
-.services-menu-button span {
-  display: block;
-
-  width: 100%;
-  height: 3px;
-
-  border-radius: 4px;
-
-  background-color: #ffffff;
-}
-
-/* =========================================================
    CONTEÚDO PRINCIPAL
    ========================================================= */
 
@@ -136,7 +66,7 @@
 .services-title-divider h1 {
   margin: 0;
 
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Poppins", sans-serif;
   font-size: clamp(2rem, 7vw, 2.7rem);
   font-weight: 700;
   line-height: 1;
@@ -285,7 +215,7 @@
 
   max-width: 180px;
 
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Poppins", sans-serif;
   font-size: 1.03rem;
   font-weight: 700;
   line-height: 1.02;
@@ -462,7 +392,7 @@
 .technical-services__heading h2 {
   margin: 0 0 8px;
 
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Poppins", sans-serif;
   font-size: clamp(1.8rem, 7vw, 2.5rem);
   font-weight: 700;
   line-height: 1.05;
@@ -529,7 +459,7 @@
 .technical-service h3 {
   margin: 0;
 
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Poppins", sans-serif;
   font-size: 1.02rem;
   font-weight: 700;
   line-height: 1.05;
@@ -564,14 +494,6 @@
    ========================================================= */
 
 @media screen and (min-width: 600px) {
-  .services-header {
-    height: 90px;
-  }
-
-  .services-header__logo {
-    width: 185px;
-  }
-
   .services-main {
     padding: 40px 30px 65px;
   }
@@ -611,18 +533,6 @@
    ========================================================= */
 
 @media screen and (min-width: 900px) {
-  .services-header {
-    height: 105px;
-  }
-
-  .services-header__logo {
-    width: 215px;
-  }
-
-  .services-menu-button {
-    left: 25px;
-  }
-
   .services-main {
     padding-top: 50px;
   }
@@ -688,14 +598,6 @@
     padding-left: 11px;
   }
 
-  .services-header {
-    height: 70px;
-  }
-
-  .services-header__logo {
-    width: 145px;
-  }
-
   .services-intro > p {
     font-size: 0.9rem;
   }
@@ -738,7 +640,6 @@
    ACESSIBILIDADE E REDUÇÃO DE MOVIMENTO
    ========================================================= */
 
-.services-menu-button:focus-visible,
 .service-card:focus-visible {
   outline: 3px solid #00a2ff;
   outline-offset: 3px;

@@ -7,11 +7,9 @@ import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { SignUp } from "../../lib/supabase/auth.ts";
 
 import Sidebar from "../../components/Sidebar/sidebar.tsx";
+import Topbar from "../../components/Topbar/topbar";
 import PasswordInput from "../../components/PasswordInput/passwordInput";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
-
-import Logo from "../../assets/image/logo-front.webp";
-import FundoHeader from "../../assets/image/background/firstcard.webp";
 
 import "./cadastrar.css";
 
@@ -202,35 +200,10 @@ export const Cadastrar = () => {
         user={currentUser}
       />
 
-      <header
-        className="cadastrar-topbar"
-        style={{
-          backgroundImage: `
-                        linear-gradient(
-                            rgba(0, 0, 0, 0.45),
-                            rgba(0, 0, 0, 0.45)
-                        ),
-                        url(${FundoHeader})
-                    `,
-        }}
-      >
-        <button
-          type="button"
-          className="btn-menu-header"
-          onClick={() => setIsSidebarOpen(true)}
-          aria-label="Abrir menu"
-          aria-expanded={isSidebarOpen}
-          aria-controls="menu-drawer"
-        >
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </button>
-
-        <div className="topbar-logo">
-          <img src={Logo} alt="Life Topografia" />
-        </div>
-      </header>
+      <Topbar
+        isSidebarOpen={isSidebarOpen}
+        onOpenSidebar={() => setIsSidebarOpen(true)}
+      />
 
       <main className="cadastrar-main-content">
         <div className="cadastrar-title-container">

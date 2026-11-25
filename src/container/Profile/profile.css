@@ -10,45 +10,6 @@
   background: #fff;
 }
 
-.profile-topbar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  height: 85px;
-  background:
-    linear-gradient(#0006, #0006),
-    url("../../assets/image/background/firstcard.webp") center 42% / cover;
-}
-
-.profile-logo img {
-  width: auto;
-  height: 57px;
-  filter: drop-shadow(0 2px 4px #0008);
-}
-.profile-menu-button {
-  position: absolute;
-  left: 16px;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  padding: 9px 7px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-}
-.profile-menu-button span {
-  height: 3px;
-  width: 100%;
-  background: #fff;
-  border-radius: 3px;
-}
-.profile-menu-button:hover {
-  background: #ffffff20;
-}
 .profile-main {
   width: 100%;
   max-width: 480px;
@@ -572,15 +533,6 @@
 }
 
 @media (max-width: 380px) {
-  .profile-topbar {
-    height: 76px;
-  }
-  .profile-logo img {
-    height: 48px;
-  }
-  .profile-menu-button {
-    left: 7px;
-  }
   .profile-main {
     padding: 16px 16px 42px;
   }
@@ -608,14 +560,6 @@
 }
 
 @media (max-width: 240px) {
-  .profile-logo img {
-    max-width: 125px;
-    height: auto;
-  }
-  .profile-menu-button {
-    width: 32px;
-    left: 0;
-  }
   .profile-main {
     padding-left: 12px;
     padding-right: 12px;
