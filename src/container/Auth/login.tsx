@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useEffect,
   useState,
   useRef,
@@ -11,10 +13,13 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
-import Sidebar from "../../components/Sidebar/sidebar.tsx";
-import Topbar from "../../components/Topbar/topbar";
-import PasswordInput from "../../components/PasswordInput/passwordInput";
 import type { UserProfile } from "../../components/Sidebar/sidebar";
+
+const Sidebar = lazy(() => import("../../components/Sidebar/sidebar.tsx"));
+const Topbar = lazy(() => import("../../components/Topbar/topbar"));
+const PasswordInput = lazy(
+  () => import("../../components/PasswordInput/passwordInput"),
+);
 import {
   SendResetPassword,
   ConfirmResetPassword,
@@ -347,11 +352,11 @@ export const Login = () => {
 
   const handleSubmitNewPassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if(formData.novaSenha !== formData.confirmarNovaSenha) {
+    if (formData.novaSenha !== formData.confirmarNovaSenha) {
       setFeedback("As senhas informadas não são iguais.");
       return;
     }
-    
+
     const strongPasswordSchema = z
       .string()
       .min(8, "A senha deve ter pelo menos 8 caracteres.")
@@ -368,7 +373,6 @@ export const Login = () => {
       );
       return;
     }
-
 
     setFeedback("");
 
@@ -409,11 +413,11 @@ export const Login = () => {
   };
 
   return (
-    <div className="login-page">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        user={currentUser}
+    <>
+      <title>Login - Life Topografia</title>
+      <meta
+        name="description"
+        content="Acesse sua conta na Life Topografia para gerenciar seus projetos, chats e solicitações de orçamento."
       />
 
       <Topbar
@@ -432,146 +436,220 @@ export const Login = () => {
             <span className="rhombus"></span>
             <span className="line"></span>
           </div>
-        </div>
 
-        <div className="login-card">
-          {etapa === "login" && (
-            <>
-              <div className="tabs-header">
-                <button
-                  type="button"
-                  className={`tab-btn ${
-                    tipoLogin === "pessoa" ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    setTipoLogin("pessoa");
-                    setFeedback("");
-                  }}
-                  aria-pressed={tipoLogin === "pessoa"}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="tab-icon"
-                    aria-hidden="true"
+          <div className="login-card">
+            {etapa === "login" && (
+              <>
+                <div className="tabs-header">
+                  <button
+                    type="button"
+                    className={`tab-btn ${
+                      tipoLogin === "pessoa" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setTipoLogin("pessoa");
+                      setFeedback("");
+                    }}
+                    aria-pressed={tipoLogin === "pessoa"}
                   >
-                    <path
-                      fill="currentColor"
-                      d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                    />
-                  </svg>
-
-                  <span>Pessoas</span>
-                </button>
-
-                <span className="tab-separator" aria-hidden="true">
-                  |
-                </span>
-
-                <button
-                  type="button"
-                  className={`tab-btn ${
-                    tipoLogin === "empresa" ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    setTipoLogin("empresa");
-                    setFeedback("");
-                  }}
-                  aria-pressed={tipoLogin === "empresa"}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="tab-icon"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"
-                    />
-                  </svg>
-
-                  <span>Empresas</span>
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmitLogin} className="login-form">
-                <div className="form-group">
-                  <div className="input-icon-box">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="tab-icon"
+                      aria-hidden="true"
+                    >
                       <path
                         fill="currentColor"
                         d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
                       />
                     </svg>
-                  </div>
 
-                  <div className="input-field-wrapper">
-                    <label htmlFor="loginIdentificador">
-                      {tipoLogin === "pessoa" ? "E-mail:" : "CNPJ:"}
-                    </label>
+                    <span>Pessoas</span>
+                  </button>
 
-                    <input
-                      type={tipoLogin === "pessoa" ? "email" : "text"}
-                      inputMode={tipoLogin === "empresa" ? "numeric" : "email"}
-                      id="loginIdentificador"
-                      name="loginIdentificador"
-                      value={formData.loginIdentificador}
-                      onChange={handleChange}
-                      autoComplete="username"
-                      required
-                    />
-                  </div>
+                  <span className="tab-separator" aria-hidden="true">
+                    |
+                  </span>
+
+                  <button
+                    type="button"
+                    className={`tab-btn ${
+                      tipoLogin === "empresa" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setTipoLogin("empresa");
+                      setFeedback("");
+                    }}
+                    aria-pressed={tipoLogin === "empresa"}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="tab-icon"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"
+                      />
+                    </svg>
+
+                    <span>Empresas</span>
+                  </button>
                 </div>
 
+                <form onSubmit={handleSubmitLogin} className="login-form">
+                  <div className="form-group">
+                    <div className="input-icon-box">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                        />
+                      </svg>
+                    </div>
+
+                    <div className="input-field-wrapper">
+                      <label htmlFor="loginIdentificador">
+                        {tipoLogin === "pessoa" ? "E-mail:" : "CNPJ:"}
+                      </label>
+
+                      <input
+                        type={tipoLogin === "pessoa" ? "email" : "text"}
+                        inputMode={
+                          tipoLogin === "empresa" ? "numeric" : "email"
+                        }
+                        id="loginIdentificador"
+                        name="loginIdentificador"
+                        value={formData.loginIdentificador}
+                        onChange={handleChange}
+                        autoComplete="username"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <div className="input-icon-box">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        />
+                      </svg>
+                    </div>
+
+                    <div className="input-field-wrapper">
+                      <label htmlFor="senha">Senha:</label>
+
+                      <Suspense fallback={null}>
+                        <PasswordInput
+                          id="senha"
+                          name="senha"
+                          value={formData.senha}
+                          onChange={handleChange}
+                          autoComplete="current-password"
+                          required
+                        />
+                      </Suspense>
+                    </div>
+                  </div>
+
+                  {feedback && (
+                    <p className="form-feedback error" role="alert">
+                      {feedback}
+                    </p>
+                  )}
+
+                  <div className="forgot-password-link-container">
+                    <button
+                      type="button"
+                      className="btn-forgot-password"
+                      onClick={() => {
+                        setEtapa("esqueci_email");
+                        setFeedback("");
+                      }}
+                    >
+                      Esqueci minha senha
+                    </button>
+                  </div>
+
+                  <div className="captcha-container">
+                    <Turnstile
+                      options={{
+                        size: "flexible",
+                        theme: "light",
+                      }}
+                      ref={captchaLoginRef}
+                      siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                      onSuccess={(token) => {
+                        setCaptchaToken(token);
+                      }}
+                      onExpire={() => setCaptchaToken(null)}
+                    />
+                  </div>
+
+                  <button type="submit" className="btn-action-login">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="btn-key-icon"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v2h2v-2h2v-2H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"
+                      />
+                    </svg>
+
+                    <span>ENTRAR</span>
+                  </button>
+
+                  <div className="ou-divider">
+                    <span className="line"></span>
+                    <span className="text">ou</span>
+                    <span className="line"></span>
+                  </div>
+
+                  <Link to="/cadastrar" className="btn-register-redirect">
+                    VOCÊ NÃO POSSUI CONTA?
+                  </Link>
+                </form>
+              </>
+            )}
+
+            {etapa === "esqueci_email" && (
+              <form
+                onSubmit={handleSubmitRecoveryEmail}
+                className="login-form animation-fade-in"
+              >
                 <div className="form-group">
                   <div className="input-icon-box">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         fill="currentColor"
-                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
                       />
                     </svg>
                   </div>
-
                   <div className="input-field-wrapper">
-                    <label htmlFor="senha">Senha:</label>
+                    <label htmlFor="emailRecuperacao">Insira o Email:</label>
 
-                    <PasswordInput
-                      id="senha"
-                      name="senha"
-                      value={formData.senha}
+                    <input
+                      type="email"
+                      id="emailRecuperacao"
+                      name="emailRecuperacao"
+                      value={formData.emailRecuperacao}
                       onChange={handleChange}
-                      autoComplete="current-password"
+                      autoComplete="email"
                       required
                     />
                   </div>
                 </div>
-
-                {feedback && (
-                  <p className="form-feedback error" role="alert">
-                    {feedback}
-                  </p>
-                )}
-
-                <div className="forgot-password-link-container">
-                  <button
-                    type="button"
-                    className="btn-forgot-password"
-                    onClick={() => {
-                      setEtapa("esqueci_email");
-                      setFeedback("");
-                    }}
-                  >
-                    Esqueci minha senha
-                  </button>
-                </div>
-
                 <div className="captcha-container">
                   <Turnstile
                     options={{
                       size: "flexible",
                       theme: "light",
                     }}
-                    ref={captchaLoginRef}
+                    ref={captchaEmailRef}
                     siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
                     onSuccess={(token) => {
                       setCaptchaToken(token);
@@ -580,338 +658,277 @@ export const Login = () => {
                   />
                 </div>
 
-                <button type="submit" className="btn-action-login">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="btn-key-icon"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v2h2v-2h2v-2H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"
-                    />
-                  </svg>
-
-                  <span>ENTRAR</span>
-                </button>
-
-                <div className="ou-divider">
-                  <span className="line"></span>
-                  <span className="text">ou</span>
-                  <span className="line"></span>
-                </div>
-
-                <Link to="/cadastrar" className="btn-register-redirect">
-                  VOCÊ NÃO POSSUI CONTA?
-                </Link>
-              </form>
-            </>
-          )}
-
-          {etapa === "esqueci_email" && (
-            <form
-              onSubmit={handleSubmitRecoveryEmail}
-              className="login-form animation-fade-in"
-            >
-              <div className="form-group">
-                <div className="input-icon-box">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      fill="currentColor"
-                      d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-                    />
-                  </svg>
-                </div>
-                <div className="input-field-wrapper">
-                  <label htmlFor="emailRecuperacao">Insira o Email:</label>
-
-                  <input
-                    type="email"
-                    id="emailRecuperacao"
-                    name="emailRecuperacao"
-                    value={formData.emailRecuperacao}
-                    onChange={handleChange}
-                    autoComplete="email"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="captcha-container">
-                <Turnstile
-                  options={{
-                    size: "flexible",
-                    theme: "light",
-                  }}
-                  ref={captchaEmailRef}
-                  siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
-                  onSuccess={(token) => {
-                    setCaptchaToken(token);
-                  }}
-                  onExpire={() => setCaptchaToken(null)}
-                />
-              </div>
-
-              {feedback && (
-                <p className="form-feedback error" role="alert">
-                  {feedback}
-                </p>
-              )}
-
-              <button type="submit" className="btn-action-login">
-                <span>ENVIAR</span>
-              </button>
-
-              <button
-                type="button"
-                className="btn-back-login"
-                onClick={voltarParaLogin}
-              >
-                Voltar ao Login
-              </button>
-            </form>
-          )}
-
-          {etapa === "esqueci_codigo" && (
-            <form
-              onSubmit={handleSubmitRecoveryCode}
-              className="login-form animation-fade-in text-center"
-            >
-              <h2 className="codigo-subtitle-title">INSIRA O CÓDIGO</h2>
-
-              <p className="codigo-subtitle-desc">
-                Um código foi enviado para o email{" "}
-                <span className="email-highlight">
-                  {formData.emailRecuperacao}
-                </span>
-                .
-              </p>
-
-              <div
-                className="digits-container"
-                role="group"
-                aria-label="Código de recuperação"
-              >
-                {formData.codigoDigits.map((digit, index) => (
-                  <input
-                    key={index}
-                    id={`digit-${index}`}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(event) =>
-                      handleDigitChange(index, event.target.value)
-                    }
-                    onKeyDown={(event) => handleDigitKeyDown(index, event)}
-                    onPaste={handleDigitPaste}
-                    className="digit-box"
-                    aria-label={`Dígito ${index + 1} de ${CODIGO_LENGTH}`}
-                    autoComplete={index === 0 ? "one-time-code" : "off"}
-                    required
-                  />
-                ))}
-              </div>
-              {feedback && (
-                <p className="form-feedback error" role="alert">
-                  {feedback}
-                </p>
-              )}
-
-              <button type="submit" className="btn-action-login">
-                <span>ENVIAR</span>
-              </button>
-
-              <p className="timer-text">
-                Não recebeu o código?{" "}
-                {timer > 0 ? (
-                  <span>{timer} segundos.</span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setInviCaptcha(true)}
-                    className="btn-resend"
-                  >
-                    Reenviar
-                  </button>
-                )}
-              </p>
-
-              <button
-                type="button"
-                className="btn-back-login"
-                onClick={voltarParaLogin}
-              >
-                Voltar ao Login
-              </button>
-            </form>
-          )}
-
-          {etapa === "esqueci_nova_senha" &&
-            (!logoutFail ? (
-              <form
-                onSubmit={handleSubmitNewPassword}
-                className="login-form animation-fade-in"
-              >
-                <div className="form-group">
-                  <div className="input-icon-box">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        fill="currentColor"
-                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-                      />
-                    </svg>
-                  </div>
-
-                  <div className="input-field-wrapper">
-                    <label htmlFor="novaSenha">Nova Senha:</label>
-
-                    <PasswordInput
-                      id="novaSenha"
-                      visibilityLabel="nova senha"
-                      name="novaSenha"
-                      value={formData.novaSenha}
-                      onChange={handleChange}
-                      autoComplete="new-password"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <div className="input-icon-box relative-badge">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        fill="currentColor"
-                        d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-                      />
-                    </svg>
-
-                    <span className="check-badge" aria-hidden="true">
-                      ✓
-                    </span>
-                  </div>
-
-                  <div className="input-field-wrapper">
-                    <label htmlFor="confirmarNovaSenha">Confirmar Senha:</label>
-
-                    <PasswordInput
-                      id="confirmarNovaSenha"
-                      visibilityLabel="confirmação da nova senha"
-                      name="confirmarNovaSenha"
-                      value={formData.confirmarNovaSenha}
-                      onChange={handleChange}
-                      autoComplete="new-password"
-                      required
-                    />
-                  </div>
-                </div>
-
                 {feedback && (
                   <p className="form-feedback error" role="alert">
                     {feedback}
                   </p>
                 )}
 
-                <button
-                  type="submit"
-                  className="btn-action-login"
-                  disabled={clickedButton}
-                >
-                  <span>ALTERAR SENHA</span>
+                <button type="submit" className="btn-action-login">
+                  <span>ENVIAR</span>
                 </button>
 
                 <button
                   type="button"
                   className="btn-back-login"
-                  disabled={clickedButton}
-                  onClick={async () => {
-                    try {
-                      await SignOut("local");
-                      setEtapa("login");
-                    } catch (error) {
-                      console.error("Erro ao deslogar o usuário:", error);
-                      setFeedback(
-                        "Erro ao tentar voltar ao login. Tente novamente.",
-                      );
-                    }
-                  }}
+                  onClick={voltarParaLogin}
                 >
-                  Cancelar Tudo
+                  Voltar ao Login
                 </button>
               </form>
-            ) : (
-              <div className="login-form animation-fade-in">
-                <p>Não foi possível deslogar, tente novamente.</p>
-                <button className="btn-action-login" onClick={handleTryLogout}>
-                  Tentar Novamente
+            )}
+
+            {etapa === "esqueci_codigo" && (
+              <form
+                onSubmit={handleSubmitRecoveryCode}
+                className="login-form animation-fade-in text-center"
+              >
+                <h2 className="codigo-subtitle-title">INSIRA O CÓDIGO</h2>
+
+                <p className="codigo-subtitle-desc">
+                  Um código foi enviado para o email{" "}
+                  <span className="email-highlight">
+                    {formData.emailRecuperacao}
+                  </span>
+                  .
+                </p>
+
+                <div
+                  className="digits-container"
+                  role="group"
+                  aria-label="Código de recuperação"
+                >
+                  {formData.codigoDigits.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`digit-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(event) =>
+                        handleDigitChange(index, event.target.value)
+                      }
+                      onKeyDown={(event) => handleDigitKeyDown(index, event)}
+                      onPaste={handleDigitPaste}
+                      className="digit-box"
+                      aria-label={`Dígito ${index + 1} de ${CODIGO_LENGTH}`}
+                      autoComplete={index === 0 ? "one-time-code" : "off"}
+                      required
+                    />
+                  ))}
+                </div>
+                {feedback && (
+                  <p className="form-feedback error" role="alert">
+                    {feedback}
+                  </p>
+                )}
+
+                <button type="submit" className="btn-action-login">
+                  <span>ENVIAR</span>
                 </button>
-              </div>
-            ))}
-        </div>
-      </main>
 
-      {inviCaptcha && (
-        <div
-          className="modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-resend-title"
-          style={{ zIndex: 1000 }}
-        >
+                <p className="timer-text">
+                  Não recebeu o código?{" "}
+                  {timer > 0 ? (
+                    <span>{timer} segundos.</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setInviCaptcha(true)}
+                      className="btn-resend"
+                    >
+                      Reenviar
+                    </button>
+                  )}
+                </p>
+
+                <button
+                  type="button"
+                  className="btn-back-login"
+                  onClick={voltarParaLogin}
+                >
+                  Voltar ao Login
+                </button>
+              </form>
+            )}
+
+            {etapa === "esqueci_nova_senha" &&
+              (!logoutFail ? (
+                <form
+                  onSubmit={handleSubmitNewPassword}
+                  className="login-form animation-fade-in"
+                >
+                  <div className="form-group">
+                    <div className="input-icon-box">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        />
+                      </svg>
+                    </div>
+
+                    <div className="input-field-wrapper">
+                      <label htmlFor="novaSenha">Nova Senha:</label>
+
+                      <Suspense fallback={null}>
+                        <PasswordInput
+                          id="novaSenha"
+                          visibilityLabel="nova senha"
+                          name="novaSenha"
+                          value={formData.novaSenha}
+                          onChange={handleChange}
+                          autoComplete="new-password"
+                          required
+                        />
+                      </Suspense>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <div className="input-icon-box relative-badge">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                        />
+                      </svg>
+
+                      <span className="check-badge" aria-hidden="true">
+                        ✓
+                      </span>
+                    </div>
+
+                    <div className="input-field-wrapper">
+                      <label htmlFor="confirmarNovaSenha">
+                        Confirmar Senha:
+                      </label>
+
+                      <Suspense fallback={null}>
+                        <PasswordInput
+                          id="confirmarNovaSenha"
+                          visibilityLabel="confirmação da nova senha"
+                          name="confirmarNovaSenha"
+                          value={formData.confirmarNovaSenha}
+                          onChange={handleChange}
+                          autoComplete="new-password"
+                          required
+                        />
+                      </Suspense>
+                    </div>
+                  </div>
+
+                  {feedback && (
+                    <p className="form-feedback error" role="alert">
+                      {feedback}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn-action-login"
+                    disabled={clickedButton}
+                  >
+                    <span>ALTERAR SENHA</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-back-login"
+                    disabled={clickedButton}
+                    onClick={async () => {
+                      try {
+                        await SignOut("local");
+                        setEtapa("login");
+                      } catch (error) {
+                        console.error("Erro ao deslogar o usuário:", error);
+                        setFeedback(
+                          "Erro ao tentar voltar ao login. Tente novamente.",
+                        );
+                      }
+                    }}
+                  >
+                    Cancelar Tudo
+                  </button>
+                </form>
+              ) : (
+                <div className="login-form animation-fade-in">
+                  <p>Não foi possível deslogar, tente novamente.</p>
+                  <button
+                    className="btn-action-login"
+                    onClick={handleTryLogout}
+                  >
+                    Tentar Novamente
+                  </button>
+                </div>
+              ))}
+          </div>
+        </main>
+
+        {inviCaptcha && (
           <div
-            className="modal-card animation-fade-in"
-            style={{ padding: "20px 0", background: "transparent" }}
+            className="modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-resend-title"
+            style={{ zIndex: 1000 }}
           >
-            <Turnstile
-              options={{
-                size: "normal",
-                theme: "light",
-              }}
-              ref={captchaInviRef}
-              siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
-              onSuccess={(token) => {
-                setCaptchaToken(token);
-                void handleReenviarCodigo(token);
-              }}
-              onError={() => {
-                setFeedback("Erro ao validar o captcha. Tente novamente.");
-                setInviCaptcha(false);
-              }}
-              onExpire={() => setCaptchaToken(null)}
-            />
-          </div>
-        </div>
-      )}
-
-      {showModalResend && (
-        <div
-          className="modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-resend-title"
-        >
-          <div className="modal-card animation-fade-in">
-            <h2 id="modal-resend-title" className="modal-title">
-              SOLICITAÇÃO ENVIADA
-            </h2>
-
-            <p className="modal-text">
-              A solicitação para reenviar o código foi registrada. O envio
-              efetivo será realizado pelo serviço de recuperação.
-            </p>
-
-            <button
-              type="button"
-              className="btn-modal-ok"
-              onClick={() => setShowModalResend(false)}
+            <div
+              className="modal-card animation-fade-in"
+              style={{ padding: "20px 0", background: "transparent" }}
             >
-              OK
-            </button>
+              <Turnstile
+                options={{
+                  size: "normal",
+                  theme: "light",
+                }}
+                ref={captchaInviRef}
+                siteKey="0x4AAAAAAFabYKAT6aVT3YYq"
+                onSuccess={(token) => {
+                  setCaptchaToken(token);
+                  void handleReenviarCodigo(token);
+                }}
+                onError={() => {
+                  setFeedback("Erro ao validar o captcha. Tente novamente.");
+                  setInviCaptcha(false);
+                }}
+                onExpire={() => setCaptchaToken(null)}
+              />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {showModalResend && (
+          <div
+            className="modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-resend-title"
+          >
+            <div className="modal-card animation-fade-in">
+              <h2 id="modal-resend-title" className="modal-title">
+                SOLICITAÇÃO ENVIADA
+              </h2>
+
+              <p className="modal-text">
+                A solicitação para reenviar o código foi registrada. O envio
+                efetivo será realizado pelo serviço de recuperação.
+              </p>
+
+              <button
+                type="button"
+                className="btn-modal-ok"
+                onClick={() => setShowModalResend(false)}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

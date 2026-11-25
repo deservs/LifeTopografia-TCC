@@ -29,30 +29,37 @@ export default function Erro404() {
   }, [navigate]);
 
   return (
-    <div className="erro404-overlay">
-      <section
-        className="erro404-card"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="erro404-title"
-        aria-describedby="erro404-description"
-      >
-        <div className="erro404-symbol" aria-hidden="true">
-          <img src={logo} alt="Logo da LifeTopografia" />
-        </div>
+    <>
+      <title>Página não encontrada - Life Topografia</title>
+      <meta
+        name="description"
+        content="A página solicitada não foi encontrada na plataforma Life Topografia."
+      />
+      <div className="erro404-overlay">
+        <section
+          className="erro404-card"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="erro404-title"
+          aria-describedby="erro404-description"
+        >
+          <div className="erro404-symbol" aria-hidden="true">
+            <img src={logo} alt="Logo da LifeTopografia" />
+          </div>
 
-        <span className="erro404-code">ERRO 404</span>
-        <h1 id="erro404-title">Saímos da rota.</h1>
-        <p id="erro404-description">
-          A página que você procura não foi encontrada. Volte ao início para
-          continuar navegando pela LifeTopografia.
-        </p>
+          <span className="erro404-code">ERRO 404</span>
+          <h1 id="erro404-title">Saímos da rota.</h1>
+          <p id="erro404-description">
+            A página que você procura não foi encontrada. Volte ao início para
+            continuar navegando pela LifeTopografia.
+          </p>
 
-        <Link ref={homeLinkRef} className="erro404-action" to="/" replace>
-          VOLTAR AO INÍCIO
-          <span aria-hidden="true">→</span>
-        </Link>
-      </section>
-    </div>
+          <Link ref={homeLinkRef} className="erro404-action" to="/" replace>
+            VOLTAR AO INÍCIO
+            <span aria-hidden="true">→</span>
+          </Link>
+        </section>
+      </div>
+    </>
   );
 }

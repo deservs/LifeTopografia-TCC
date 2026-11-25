@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase/supabaseClient";
-import { useEffect} from "react";
+import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const PUBLIC_AUTH_ROUTES = ["/login", "/cadastrar"];

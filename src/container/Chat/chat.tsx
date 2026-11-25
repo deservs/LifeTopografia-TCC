@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useState,
   useRef,
   useEffect,
@@ -6,9 +8,11 @@ import {
   type ChangeEvent,
 } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
-import Footer from "../../components/Footer/footer";
+import type { UserProfile } from "../../components/Sidebar/sidebar";
+
+const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
+const Topbar = lazy(() => import("../../components/Topbar/topbar"));
+const Footer = lazy(() => import("../../components/Footer/footer"));
 import { supabase } from "../../lib/supabase/supabaseClient";
 import { SerchDataUser } from "../../lib/supabase/auth";
 import "./chat.css";
@@ -887,12 +891,11 @@ export default function Chat() {
   );
 
   return (
-    <div className="chat-page">
-      {/* Sidebar integrada com o mesmo padrão do site */}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        user={userProfile}
+    <>
+      <title>Chat e Orçamentos - Life Topografia</title>
+      <meta
+        name="description"
+        content="Converse com a equipe da Life Topografia, envie documentos e acompanhe suas propostas de orçamento."
       />
 
       <Topbar
@@ -924,866 +927,907 @@ export default function Chat() {
             <span
               className={`chat-hierarchy-pill ${isAdmin ? "pill-admin" : "pill-client"}`}
             >
-              {isAdmin
-                ? "PAINEL ADMINISTRATIVO (CONVERSÃO DXF & ORÇAMENTOS)"
-                : "ATENDIMENTO AO CLIENTE (PESSOA FÍSICA & EMPRESA)"}
-            </span>
+              {isAdmin ? "🛡️ Administrador" : "👤 Cliente (Empresa/Pessoa)"}
+            </button>
           </div>
-          <h1 className="chat-title">
-            {isAdmin
-              ? "GERENCIAMENTO DE ATENDIMENTOS"
-              : "ATENDIMENTO & SUPORTE"}
-          </h1>
-          <p className="chat-subtitle">
-            {isAdmin
-              ? "Receba matrículas em PDF de clientes, converta as coordenadas georreferenciadas para DXF e emita propostas oficiais de orçamento."
-              : "Converse com os agrimensores da Life Topografia, envie a certidão de matrícula em PDF e aprove seu orçamento com pagamento SumUp."}
-          </p>
-          <div className="title-divider" aria-hidden="true">
-            <span className="line" />
-            <span className="rhombus" />
-            <span className="line" />
-          </div>
-        </div>
+        </header>
 
-        {/* Card Unificado de Chat com Hierarquia */}
-        <section
-          className={`chat-card ${
-            isAdmin
-              ? mobileView === "list"
-                ? "mobile-view--list"
-                : "mobile-view--chat"
-              : "is-client-view"
-          }`}
-          aria-label="Central de Mensagens"
-        >
-          {/* PAINEL LATERAL: 
+        {/* Conteúdo Principal */}
+        <main className="chat-main">
+          <div className="chat-title-container">
+            <div className="chat-badge-row">
+              <span
+                className={`chat-hierarchy-pill ${isAdmin ? "pill-admin" : "pill-client"}`}
+              >
+                {isAdmin
+                  ? "PAINEL ADMINISTRATIVO (CONVERSÃO DXF & ORÇAMENTOS)"
+                  : "ATENDIMENTO AO CLIENTE (PESSOA FÍSICA & EMPRESA)"}
+              </span>
+            </div>
+            <h1 className="chat-title">
+              {isAdmin
+                ? "GERENCIAMENTO DE ATENDIMENTOS"
+                : "ATENDIMENTO & SUPORTE"}
+            </h1>
+            <p className="chat-subtitle">
+              {isAdmin
+                ? "Receba matrículas em PDF de clientes, converta as coordenadas georreferenciadas para DXF e emita propostas oficiais de orçamento."
+                : "Converse com os agrimensores da Life Topografia, envie a certidão de matrícula em PDF e aprove seu orçamento com pagamento SumUp."}
+            </p>
+            <div className="title-divider" aria-hidden="true">
+              <span className="line" />
+              <span className="rhombus" />
+              <span className="line" />
+            </div>
+          </div>
+
+          {/* Card Unificado de Chat com Hierarquia */}
+          <section
+            className={`chat-card ${
+              isAdmin
+                ? mobileView === "list"
+                  ? "mobile-view--list"
+                  : "mobile-view--chat"
+                : "is-client-view"
+            }`}
+            aria-label="Central de Mensagens"
+          >
+            {/* PAINEL LATERAL: 
               - No modo ADMIN: Lista todos os clientes e solicitações em aberto.
               - No modo CLIENTE: Mostra o canal direto com a Life Topografia e status. */}
-          <aside className="chat-sidebar-panel">
-            <div className="chat-sidebar-panel__header">
-              <h2>
-                {isAdmin ? "Fila de Atendimento aos Clientes" : "Canal Oficial"}
-              </h2>
-              {isAdmin && (
-                <div className="chat-search-box">
-                  <span className="search-icon" aria-hidden="true">
-                    🔍
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Filtrar por nome ou CNPJ/CPF..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    aria-label="Buscar clientes"
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="chat-conversations-list" role="list">
-              {isAdmin ? (
-                filteredAdminThreads.length === 0 ? (
-                  <div className="chat-empty-search" role="status">
-                    <span className="empty-search-icon" aria-hidden="true">
+            <aside className="chat-sidebar-panel">
+              <div className="chat-sidebar-panel__header">
+                <h2>
+                  {isAdmin
+                    ? "Fila de Atendimento aos Clientes"
+                    : "Canal Oficial"}
+                </h2>
+                {isAdmin && (
+                  <div className="chat-search-box">
+                    <span className="search-icon" aria-hidden="true">
                       🔍
                     </span>
-                    <p>Nenhum cliente encontrado para "{searchTerm}".</p>
+                    <input
+                      type="text"
+                      placeholder="Filtrar por nome ou CNPJ/CPF..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      aria-label="Buscar clientes"
+                    />
                   </div>
-                ) : (
-                  filteredAdminThreads.map((thread) => {
-                    const isActive = thread.id === activeThreadId;
-                    const lastMsg = thread.messages[thread.messages.length - 1];
-                    const previewText =
-                      lastMsg?.type === "file"
-                        ? `📎 Arquivo: ${lastMsg.file?.name}`
-                        : lastMsg?.type === "budget"
-                          ? `💼 Orçamento: R$ ${lastMsg.budget?.amount}`
-                          : lastMsg?.text || "Inicie a conversa...";
+                )}
+              </div>
 
-                    return (
-                      <div
-                        key={thread.id}
-                        role="listitem"
-                        className={`conversation-item ${isActive ? "is-active" : ""}`}
-                        onClick={() => {
-                          setActiveThreadId(thread.id);
-                          setMobileView("chat");
-                        }}
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
+              <div className="chat-conversations-list" role="list">
+                {isAdmin ? (
+                  filteredAdminThreads.length === 0 ? (
+                    <div className="chat-empty-search" role="status">
+                      <span className="empty-search-icon" aria-hidden="true">
+                        🔍
+                      </span>
+                      <p>Nenhum cliente encontrado para "{searchTerm}".</p>
+                    </div>
+                  ) : (
+                    filteredAdminThreads.map((thread) => {
+                      const isActive = thread.id === activeThreadId;
+                      const lastMsg =
+                        thread.messages[thread.messages.length - 1];
+                      const previewText =
+                        lastMsg?.type === "file"
+                          ? `📎 Arquivo: ${lastMsg.file?.name}`
+                          : lastMsg?.type === "budget"
+                            ? `💼 Orçamento: R$ ${lastMsg.budget?.amount}`
+                            : lastMsg?.text || "Inicie a conversa...";
+
+                      return (
+                        <div
+                          key={thread.id}
+                          role="listitem"
+                          className={`conversation-item ${isActive ? "is-active" : ""}`}
+                          onClick={() => {
                             setActiveThreadId(thread.id);
                             setMobileView("chat");
-                          }
-                        }}
-                      >
-                        <div className="conversation-avatar-box">
-                          <div className="conversation-avatar">
-                            {thread.clientName.charAt(0)}
+                          }}
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setActiveThreadId(thread.id);
+                              setMobileView("chat");
+                            }
+                          }}
+                        >
+                          <div className="conversation-avatar-box">
+                            <div className="conversation-avatar">
+                              {thread.clientName.charAt(0)}
+                            </div>
+                            {thread.chatStatus === "open" && (
+                              <span
+                                className="online-indicator"
+                                title="Conversa aberta"
+                              />
+                            )}
                           </div>
-                          {thread.chatStatus === "open" && (
-                            <span
-                              className="online-indicator"
-                              title="Conversa aberta"
-                            />
-                          )}
-                        </div>
 
-                        <div className="conversation-details">
-                          <div className="conversation-top-row">
-                            <span className="conversation-name">
-                              {thread.clientName}
+                          <div className="conversation-details">
+                            <div className="conversation-top-row">
+                              <span className="conversation-name">
+                                {thread.clientName}
+                              </span>
+                              <span className="conversation-time">
+                                {thread.lastMessageTime}
+                              </span>
+                            </div>
+                            <span className="conversation-role">
+                              {thread.clientType === "empresa"
+                                ? "Empresa"
+                                : "Pessoa Física"}{" "}
+                              • {thread.document}
                             </span>
-                            <span className="conversation-time">
-                              {thread.lastMessageTime}
-                            </span>
+                            <p className="conversation-preview">
+                              {previewText}
+                            </p>
                           </div>
-                          <span className="conversation-role">
-                            {thread.clientType === "empresa"
-                              ? "Empresa"
-                              : "Pessoa Física"}{" "}
-                            • {thread.document}
-                          </span>
-                          <p className="conversation-preview">{previewText}</p>
                         </div>
+                      );
+                    })
+                  )
+                ) : (
+                  <div className="conversation-item is-active">
+                    <div className="conversation-avatar-box">
+                      <div className="conversation-avatar brand-avatar">LT</div>
+                      {clientChatStatus === "open" && (
+                        <span
+                          className="online-indicator"
+                          title="Conversa aberta"
+                        />
+                      )}
+                    </div>
+                    <div className="conversation-details">
+                      <div className="conversation-top-row">
+                        <span className="conversation-name">
+                          Life Topografia
+                        </span>
+                        <span className="conversation-time">Agora</span>
                       </div>
-                    );
-                  })
-                )
-              ) : (
-                <div className="conversation-item is-active">
-                  <div className="conversation-avatar-box">
-                    <div className="conversation-avatar brand-avatar">LT</div>
-                    {clientChatStatus === "open" && (
+                      <span className="conversation-role">
+                        CREA/SP • Engenharia &amp; Topografia
+                      </span>
+                      <p className="conversation-preview">
+                        Atendimento direto com os responsáveis técnicos.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="chat-sidebar-panel__footer">
+                <span className="channel-badge">
+                  {isAdmin
+                    ? "🛡️ Modo Administrador: Acesso completo ao sistema"
+                    : "🔒 Conexão Segura: Cliente verificado via Supabase"}
+                </span>
+              </div>
+            </aside>
+
+            {/* PAINEL PRINCIPAL: Janela de Mensagens */}
+            <div className="chat-window-panel">
+              {/* Header da Conversa Ativa */}
+              <header className="chat-active-header">
+                <div className="active-attendant-info">
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className="btn-mobile-back"
+                      onClick={() => setMobileView("list")}
+                      aria-label="Voltar para lista de conversas"
+                      title="Voltar para lista de clientes"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                      <span className="btn-mobile-back-text">Clientes</span>
+                    </button>
+                  )}
+
+                  <div
+                    className={`active-attendant-avatar ${isAdmin ? "" : "brand-avatar"}`}
+                    aria-hidden="true"
+                  >
+                    {isAdmin ? currentChatTitle.charAt(0) : "LT"}
+                    {(isAdmin
+                      ? currentAdminThread?.chatStatus
+                      : clientChatStatus) === "open" && (
                       <span
                         className="online-indicator"
-                        title="Conversa aberta"
+                        title="Conversa ativa"
                       />
                     )}
                   </div>
-                  <div className="conversation-details">
-                    <div className="conversation-top-row">
-                      <span className="conversation-name">Life Topografia</span>
-                      <span className="conversation-time">Agora</span>
+
+                  <div className="active-attendant-text">
+                    <div className="active-attendant-title-row">
+                      <h3
+                        className="active-attendant-name"
+                        title={currentChatTitle}
+                      >
+                        {currentChatTitle}
+                      </h3>
+                      <span
+                        className={`chat-status-label ${
+                          (isAdmin
+                            ? currentAdminThread?.chatStatus
+                            : clientChatStatus) === "closed"
+                            ? "is-closed"
+                            : "is-open"
+                        }`}
+                      >
+                        <span className="status-dot" aria-hidden="true" />
+                        <span className="status-label-text">
+                          {(isAdmin
+                            ? currentAdminThread?.chatStatus
+                            : clientChatStatus) === "closed"
+                            ? "Chat encerrado"
+                            : "Chat aberto"}
+                        </span>
+                      </span>
                     </div>
-                    <span className="conversation-role">
-                      CREA/SP • Engenharia &amp; Topografia
+
+                    <span
+                      className="active-attendant-status"
+                      title={currentChatSubtitle}
+                    >
+                      {(isAdmin
+                        ? currentAdminThread?.chatStatus
+                        : clientChatStatus) === "closed" ? (
+                        "Atendimento encerrado"
+                      ) : (
+                        <span className="online-status-line">
+                          <span className="pulse-dot" aria-hidden="true" />
+                          Ativo agora • {currentChatSubtitle}
+                        </span>
+                      )}
                     </span>
-                    <p className="conversation-preview">
-                      Atendimento direto com os responsáveis técnicos.
-                    </p>
                   </div>
                 </div>
-              )}
-            </div>
 
-            <div className="chat-sidebar-panel__footer">
-              <span className="channel-badge">
-                {isAdmin
-                  ? "🛡️ Modo Administrador: Acesso completo ao sistema"
-                  : "🔒 Conexão Segura: Cliente verificado via Supabase"}
-              </span>
-            </div>
-          </aside>
+                {/* Ações e status do atendimento */}
+                <div className="active-header-actions">
+                  {isAdmin && currentAdminThread && (
+                    <>
+                      <button
+                        type="button"
+                        className="btn-header-budget"
+                        onClick={() => setShowBudgetModal(true)}
+                        disabled={currentAdminThread.chatStatus === "closed"}
+                      >
+                        + Orçamento
+                      </button>
 
-          {/* PAINEL PRINCIPAL: Janela de Mensagens */}
-          <div className="chat-window-panel">
-            {/* Header da Conversa Ativa */}
-            <header className="chat-active-header">
-              <div className="active-attendant-info">
-                {isAdmin && (
-                  <button
-                    type="button"
-                    className="btn-mobile-back"
-                    onClick={() => setMobileView("list")}
-                    aria-label="Voltar para lista de conversas"
-                    title="Voltar para lista de clientes"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="18"
-                      height="18"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                    <span className="btn-mobile-back-text">Clientes</span>
-                  </button>
-                )}
+                      {currentAdminThread.serviceStatus !== "completed" && (
+                        <button
+                          type="button"
+                          className="btn-complete-service"
+                          onClick={handleCompleteService}
+                        >
+                          Concluir Serviço
+                        </button>
+                      )}
+                    </>
+                  )}
 
-                <div
-                  className={`active-attendant-avatar ${isAdmin ? "" : "brand-avatar"}`}
-                  aria-hidden="true"
-                >
-                  {isAdmin ? currentChatTitle.charAt(0) : "LT"}
                   {(isAdmin
                     ? currentAdminThread?.chatStatus
                     : clientChatStatus) === "open" && (
-                    <span className="online-indicator" title="Conversa ativa" />
-                  )}
-                </div>
-
-                <div className="active-attendant-text">
-                  <div className="active-attendant-title-row">
-                    <h3
-                      className="active-attendant-name"
-                      title={currentChatTitle}
-                    >
-                      {currentChatTitle}
-                    </h3>
-                    <span
-                      className={`chat-status-label ${
-                        (isAdmin
-                          ? currentAdminThread?.chatStatus
-                          : clientChatStatus) === "closed"
-                          ? "is-closed"
-                          : "is-open"
-                      }`}
-                    >
-                      <span className="status-dot" aria-hidden="true" />
-                      <span className="status-label-text">
-                        {(isAdmin
-                          ? currentAdminThread?.chatStatus
-                          : clientChatStatus) === "closed"
-                          ? "Chat encerrado"
-                          : "Chat aberto"}
-                      </span>
-                    </span>
-                  </div>
-
-                  <span
-                    className="active-attendant-status"
-                    title={currentChatSubtitle}
-                  >
-                    {(isAdmin
-                      ? currentAdminThread?.chatStatus
-                      : clientChatStatus) === "closed" ? (
-                      "Atendimento encerrado"
-                    ) : (
-                      <span className="online-status-line">
-                        <span className="pulse-dot" aria-hidden="true" />
-                        Ativo agora • {currentChatSubtitle}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {/* Ações e status do atendimento */}
-              <div className="active-header-actions">
-                {isAdmin && currentAdminThread && (
-                  <>
                     <button
                       type="button"
-                      className="btn-header-budget"
-                      onClick={() => setShowBudgetModal(true)}
-                      disabled={currentAdminThread.chatStatus === "closed"}
+                      className="btn-close-chat"
+                      onClick={handleCloseChat}
+                      title="Encerrar conversa atual"
                     >
-                      + Orçamento
+                      Encerrar Chat
                     </button>
-
-                    {currentAdminThread.serviceStatus !== "completed" && (
-                      <button
-                        type="button"
-                        className="btn-complete-service"
-                        onClick={handleCompleteService}
-                      >
-                        Concluir Serviço
-                      </button>
-                    )}
-                  </>
-                )}
-
-                {(isAdmin
-                  ? currentAdminThread?.chatStatus
-                  : clientChatStatus) === "open" && (
-                  <button
-                    type="button"
-                    className="btn-close-chat"
-                    onClick={handleCloseChat}
-                    title="Encerrar conversa atual"
-                  >
-                    Encerrar Chat
-                  </button>
-                )}
-              </div>
-            </header>
-
-            {/* Área de Mensagens */}
-            <div
-              className="chat-messages-area"
-              role="log"
-              aria-live="polite"
-              ref={messagesContainerRef}
-              onScroll={handleMessagesScroll}
-            >
-              <div className="chat-date-badge">
-                <span>Canal Oficial de Atendimento • Life Topografia</span>
-              </div>
-
-              {activeMessages.length === 0 && (
-                <div className="chat-empty-messages">
-                  <p>
-                    Nenhuma mensagem nesta conversa ainda. Inicie o atendimento
-                    enviando uma mensagem ou arquivo.
-                  </p>
+                  )}
                 </div>
-              )}
+              </header>
 
-              {activeMessages.map((msg) => {
-                const isUser = msg.sender === (isAdmin ? "admin" : "client");
-                const isSystem = msg.type === "system";
+              {/* Área de Mensagens */}
+              <div
+                className="chat-messages-area"
+                role="log"
+                aria-live="polite"
+                ref={messagesContainerRef}
+                onScroll={handleMessagesScroll}
+              >
+                <div className="chat-date-badge">
+                  <span>Canal Oficial de Atendimento • Life Topografia</span>
+                </div>
 
-                if (isSystem) {
+                {activeMessages.length === 0 && (
+                  <div className="chat-empty-messages">
+                    <p>
+                      Nenhuma mensagem nesta conversa ainda. Inicie o
+                      atendimento enviando uma mensagem ou arquivo.
+                    </p>
+                  </div>
+                )}
+
+                {activeMessages.map((msg) => {
+                  const isUser = msg.sender === (isAdmin ? "admin" : "client");
+                  const isSystem = msg.type === "system";
+
+                  if (isSystem) {
+                    return (
+                      <div key={msg.id} className="system-notice-row">
+                        <span className="system-notice-icon">⚙️</span>
+                        <p>{msg.text}</p>
+                      </div>
+                    );
+                  }
+
                   return (
-                    <div key={msg.id} className="system-notice-row">
-                      <span className="system-notice-icon">⚙️</span>
-                      <p>{msg.text}</p>
+                    <div
+                      key={msg.id}
+                      className={`message-row ${isUser ? "message-row--user" : "message-row--attendant"}`}
+                    >
+                      {!isUser && (
+                        <div
+                          className="message-sender-avatar"
+                          aria-hidden="true"
+                        >
+                          {msg.senderName.charAt(0)}
+                        </div>
+                      )}
+
+                      <div
+                        className={`message-bubble ${isUser ? "bubble--user" : "bubble--attendant"}`}
+                      >
+                        <span className="message-sender-label">
+                          {msg.senderName}
+                        </span>
+
+                        {/* Texto */}
+                        {msg.type === "text" && (
+                          <p className="message-text">{msg.text}</p>
+                        )}
+
+                        {/* Arquivo (PDF ou DXF) */}
+                        {msg.type === "file" && msg.file && (
+                          <div
+                            className={`file-attachment-card ${msg.file.type === "dxf" ? "card-dxf" : "card-pdf"}`}
+                          >
+                            <div className="file-icon-badge" aria-hidden="true">
+                              {msg.file.type === "pdf" ? "📄" : "📐"}
+                            </div>
+                            <div className="file-info">
+                              <span className="file-name">{msg.file.name}</span>
+                              <span className="file-meta">
+                                {msg.file.size} •{" "}
+                                {msg.file.type === "pdf"
+                                  ? "Documento Matrícula (PDF)"
+                                  : "Arquivo CAD (DXF SIRGAS 2000)"}
+                              </span>
+                            </div>
+
+                            <div className="file-actions-group">
+                              {/* Download do arquivo */}
+                              {msg.file.type === "dxf" &&
+                              msg.file.dxfContent ? (
+                                <button
+                                  type="button"
+                                  className="file-action-btn btn-dxf-download"
+                                  onClick={() =>
+                                    downloadDxfFile(
+                                      msg.file?.name || "projeto.dxf",
+                                      msg.file?.dxfContent || "",
+                                    )
+                                  }
+                                >
+                                  Baixar DXF
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="file-action-btn"
+                                  onClick={() =>
+                                    alert(
+                                      `Visualizando documento: ${msg.file?.name}`,
+                                    )
+                                  }
+                                >
+                                  Visualizar
+                                </button>
+                              )}
+
+                              {/* AÇÃO EXCLUSIVA DE ADMIN: CONVERTER COORDENADAS PARA DXF */}
+                              {isAdmin && msg.file.type === "pdf" && (
+                                <button
+                                  type="button"
+                                  className="btn-convert-dxf"
+                                  disabled={convertingPdfId === msg.id}
+                                  onClick={() =>
+                                    handleConvertPdfToDxf(
+                                      msg.id,
+                                      msg.file?.name || "documento.pdf",
+                                    )
+                                  }
+                                  title="Gera um DXF demonstrativo com coordenadas fictícias; não processa o PDF"
+                                >
+                                  {convertingPdfId === msg.id ? (
+                                    <span className="converting-spinner">
+                                      Convertendo...
+                                    </span>
+                                  ) : (
+                                    "📐 Gerar DXF de demonstração"
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Proposta de Orçamento SumUp */}
+                        {msg.type === "budget" && msg.budget && (
+                          <div className="sumup-proposal-card">
+                            <div className="sumup-card-header">
+                              <span className="sumup-brand-tag">sumup®</span>
+                              <span
+                                className={`budget-status-badge status-${msg.budget.status}`}
+                              >
+                                {msg.budget.status === "pending" &&
+                                  "⏳ Aguardando Aprovação"}
+                                {msg.budget.status === "accepted" &&
+                                  "✓ Proposta Aceita"}
+                                {msg.budget.status === "rejected" &&
+                                  "✕ Proposta Recusada"}
+                              </span>
+                            </div>
+
+                            <h4 className="sumup-service-name">
+                              {msg.budget.serviceTitle}
+                            </h4>
+                            <p className="sumup-service-desc">
+                              {msg.budget.description}
+                            </p>
+
+                            <div className="sumup-pricing-row">
+                              <span className="sumup-label">
+                                Valor total do serviço:
+                              </span>
+                              <span className="sumup-price">
+                                R$ {msg.budget.amount}
+                              </span>
+                            </div>
+
+                            {/* Se for CLIENTE: pode Aceitar ou Recusar a proposta */}
+                            {!isAdmin && msg.budget.status === "pending" && (
+                              <div className="budget-client-actions">
+                                <button
+                                  type="button"
+                                  className="btn-accept-budget"
+                                  onClick={() =>
+                                    handleClientBudgetDecision(
+                                      msg.budget!.id,
+                                      "accepted",
+                                    )
+                                  }
+                                  disabled={clientChatStatus === "closed"}
+                                >
+                                  ✓ Aceitar Orçamento
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn-reject-budget"
+                                  onClick={() =>
+                                    handleClientBudgetDecision(
+                                      msg.budget!.id,
+                                      "rejected",
+                                    )
+                                  }
+                                  disabled={clientChatStatus === "closed"}
+                                >
+                                  Recusar
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Se o orçamento foi ACEITO: botão de pagamento SumUp liberado */}
+                            {msg.budget.status === "accepted" && (
+                              <div className="sumup-footer-actions">
+                                <Link
+                                  to="/pagamento"
+                                  className="sumup-pay-button"
+                                >
+                                  💳 Pagar com SumUp (Cartão ou Pix) →
+                                </Link>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <span className="message-time">{msg.time}</span>
+                      </div>
                     </div>
                   );
-                }
+                })}
+                <div ref={messagesEndRef} />
+              </div>
 
-                return (
-                  <div
-                    key={msg.id}
-                    className={`message-row ${isUser ? "message-row--user" : "message-row--attendant"}`}
-                  >
-                    {!isUser && (
-                      <div className="message-sender-avatar" aria-hidden="true">
-                        {msg.senderName.charAt(0)}
-                      </div>
-                    )}
-
-                    <div
-                      className={`message-bubble ${isUser ? "bubble--user" : "bubble--attendant"}`}
-                    >
-                      <span className="message-sender-label">
-                        {msg.senderName}
-                      </span>
-
-                      {/* Texto */}
-                      {msg.type === "text" && (
-                        <p className="message-text">{msg.text}</p>
-                      )}
-
-                      {/* Arquivo (PDF ou DXF) */}
-                      {msg.type === "file" && msg.file && (
-                        <div
-                          className={`file-attachment-card ${msg.file.type === "dxf" ? "card-dxf" : "card-pdf"}`}
-                        >
-                          <div className="file-icon-badge" aria-hidden="true">
-                            {msg.file.type === "pdf" ? "📄" : "📐"}
-                          </div>
-                          <div className="file-info">
-                            <span className="file-name">{msg.file.name}</span>
-                            <span className="file-meta">
-                              {msg.file.size} •{" "}
-                              {msg.file.type === "pdf"
-                                ? "Documento Matrícula (PDF)"
-                                : "Arquivo CAD (DXF SIRGAS 2000)"}
-                            </span>
-                          </div>
-
-                          <div className="file-actions-group">
-                            {/* Download do arquivo */}
-                            {msg.file.type === "dxf" && msg.file.dxfContent ? (
-                              <button
-                                type="button"
-                                className="file-action-btn btn-dxf-download"
-                                onClick={() =>
-                                  downloadDxfFile(
-                                    msg.file?.name || "projeto.dxf",
-                                    msg.file?.dxfContent || "",
-                                  )
-                                }
-                              >
-                                Baixar DXF
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className="file-action-btn"
-                                onClick={() =>
-                                  alert(
-                                    `Visualizando documento: ${msg.file?.name}`,
-                                  )
-                                }
-                              >
-                                Visualizar
-                              </button>
-                            )}
-
-                            {/* AÇÃO EXCLUSIVA DE ADMIN: CONVERTER COORDENADAS PARA DXF */}
-                            {isAdmin && msg.file.type === "pdf" && (
-                              <button
-                                type="button"
-                                className="btn-convert-dxf"
-                                disabled={convertingPdfId === msg.id}
-                                onClick={() =>
-                                  handleConvertPdfToDxf(
-                                    msg.id,
-                                    msg.file?.name || "documento.pdf",
-                                  )
-                                }
-                                title="Gera um DXF demonstrativo com coordenadas fictícias; não processa o PDF"
-                              >
-                                {convertingPdfId === msg.id ? (
-                                  <span className="converting-spinner">
-                                    Convertendo...
-                                  </span>
-                                ) : (
-                                  "📐 Gerar DXF de demonstração"
-                                )}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Proposta de Orçamento SumUp */}
-                      {msg.type === "budget" && msg.budget && (
-                        <div className="sumup-proposal-card">
-                          <div className="sumup-card-header">
-                            <span className="sumup-brand-tag">sumup®</span>
-                            <span
-                              className={`budget-status-badge status-${msg.budget.status}`}
-                            >
-                              {msg.budget.status === "pending" &&
-                                "⏳ Aguardando Aprovação"}
-                              {msg.budget.status === "accepted" &&
-                                "✓ Proposta Aceita"}
-                              {msg.budget.status === "rejected" &&
-                                "✕ Proposta Recusada"}
-                            </span>
-                          </div>
-
-                          <h4 className="sumup-service-name">
-                            {msg.budget.serviceTitle}
-                          </h4>
-                          <p className="sumup-service-desc">
-                            {msg.budget.description}
-                          </p>
-
-                          <div className="sumup-pricing-row">
-                            <span className="sumup-label">
-                              Valor total do serviço:
-                            </span>
-                            <span className="sumup-price">
-                              R$ {msg.budget.amount}
-                            </span>
-                          </div>
-
-                          {/* Se for CLIENTE: pode Aceitar ou Recusar a proposta */}
-                          {!isAdmin && msg.budget.status === "pending" && (
-                            <div className="budget-client-actions">
-                              <button
-                                type="button"
-                                className="btn-accept-budget"
-                                onClick={() =>
-                                  handleClientBudgetDecision(
-                                    msg.budget!.id,
-                                    "accepted",
-                                  )
-                                }
-                                disabled={clientChatStatus === "closed"}
-                              >
-                                ✓ Aceitar Orçamento
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-reject-budget"
-                                onClick={() =>
-                                  handleClientBudgetDecision(
-                                    msg.budget!.id,
-                                    "rejected",
-                                  )
-                                }
-                                disabled={clientChatStatus === "closed"}
-                              >
-                                Recusar
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Se o orçamento foi ACEITO: botão de pagamento SumUp liberado */}
-                          {msg.budget.status === "accepted" && (
-                            <div className="sumup-footer-actions">
-                              <Link
-                                to="/pagamento"
-                                className="sumup-pay-button"
-                              >
-                                💳 Pagar com SumUp (Cartão ou Pix) →
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      <span className="message-time">{msg.time}</span>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Botão flutuante para descer ao fim das mensagens */}
-            {isScrolledUp && (
-              <button
-                type="button"
-                className="btn-scroll-bottom"
-                onClick={() => scrollToBottom("smooth")}
-                aria-label="Rolar para mensagens recentes"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="14"
-                  height="14"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+              {/* Botão flutuante para descer ao fim das mensagens */}
+              {isScrolledUp && (
+                <button
+                  type="button"
+                  className="btn-scroll-bottom"
+                  onClick={() => scrollToBottom("smooth")}
+                  aria-label="Rolar para mensagens recentes"
                 >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-                <span>Recentes</span>
-                {unreadWhileScrolled > 0 && (
-                  <span className="scroll-bottom-badge">
-                    {unreadWhileScrolled}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Menu de Ações Rápidas (Anexar PDF / Gerar Orçamento) */}
-            {showQuickActions && (
-              <>
-                <div
-                  className="quick-actions-backdrop"
-                  onClick={() => setShowQuickActions(false)}
-                  aria-hidden="true"
-                />
-                <div className="quick-actions-drawer" role="menu">
-                  {/* O Cliente e o Admin podem enviar PDF */}
-                  <button
-                    type="button"
-                    className="quick-action-item"
-                    onClick={() => fileInputRef.current?.click()}
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
                   >
-                    <span className="quick-action-icon">📄</span>
-                    <div>
-                      <strong>Enviar Matrícula (PDF)</strong>
-                      <p>
-                        Certidão de matrícula, escrituras ou memorial descritivo
-                      </p>
-                    </div>
-                  </button>
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                  <span>Recentes</span>
+                  {unreadWhileScrolled > 0 && (
+                    <span className="scroll-bottom-badge">
+                      {unreadWhileScrolled}
+                    </span>
+                  )}
+                </button>
+              )}
 
-                  {/* Exclusivo para Administrador: Gerar Orçamento */}
-                  {isAdmin ? (
+              {/* Menu de Ações Rápidas (Anexar PDF / Gerar Orçamento) */}
+              {showQuickActions && (
+                <>
+                  <div
+                    className="quick-actions-backdrop"
+                    onClick={() => setShowQuickActions(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="quick-actions-drawer" role="menu">
+                    {/* O Cliente e o Admin podem enviar PDF */}
                     <button
                       type="button"
                       className="quick-action-item"
-                      onClick={() => {
-                        setShowQuickActions(false);
-                        setShowBudgetModal(true);
-                      }}
+                      onClick={() => fileInputRef.current?.click()}
                     >
-                      <span className="quick-action-icon">💼</span>
+                      <span className="quick-action-icon">📄</span>
                       <div>
-                        <strong>Gerar Proposta de Orçamento</strong>
-                        <p>Emitir proposta oficial com cobrança via SumUp®</p>
+                        <strong>Enviar Matrícula (PDF)</strong>
+                        <p>
+                          Certidão de matrícula, escrituras ou memorial
+                          descritivo
+                        </p>
                       </div>
                     </button>
-                  ) : (
-                    <div className="client-permission-hint">
-                      ℹ️ Para solicitar orçamentos, envie a matrícula em PDF e
-                      converse com a equipe no chat.
-                    </div>
-                  )}
+
+                    {/* Exclusivo para Administrador: Gerar Orçamento */}
+                    {isAdmin ? (
+                      <button
+                        type="button"
+                        className="quick-action-item"
+                        onClick={() => {
+                          setShowQuickActions(false);
+                          setShowBudgetModal(true);
+                        }}
+                      >
+                        <span className="quick-action-icon">💼</span>
+                        <div>
+                          <strong>Gerar Proposta de Orçamento</strong>
+                          <p>Emitir proposta oficial com cobrança via SumUp®</p>
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="client-permission-hint">
+                        ℹ️ Para solicitar orçamentos, envie a matrícula em PDF e
+                        converse com a equipe no chat.
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {(isAdmin ? currentAdminThread?.chatStatus : clientChatStatus) ===
+                "closed" && (
+                <div className="chat-closed-notice" role="status">
+                  Esta conversa foi encerrada. O envio de mensagens e arquivos
+                  está desabilitado.
                 </div>
-              </>
+              )}
+
+              {/* Barra de Entrada de Mensagens */}
+              <form className="chat-input-bar" onSubmit={handleSendMessage}>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  accept=".pdf,application/pdf"
+                  onChange={handleFileUpload}
+                  disabled={
+                    (isAdmin
+                      ? currentAdminThread?.chatStatus
+                      : clientChatStatus) === "closed"
+                  }
+                />
+
+                <button
+                  type="button"
+                  className={`btn-action-trigger ${showQuickActions ? "is-active" : ""}`}
+                  onClick={() => setShowQuickActions(!showQuickActions)}
+                  aria-label="Abrir opções de anexo"
+                  title="Anexar matrícula em PDF ou ações rápidas"
+                  disabled={
+                    (isAdmin
+                      ? currentAdminThread?.chatStatus
+                      : clientChatStatus) === "closed"
+                  }
+                >
+                  +
+                </button>
+
+                <input
+                  type="text"
+                  className="chat-text-input"
+                  placeholder={
+                    isAdmin
+                      ? "Responder cliente como Administrador..."
+                      : "Digite sua mensagem para a Life Topografia..."
+                  }
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  disabled={
+                    (isAdmin
+                      ? currentAdminThread?.chatStatus
+                      : clientChatStatus) === "closed"
+                  }
+                  aria-label="Mensagem de atendimento"
+                />
+
+                <button
+                  type="submit"
+                  className="btn-send-message"
+                  disabled={
+                    !inputText.trim() ||
+                    (isAdmin
+                      ? currentAdminThread?.chatStatus
+                      : clientChatStatus) === "closed"
+                  }
+                  aria-label="Enviar mensagem"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </section>
+
+          {!isAdmin &&
+            clientServiceStatus === "completed" &&
+            !ratingSubmitted && (
+              <section
+                className="service-rating-prompt"
+                aria-labelledby="rating-prompt-title"
+              >
+                <h3 id="rating-prompt-title">Como foi sua experiência?</h3>
+                <p>
+                  Seu serviço foi concluído. Avalie o atendimento da Life
+                  Topografia.
+                </p>
+                <button
+                  type="button"
+                  className="btn-open-rating"
+                  onClick={() => setShowRatingModal(true)}
+                >
+                  Avaliar Atendimento
+                </button>
+              </section>
             )}
 
-            {(isAdmin ? currentAdminThread?.chatStatus : clientChatStatus) ===
-              "closed" && (
-              <div className="chat-closed-notice" role="status">
-                Esta conversa foi encerrada. O envio de mensagens e arquivos
-                está desabilitado.
-              </div>
-            )}
-
-            {/* Barra de Entrada de Mensagens */}
-            <form className="chat-input-bar" onSubmit={handleSendMessage}>
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                accept=".pdf,application/pdf"
-                onChange={handleFileUpload}
-                disabled={
-                  (isAdmin
-                    ? currentAdminThread?.chatStatus
-                    : clientChatStatus) === "closed"
-                }
-              />
-
-              <button
-                type="button"
-                className={`btn-action-trigger ${showQuickActions ? "is-active" : ""}`}
-                onClick={() => setShowQuickActions(!showQuickActions)}
-                aria-label="Abrir opções de anexo"
-                title="Anexar matrícula em PDF ou ações rápidas"
-                disabled={
-                  (isAdmin
-                    ? currentAdminThread?.chatStatus
-                    : clientChatStatus) === "closed"
-                }
-              >
-                +
-              </button>
-
-              <input
-                type="text"
-                className="chat-text-input"
-                placeholder={
-                  isAdmin
-                    ? "Responder cliente como Administrador..."
-                    : "Digite sua mensagem para a Life Topografia..."
-                }
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                disabled={
-                  (isAdmin
-                    ? currentAdminThread?.chatStatus
-                    : clientChatStatus) === "closed"
-                }
-                aria-label="Mensagem de atendimento"
-              />
-
-              <button
-                type="submit"
-                className="btn-send-message"
-                disabled={
-                  !inputText.trim() ||
-                  (isAdmin
-                    ? currentAdminThread?.chatStatus
-                    : clientChatStatus) === "closed"
-                }
-                aria-label="Enviar mensagem"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                </svg>
-              </button>
-            </form>
-          </div>
-        </section>
-
-        {!isAdmin &&
-          clientServiceStatus === "completed" &&
-          !ratingSubmitted && (
-            <section
-              className="service-rating-prompt"
-              aria-labelledby="rating-prompt-title"
-            >
-              <h3 id="rating-prompt-title">Como foi sua experiência?</h3>
-              <p>
-                Seu serviço foi concluído. Avalie o atendimento da Life
-                Topografia.
-              </p>
-              <button
-                type="button"
-                className="btn-open-rating"
-                onClick={() => setShowRatingModal(true)}
-              >
-                Avaliar Atendimento
-              </button>
-            </section>
+          {!isAdmin && ratingSubmitted && (
+            <p className="rating-success-message" role="status">
+              Obrigado pela sua avaliação! Nota registrada nesta sessão:{" "}
+              {submittedRating?.score}/5.
+            </p>
           )}
 
-        {!isAdmin && ratingSubmitted && (
-          <p className="rating-success-message" role="status">
-            Obrigado pela sua avaliação! Nota registrada nesta sessão:{" "}
-            {submittedRating?.score}/5.
-          </p>
-        )}
-
-        {/* MODAL EXCLUSIVO DO ADMINISTRADOR: Criar Proposta de Orçamento */}
-        {showBudgetModal && isAdmin && (
-          <div
-            className="budget-modal-backdrop"
-            onClick={() => setShowBudgetModal(false)}
-          >
+          {/* MODAL EXCLUSIVO DO ADMINISTRADOR: Criar Proposta de Orçamento */}
+          {showBudgetModal && isAdmin && (
             <div
-              className="budget-modal-content"
-              onClick={(e) => e.stopPropagation()}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="modal-budget-title"
+              className="budget-modal-backdrop"
+              onClick={() => setShowBudgetModal(false)}
             >
-              <header className="budget-modal-header">
-                <span className="sumup-badge-pill">sumup® emissão oficial</span>
-                <h3 id="modal-budget-title">Gerar Proposta de Orçamento</h3>
-                <button
-                  type="button"
-                  className="btn-close-modal"
-                  onClick={() => setShowBudgetModal(false)}
-                  aria-label="Fechar modal"
-                >
-                  ✕
-                </button>
-              </header>
-
-              <form
-                onSubmit={handleSendBudgetProposal}
-                className="budget-modal-form"
+              <div
+                className="budget-modal-content"
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-budget-title"
               >
-                <div className="modal-field-group">
-                  <label htmlFor="budget-service-name">
-                    Serviço Topográfico:
-                  </label>
-                  <input
-                    id="budget-service-name"
-                    type="text"
-                    placeholder="Ex.: Demarcação de Divisa com GNSS RTK"
-                    value={budgetTitle}
-                    onChange={(e) => setBudgetTitle(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="modal-field-group">
-                  <label htmlFor="budget-service-amount">
-                    Valor Total (R$):
-                  </label>
-                  <input
-                    id="budget-service-amount"
-                    type="text"
-                    placeholder="Ex.: 2.450,00"
-                    value={budgetAmount}
-                    onChange={(e) => setBudgetAmount(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="modal-field-group">
-                  <label htmlFor="budget-service-desc">
-                    Escopo Técnico e Entregáveis:
-                  </label>
-                  <textarea
-                    id="budget-service-desc"
-                    rows={3}
-                    placeholder="Ex.: Levantamento planialtimétrico cadastral, emissão de ART registrada no CREA/SP, memorial descritivo e arquivo DXF."
-                    value={budgetDescription}
-                    onChange={(e) => setBudgetDescription(e.target.value)}
-                  />
-                </div>
-
-                <footer className="budget-modal-footer">
+                <header className="budget-modal-header">
+                  <span className="sumup-badge-pill">
+                    sumup® emissão oficial
+                  </span>
+                  <h3 id="modal-budget-title">Gerar Proposta de Orçamento</h3>
                   <button
                     type="button"
-                    className="btn-modal-cancel"
+                    className="btn-close-modal"
                     onClick={() => setShowBudgetModal(false)}
+                    aria-label="Fechar modal"
                   >
-                    Cancelar
+                    ✕
                   </button>
-                  <button type="submit" className="btn-modal-submit">
-                    Enviar Proposta ao Cliente
-                  </button>
-                </footer>
-              </form>
-            </div>
-          </div>
-        )}
-        {showRatingModal && !isAdmin && (
-          <div
-            className="budget-modal-backdrop"
-            onClick={() => setShowRatingModal(false)}
-          >
-            <div
-              className="budget-modal-content rating-modal-content"
-              onClick={(e) => e.stopPropagation()}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="rating-modal-title"
-            >
-              <header className="budget-modal-header">
-                <h3 id="rating-modal-title">Avaliar Atendimento</h3>
-                <button
-                  type="button"
-                  className="btn-close-modal"
-                  onClick={() => setShowRatingModal(false)}
-                  aria-label="Fechar avaliação"
+                </header>
+
+                <form
+                  onSubmit={handleSendBudgetProposal}
+                  className="budget-modal-form"
                 >
-                  ✕
-                </button>
-              </header>
-
-              <form onSubmit={handleSubmitRating} className="budget-modal-form">
-                <fieldset className="rating-fieldset">
-                  <legend>Selecione uma nota de 1 a 5:</legend>
-                  <div className="rating-stars">
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <button
-                        key={value}
-                        type="button"
-                        className={value <= rating ? "is-selected" : ""}
-                        onClick={() => setRating(value)}
-                        aria-label={`${value} ${value === 1 ? "estrela" : "estrelas"}`}
-                        aria-pressed={rating === value}
-                      >
-                        ★
-                      </button>
-                    ))}
+                  <div className="modal-field-group">
+                    <label htmlFor="budget-service-name">
+                      Serviço Topográfico:
+                    </label>
+                    <input
+                      id="budget-service-name"
+                      type="text"
+                      placeholder="Ex.: Demarcação de Divisa com GNSS RTK"
+                      value={budgetTitle}
+                      onChange={(e) => setBudgetTitle(e.target.value)}
+                      required
+                    />
                   </div>
-                </fieldset>
 
-                <div className="modal-field-group">
-                  <label htmlFor="rating-comment">Comentário (opcional):</label>
-                  <textarea
-                    id="rating-comment"
-                    rows={4}
-                    maxLength={1000}
-                    placeholder="Conte como foi sua experiência..."
-                    value={ratingComment}
-                    onChange={(e) => setRatingComment(e.target.value)}
-                  />
-                </div>
+                  <div className="modal-field-group">
+                    <label htmlFor="budget-service-amount">
+                      Valor Total (R$):
+                    </label>
+                    <input
+                      id="budget-service-amount"
+                      type="text"
+                      placeholder="Ex.: 2.450,00"
+                      value={budgetAmount}
+                      onChange={(e) => setBudgetAmount(e.target.value)}
+                      required
+                    />
+                  </div>
 
-                <footer className="budget-modal-footer">
+                  <div className="modal-field-group">
+                    <label htmlFor="budget-service-desc">
+                      Escopo Técnico e Entregáveis:
+                    </label>
+                    <textarea
+                      id="budget-service-desc"
+                      rows={3}
+                      placeholder="Ex.: Levantamento planialtimétrico cadastral, emissão de ART registrada no CREA/SP, memorial descritivo e arquivo DXF."
+                      value={budgetDescription}
+                      onChange={(e) => setBudgetDescription(e.target.value)}
+                    />
+                  </div>
+
+                  <footer className="budget-modal-footer">
+                    <button
+                      type="button"
+                      className="btn-modal-cancel"
+                      onClick={() => setShowBudgetModal(false)}
+                    >
+                      Cancelar
+                    </button>
+                    <button type="submit" className="btn-modal-submit">
+                      Enviar Proposta ao Cliente
+                    </button>
+                  </footer>
+                </form>
+              </div>
+            </div>
+          )}
+          {showRatingModal && !isAdmin && (
+            <div
+              className="budget-modal-backdrop"
+              onClick={() => setShowRatingModal(false)}
+            >
+              <div
+                className="budget-modal-content rating-modal-content"
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="rating-modal-title"
+              >
+                <header className="budget-modal-header">
+                  <h3 id="rating-modal-title">Avaliar Atendimento</h3>
                   <button
                     type="button"
-                    className="btn-modal-cancel"
+                    className="btn-close-modal"
                     onClick={() => setShowRatingModal(false)}
+                    aria-label="Fechar avaliação"
                   >
-                    Cancelar
+                    ✕
                   </button>
-                  <button
-                    type="submit"
-                    className="btn-modal-submit"
-                    disabled={rating === 0}
-                  >
-                    Enviar Avaliação
-                  </button>
-                </footer>
-              </form>
-            </div>
-          </div>
-        )}
-      </main>
+                </header>
 
-      {/* Footer padrão do site */}
-      <Footer />
-    </div>
+                <form
+                  onSubmit={handleSubmitRating}
+                  className="budget-modal-form"
+                >
+                  <fieldset className="rating-fieldset">
+                    <legend>Selecione uma nota de 1 a 5:</legend>
+                    <div className="rating-stars">
+                      {[1, 2, 3, 4, 5].map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={value <= rating ? "is-selected" : ""}
+                          onClick={() => setRating(value)}
+                          aria-label={`${value} ${value === 1 ? "estrela" : "estrelas"}`}
+                          aria-pressed={rating === value}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <div className="modal-field-group">
+                    <label htmlFor="rating-comment">
+                      Comentário (opcional):
+                    </label>
+                    <textarea
+                      id="rating-comment"
+                      rows={4}
+                      maxLength={1000}
+                      placeholder="Conte como foi sua experiência..."
+                      value={ratingComment}
+                      onChange={(e) => setRatingComment(e.target.value)}
+                    />
+                  </div>
+
+                  <footer className="budget-modal-footer">
+                    <button
+                      type="button"
+                      className="btn-modal-cancel"
+                      onClick={() => setShowRatingModal(false)}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn-modal-submit"
+                      disabled={rating === 0}
+                    >
+                      Enviar Avaliação
+                    </button>
+                  </footer>
+                </form>
+              </div>
+            </div>
+          )}
+        </main>
+
+        {/* Footer padrão do site */}
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      </div>
+    </>
   );
 }

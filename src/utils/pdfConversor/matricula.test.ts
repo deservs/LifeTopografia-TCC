@@ -114,7 +114,7 @@ async function runTests() {
     validacao1.resumo.permiteGeracaoDXF,
     "Validação aprova geração de DXF",
   );
-  const dxf1 = gerarDXFString(resultado1, validacao1);
+  const dxf1 = await gerarDXFString(resultado1, validacao1);
   assert(
     dxf1.stringDxf.includes("SECTION"),
     "DXF gerado contém seções válidas",
@@ -184,8 +184,8 @@ async function runTests() {
     validacao2.resumo.dxfAproximado,
     "DXF identificado explicitamente como aproximado",
   );
-
-  const dxf2 = gerarDXFString(resultado2, validacao2);
+  
+  const dxf2 = await gerarDXFString(resultado2, validacao2);
   assert(
     dxf2.stringDxf.includes("REPRESENTACAO ESQUEMATICA"),
     "DXF convencional contém nota de representação esquemática",
@@ -283,7 +283,7 @@ async function runTests() {
   assert(alertaDist, "Diagnosticou alerta de distância divergente");
   assert(alertaCurva, "Diagnosticou alerta de curva divergente");
 
-  const dxf3 = gerarDXFString(resultado3, validacao3);
+  const dxf3 = await gerarDXFString(resultado3, validacao3);
   assert(
     dxf3.avisos.length > 0,
     "DXF registrou avisos de divergências sem quebrar a execução",
@@ -400,7 +400,7 @@ async function runTests() {
     { id: t2.id, titulo: t2.titulo, dados: t2.resultado, validacao: valT2 },
   ];
 
-  const dxfMulti = gerarDXFStringMultiplosTerrenos(itensDxf);
+  const dxfMulti = await gerarDXFStringMultiplosTerrenos(itensDxf);
   assert(
     dxfMulti.stringDxf.includes("T1_CONTORNO"),
     "DXF possui camada T1_CONTORNO",
@@ -483,7 +483,7 @@ async function runTests() {
     validacao7.resumo.permiteGeracaoDXF,
     "Validação geométrica aprova a geração do DXF da poligonal",
   );
-  const dxf7 = gerarDXFString(resultado7, validacao7);
+  const dxf7 = await gerarDXFString(resultado7, validacao7);
   assert(
     dxf7.stringDxf.includes("CONTORNO"),
     "DXF possui camada de contorno da poligonal",

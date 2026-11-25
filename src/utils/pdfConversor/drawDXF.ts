@@ -1,14 +1,6 @@
 // src/utils/drawDXF.ts
 
-import {
-  DxfWriter,
-  point2d,
-  point3d,
-  Units,
-  LWPolylineFlags,
-  Colors,
-  type LWPolylineVertex,
-} from "@tarikjabiri/dxf";
+import type { DxfWriter, LWPolylineVertex } from "@tarikjabiri/dxf";
 
 import type { Coordenada, Segmento, ResultadoExtracao } from "./textSanitizer";
 
@@ -17,6 +9,8 @@ import type { ResultadoValidacao } from "./validarGeometria";
 // ======================================================
 // 1. TIPOS
 // ======================================================
+
+type DxfModule = typeof import("@tarikjabiri/dxf");
 
 export interface OpcoesGeracaoDXF {
   incluirVertices?: boolean;
@@ -46,6 +40,8 @@ export interface ResultadoGeracaoDXF {
 // 2. CONSTANTES
 // ======================================================
 
+let dxfPromise: Promise<DxfModule> | null = null;
+
 const CAMADAS = {
   CONTORNO: "CONTORNO",
   CURVAS: "CURVAS",
@@ -57,17 +53,6 @@ const CAMADAS = {
   INFO: "INFORMACOES",
 } as const;
 
-const CORES = {
-  CONTORNO: Colors.White,
-  CURVAS: Colors.Magenta,
-  VERTICES: Colors.Red,
-  IDENTIFICACAO: Colors.Green,
-  MEDIDAS: Colors.Cyan,
-  AZIMUTES: Colors.Yellow,
-  CONFRONTACOES: Colors.Blue,
-  INFO: 8, // Cinza
-} as const;
-
 const OPCOES_PADRAO: Required<OpcoesGeracaoDXF> = {
   incluirVertices: true,
   incluirIdentificacao: true,
@@ -77,6 +62,24 @@ const OPCOES_PADRAO: Required<OpcoesGeracaoDXF> = {
   alturaTexto: 0,
   nomeArquivo: "terreno.dxf",
 };
+
+function getDxfLib() {
+  if (!dxfPromise) dxfPromise = import("@tarikjabiri/dxf");
+  return dxfPromise;
+}
+
+function getColors(Colors: DxfModule["Colors"]) {
+  return {
+    CONTORNO: Colors.White,
+    CURVAS: Colors.Magenta,
+    VERTICES: Colors.Red,
+    IDENTIFICACAO: Colors.Green,
+    MEDIDAS: Colors.Cyan,
+    AZIMUTES: Colors.Yellow,
+    CONFRONTACOES: Colors.Blue,
+    INFO: 8, // Cinza
+  } as const;
+}
 
 // ======================================================
 // 3. MATEMÁTICA PARA ARCOS DXF
@@ -186,14 +189,16 @@ function calcularAlturaTexto(pontos: Coordenada[]): number {
 // 4. GERAÇÃO DXF — TERRENO GEORREFERENCIADO
 // ======================================================
 
-function gerarDXFGeorreferenciado(
+async function gerarDXFGeorreferenciado(
   dxf: DxfWriter,
   dados: ResultadoExtracao,
   opcoes: Required<OpcoesGeracaoDXF>,
   avisos: string[],
   prefixoCamada: string = "",
   tituloTerreno?: string,
-): void {
+): Promise<void> {
+  const { point3d } = await getDxfLib();
+
   const coordenadas = dados.coordenadas;
 
   const cContorno = `${prefixoCamada}${CAMADAS.CONTORNO}`;
@@ -444,7 +449,7 @@ function gerarDXFGeorreferenciado(
 // 5. GERAÇÃO DXF — TERRENO CONVENCIONAL (ESQUEMÁTICO)
 // ======================================================
 
-function gerarDXFConvencional(
+async function gerarDXFConvencional(
   dxf: DxfWriter,
   dados: ResultadoExtracao,
   opcoes: Required<OpcoesGeracaoDXF>,
@@ -453,7 +458,8 @@ function gerarDXFConvencional(
   offsetX: number = 0,
   offsetY: number = 0,
   tituloTerreno?: string,
-): void {
+): Promise<void> {
+  const { point2d, point3d, LWPolylineFlags } = await getDxfLib();
   const cContorno = `${prefixoCamada}${CAMADAS.CONTORNO}`;
   const cVertices = `${prefixoCamada}${CAMADAS.VERTICES}`;
   const cIdentificacao = `${prefixoCamada}${CAMADAS.IDENTIFICACAO}`;
@@ -616,11 +622,14 @@ function gerarDXFConvencional(
 // 6. FUNÇÃO PRINCIPAL
 // ======================================================
 
-export function gerarDXF(
+export async function gerarDXF(
   dados: ResultadoExtracao,
   validacao: ResultadoValidacao,
   opcoes: OpcoesGeracaoDXF = {},
-): ResultadoGeracaoDXF {
+): Promise<ResultadoGeracaoDXF> {
+  const { DxfWriter, Units, Colors } = await getDxfLib();
+  const CORES = getColors(Colors);
+
   const opcoesCompletas: Required<OpcoesGeracaoDXF> = {
     ...OPCOES_PADRAO,
     ...opcoes,
@@ -655,7 +664,7 @@ export function gerarDXF(
     const tipo = validacao.tipoDescricao;
 
     if (tipo === "georreferenciada" || tipo === "mista") {
-      gerarDXFGeorreferenciado(dxf, dados, opcoesCompletas, avisos);
+      await gerarDXFGeorreferenciado(dxf, dados, opcoesCompletas, avisos);
     } else if (tipo === "convencional") {
       gerarDXFConvencional(dxf, dados, opcoesCompletas, avisos);
     } else {
@@ -714,11 +723,13 @@ export function gerarDXF(
 /**
  * Retorna o conteúdo DXF como string pura (útil para testes unitários ou backend)
  */
-export function gerarDXFString(
+export async function gerarDXFString(
   dados: ResultadoExtracao,
   validacao: ResultadoValidacao,
   opcoes: OpcoesGeracaoDXF = {},
-): { stringDxf: string; avisos: string[] } {
+): Promise<{ stringDxf: string; avisos: string[] }> {
+  const { DxfWriter, Units, Colors } = await getDxfLib();
+  const CORES = getColors(Colors);
   const opcoesCompletas: Required<OpcoesGeracaoDXF> = {
     ...OPCOES_PADRAO,
     ...opcoes,
@@ -739,9 +750,9 @@ export function gerarDXFString(
 
   const tipo = validacao.tipoDescricao;
   if (tipo === "georreferenciada" || tipo === "mista") {
-    gerarDXFGeorreferenciado(dxf, dados, opcoesCompletas, avisos);
+    await gerarDXFGeorreferenciado(dxf, dados, opcoesCompletas, avisos);
   } else if (tipo === "convencional") {
-    gerarDXFConvencional(dxf, dados, opcoesCompletas, avisos);
+    await gerarDXFConvencional(dxf, dados, opcoesCompletas, avisos);
   }
 
   return {
@@ -754,10 +765,12 @@ export function gerarDXFString(
 // 7. GERAÇÃO DXF — MÚLTIPLOS TERRENOS
 // ======================================================
 
-export function gerarDXFMultiplosTerrenos(
+export async function gerarDXFMultiplosTerrenos(
   terrenos: ItemTerrenoDXF[],
   opcoes: OpcoesGeracaoDXF = {},
-): ResultadoGeracaoDXF {
+): Promise<ResultadoGeracaoDXF> {
+  const { DxfWriter, Units, Colors } = await getDxfLib();
+  const CORES = getColors(Colors);
   const opcoesCompletas: Required<OpcoesGeracaoDXF> = {
     ...OPCOES_PADRAO,
     ...opcoes,
@@ -828,7 +841,7 @@ export function gerarDXFMultiplosTerrenos(
         item.validacao.tipoDescricao === "georreferenciada" ||
         item.validacao.tipoDescricao === "mista"
       ) {
-        gerarDXFGeorreferenciado(
+        await gerarDXFGeorreferenciado(
           dxf,
           item.dados,
           opcoesCompletas,
@@ -837,7 +850,7 @@ export function gerarDXFMultiplosTerrenos(
           tit,
         );
       } else if (item.validacao.tipoDescricao === "convencional") {
-        gerarDXFConvencional(
+        await gerarDXFConvencional(
           dxf,
           item.dados,
           opcoesCompletas,
@@ -891,10 +904,13 @@ export function gerarDXFMultiplosTerrenos(
   }
 }
 
-export function gerarDXFStringMultiplosTerrenos(
+export async function gerarDXFStringMultiplosTerrenos(
   terrenos: ItemTerrenoDXF[],
   opcoes: OpcoesGeracaoDXF = {},
-): { stringDxf: string; avisos: string[] } {
+): Promise<{ stringDxf: string; avisos: string[] }> {
+  const { DxfWriter, Units, Colors } = await getDxfLib();
+  const CORES = getColors(Colors);
+
   const opcoesCompletas: Required<OpcoesGeracaoDXF> = {
     ...OPCOES_PADRAO,
     ...opcoes,
@@ -932,7 +948,7 @@ export function gerarDXFStringMultiplosTerrenos(
       item.validacao.tipoDescricao === "georreferenciada" ||
       item.validacao.tipoDescricao === "mista"
     ) {
-      gerarDXFGeorreferenciado(
+      await gerarDXFGeorreferenciado(
         dxf,
         item.dados,
         opcoesCompletas,
@@ -941,7 +957,7 @@ export function gerarDXFStringMultiplosTerrenos(
         tit,
       );
     } else if (item.validacao.tipoDescricao === "convencional") {
-      gerarDXFConvencional(
+      await gerarDXFConvencional(
         dxf,
         item.dados,
         opcoesCompletas,

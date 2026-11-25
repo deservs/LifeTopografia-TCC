@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useEffect,
   useRef,
   useState,
@@ -7,10 +9,14 @@ import {
 } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-import Sidebar, { type UserProfile } from "../../components/Sidebar/sidebar";
-import Topbar from "../../components/Topbar/topbar";
-import Footer from "../../components/Footer/footer";
-import PasswordInput from "../../components/PasswordInput/passwordInput";
+import type { UserProfile } from "../../components/Sidebar/sidebar";
+
+const Sidebar = lazy(() => import("../../components/Sidebar/sidebar"));
+const Topbar = lazy(() => import("../../components/Topbar/topbar"));
+const Footer = lazy(() => import("../../components/Footer/footer"));
+const PasswordInput = lazy(
+  () => import("../../components/PasswordInput/passwordInput"),
+);
 
 import {
   SerchDataUser,
@@ -596,6 +602,11 @@ export default function Profile({
 
   return (
     <>
+      <title>Perfil - Life Topografia</title>
+      <meta
+        name="description"
+        content="Gerencie seus dados de perfil, foto, senha e membros da empresa na Life Topografia."
+      />
       <div className="profile-page">
         <Sidebar
           isOpen={isSidebarOpen}
@@ -1004,18 +1015,20 @@ export default function Profile({
                 >
                   <div className="profile-field">
                     <label htmlFor="profile-new-password">Nova senha:</label>
-                    <PasswordInput
-                      id="profile-new-password"
-                      visibilityLabel="nova senha"
-                      autoComplete="new-password"
-                      minLength={8}
-                      pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9\s]).{8,}"
-                      title="Use ao menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um símbolo"
-                      value={newPassword}
-                      required
-                      disabled={busy}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                    />
+                    <Suspense fallback={null}>
+                      <PasswordInput
+                        id="profile-new-password"
+                        visibilityLabel="nova senha"
+                        autoComplete="new-password"
+                        minLength={8}
+                        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9\s]).{8,}"
+                        title="Use ao menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um símbolo"
+                        value={newPassword}
+                        required
+                        disabled={busy}
+                        onChange={(event) => setNewPassword(event.target.value)}
+                      />
+                    </Suspense>
                   </div>
                   <p className="profile-password-hint">
                     Use ao menos 8 caracteres, uma letra maiúscula, uma
@@ -1025,17 +1038,19 @@ export default function Profile({
                     <label htmlFor="profile-repeat-password">
                       Confirmar senha:
                     </label>
-                    <PasswordInput
-                      id="profile-repeat-password"
-                      visibilityLabel="confirmação de senha"
-                      autoComplete="new-password"
-                      value={repeatPassword}
-                      required
-                      disabled={busy}
-                      onChange={(event) =>
-                        setRepeatPassword(event.target.value)
-                      }
-                    />
+                    <Suspense fallback={null}>
+                      <PasswordInput
+                        id="profile-repeat-password"
+                        visibilityLabel="confirmação de senha"
+                        autoComplete="new-password"
+                        value={repeatPassword}
+                        required
+                        disabled={busy}
+                        onChange={(event) =>
+                          setRepeatPassword(event.target.value)
+                        }
+                      />
+                    </Suspense>
                   </div>
                   {feedbackNode}
                   <button
@@ -1050,7 +1065,9 @@ export default function Profile({
             </>
           )}
         </main>
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
 
       {action && confirmationPerson && (
@@ -1200,29 +1217,31 @@ export default function Profile({
                 ? "Sua senha atual"
                 : "Senha da conta responsável"}
             </label>
-            <PasswordInput
-              id="profile-confirm-password"
-              visibilityLabel={
-                deletingAccount && !company
-                  ? "sua senha atual"
-                  : "senha da conta responsável"
-              }
-              placeholder="Senha:"
-              autoComplete="current-password"
-              autoFocus={!deletingAccount}
-              required
-              value={password}
-              disabled={busy}
-              aria-invalid={invalidPassword}
-              aria-describedby={
-                passwordError ? "profile-password-error" : undefined
-              }
-              onChange={(event) => {
-                setPassword(event.target.value);
-                setPasswordError("");
-                setInvalidPassword(false);
-              }}
-            />
+            <Suspense fallback={null}>
+              <PasswordInput
+                id="profile-confirm-password"
+                visibilityLabel={
+                  deletingAccount && !company
+                    ? "sua senha atual"
+                    : "senha da conta responsável"
+                }
+                placeholder="Senha:"
+                autoComplete="current-password"
+                autoFocus={!deletingAccount}
+                required
+                value={password}
+                disabled={busy}
+                aria-invalid={invalidPassword}
+                aria-describedby={
+                  passwordError ? "profile-password-error" : undefined
+                }
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setPasswordError("");
+                  setInvalidPassword(false);
+                }}
+              />
+            </Suspense>
             {passwordError && (
               <p
                 id="profile-password-error"
