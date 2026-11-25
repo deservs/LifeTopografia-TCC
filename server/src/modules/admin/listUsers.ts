@@ -129,21 +129,20 @@ export async function listAdminUsers(
     )
     .map((row) => row.id)
 
-  const memberCountByCompany = new Map<string, number>()
+  const memberIdsByCompany = new Map<string, Set<string>>()
 
   if (companyIds.length > 0) {
     const { data: links, error: linksError } = await supabaseAdmin
       .from('membros_empresa')
-      .select('empresa_id')
+      .select('id, empresa_id, funcionario_id')
       .in('empresa_id', companyIds)
 
     if (!linksError && links) {
       for (const link of links) {
         if (!link.empresa_id) continue
-        memberCountByCompany.set(
-          link.empresa_id,
-          (memberCountByCompany.get(link.empresa_id) ?? 0) + 1,
-        )
+        const set = memberIdsByCompany.get(link.empresa_id) ?? new Set<string>()
+        set.add(link.funcionario_id ?? String(link.id))
+        memberIdsByCompany.set(link.empresa_id, set)
       }
     }
   }
@@ -164,7 +163,7 @@ export async function listAdminUsers(
       cnpj: row.cnpj ?? null,
       status: row.status ?? null,
       createdAt: row.created_at,
-      membersCount: isCompany ? (memberCountByCompany.get(row.id) ?? 0) : undefined,
+      membersCount: isCompany ? (memberIdsByCompany.get(row.id)?.size ?? 0) : undefined,
     }
   })
 
@@ -204,11 +203,13 @@ export async function listAdminCompanyMembers(
   }
 
   const members: AdminCompanyMemberRecord[] = []
+  const seenMemberIds = new Set<string>()
 
   for (const row of data ?? []) {
     const perfil = Array.isArray(row.perfis) ? row.perfis[0] : row.perfis
     const memberId = perfil?.id ?? row.funcionario_id
-    if (!memberId) continue
+    if (!memberId || seenMemberIds.has(memberId)) continue
+    seenMemberIds.add(memberId)
 
     members.push({
       id: memberId,

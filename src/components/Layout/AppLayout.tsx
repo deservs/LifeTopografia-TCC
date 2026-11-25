@@ -1,7 +1,5 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
   type ReactNode,
@@ -12,15 +10,8 @@ import Footer from "../Footer/footer";
 import Sidebar from "../Sidebar/sidebar";
 import Topbar from "../Topbar/topbar";
 import "./AppLayout.css";
+import { LayoutContext } from "../../hook/useLayout";
 
-interface LayoutContextValue {
-  isSidebarOpen: boolean;
-  openSidebar: () => void;
-  closeSidebar: () => void;
-  setTopbarRightContent: (content: ReactNode | null) => void;
-}
-
-const LayoutContext = createContext<LayoutContextValue | null>(null);
 
 interface AppLayoutProps {
   showTopbar?: boolean;
@@ -78,12 +69,6 @@ export function AppLayout({
   );
 }
 
-export function useLayout(): LayoutContextValue {
-  const context = useContext(LayoutContext);
-  if (!context) {
-    throw new Error("useLayout deve ser utilizado dentro de um AppLayout.");
-  }
-  return context;
-}
+
 
 export default AppLayout;

@@ -1,21 +1,30 @@
-import { lazy, Suspense, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ConfirmResetPassword } from "../../lib/supabase/auth";
 
 import "./definirSenha.css";
+import { useAuth } from "../../hook/useAuth";
 
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
 );
 
 export const DefinirSenha = () => {
+  const { user, status } = useAuth();
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if ( status !== "authenticated" || !user ) return;
+
+    if (user.status === "PENDENTE") {
+      navigate("/", { replace: true });
+    }
+  }, [status, user, navigate]);
   const senhaRequisitos = [
     {
       id: "comprimento",

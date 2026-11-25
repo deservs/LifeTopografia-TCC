@@ -27,7 +27,7 @@ import { updateUserProfile } from './modules/auth/userUpdate.js'
 import sendEmail from './modules/email/sendEmail.js'
 import getUserFromRequest from './Shared/middleware/getUser.js'
 import { UrlFileGenerator } from './Shared/storage/r2.js'
-import { isValidCnpj, normalizeCnpj } from './Shared/utils/cnpj.js'
+import { normalizeCnpj } from './Shared/utils/cnpj.js'
 import { isValidCNPJ } from './modules/cnpj/verificarCnpj.js';
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>()

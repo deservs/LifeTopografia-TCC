@@ -114,8 +114,22 @@ export function normalizeMemberBondStatus(rawStatus: unknown): {
     token === "DESVINCULADO" ||
     token === "CANCELADO";
 
+  if (isRemoved) {
+    return {
+      bondStatus: "REMOVIDO",
+      rawStatus: token,
+    };
+  }
+
+  if (token === "PENDENTE") {
+    return {
+      bondStatus: "PENDENTE",
+      rawStatus: "PENDENTE",
+    };
+  }
+
   return {
-    bondStatus: isRemoved ? "REMOVIDO" : "ATIVO",
+    bondStatus: "ATIVO",
     rawStatus: token || "ATIVO",
   };
 }

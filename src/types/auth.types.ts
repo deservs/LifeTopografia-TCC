@@ -5,7 +5,7 @@ export type AccountRole =
   | "AUXILIAR"
   | "PESSOA_JURIDICA";
 
-export type ProfileStatus = "ATIVO" | "EXCLUIDO" | "AFASTADO";
+export type ProfileStatus = "ATIVO" | "EXCLUIDO" | "AFASTADO" | "PENDENTE";
 
 export interface UserProfile {
   id: string;
@@ -63,6 +63,7 @@ export function normalizeProfileStatus(rawStatus: unknown): ProfileStatus {
   const token = normalizeToken(rawStatus);
   if (token === "EXCLUIDO") return "EXCLUIDO";
   if (token === "AFASTADO") return "AFASTADO";
+  if (token === "PENDENTE") return "PENDENTE";
   return "ATIVO";
 }
 

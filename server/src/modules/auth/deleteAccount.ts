@@ -60,7 +60,7 @@ export async function CheckPassword(
       },
     },
   );
-  const { data: isValid, error } = await supabaseAdmin.rpc(
+  const { data: isValid, error } = await authCheckClient.rpc(
     "verify_user_password",
     {
       user_id: userId,

@@ -46,9 +46,11 @@ export async function SearchMemberData(
   }
 
   const members: MemberItem[] = []
+  const seenMemberIds = new Set<string>()
   for (const row of data) {
     const perfil = Array.isArray(row.perfis) ? row.perfis[0] : row.perfis
-    if (!perfil) continue
+    if (!perfil || seenMemberIds.has(perfil.id)) continue
+    seenMemberIds.add(perfil.id)
     members.push({
       id: perfil.id,
       created_at: row.created_at,

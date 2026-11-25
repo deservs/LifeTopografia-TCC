@@ -1,7 +1,5 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -15,20 +13,7 @@ import {
   type UserProfile,
 } from "../types/auth.types";
 import { getAvatarPublicUrl } from "../utils/users/urlConversor";
-
-export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
-
-interface AuthContextValue {
-  user: UserProfile | null;
-  session: Session | null;
-  status: AuthStatus;
-  isPasswordRecovery: boolean;
-  setPasswordRecovery: (active: boolean) => void;
-  refreshProfile: () => Promise<UserProfile | null>;
-  signOut: (scope?: "local" | "global") => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
+import { AuthContext, type AuthStatus } from "../hook/useAuth";
 
 const LEGACY_PROFILE_STORAGE_KEY = "userProfile";
 
@@ -220,10 +205,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth deve ser utilizado dentro de um AuthProvider.");
-  }
-  return context;
-}
+

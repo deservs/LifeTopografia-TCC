@@ -8,7 +8,7 @@ type MemberSignUpResponse =
         id: string
         name: string
         email: string
-        status: 'ATIVO'
+        status: 'PENDENTE'
       }
     }
   | {
@@ -40,19 +40,52 @@ export async function MemberSignUp(
     }
   }
 
-  const { error: linkError } = await supabaseAdmin
-    .from('membros_empresa')
-    .insert({
-      empresa_id: company_id,
-      funcionario_id: data.user.id,
-    })
+  const { error: statusError } = await supabaseAdmin
+    .from('perfis')
+    .update({ status: 'PENDENTE' })
+    .eq('id', data.user.id)
 
-  if (linkError) {
-    console.error('Erro ao vincular membro na tabela membros_empresa:', linkError)
+  if (statusError) {
+    console.error('Erro ao definir status PENDENTE para o membro:', statusError)
+    return {
+      ok: false,
+      code: 'MEMBER_STATUS_FAILED',
+      message: 'Usuário convidado, mas não foi possível definir o status inicial.',
+    }
+  }
+
+  const { data: existingLink, error: checkLinkError } = await supabaseAdmin
+    .from('membros_empresa')
+    .select('id')
+    .eq('empresa_id', company_id)
+    .eq('funcionario_id', data.user.id)
+    .limit(1)
+    .maybeSingle()
+
+  if (checkLinkError) {
+    console.error('Erro ao verificar vínculo existente em membros_empresa:', checkLinkError)
     return {
       ok: false,
       code: 'MEMBER_LINK_FAILED',
-      message: 'Usuário convidado, mas não foi possível vincular à empresa.',
+      message: 'Usuário convidado, mas não foi possível verificar o vínculo à empresa.',
+    }
+  }
+
+  if (!existingLink) {
+    const { error: linkError } = await supabaseAdmin
+      .from('membros_empresa')
+      .insert({
+        empresa_id: company_id,
+        funcionario_id: data.user.id,
+      })
+
+    if (linkError && linkError.code !== '23505') {
+      console.error('Erro ao vincular membro na tabela membros_empresa:', linkError)
+      return {
+        ok: false,
+        code: 'MEMBER_LINK_FAILED',
+        message: 'Usuário convidado, mas não foi possível vincular à empresa.',
+      }
     }
   }
 
@@ -62,7 +95,7 @@ export async function MemberSignUp(
       id: data.user.id,
       name: nome,
       email: data.user.email ?? email,
-      status: 'ATIVO',
+      status: 'PENDENTE',
     },
   }
 }

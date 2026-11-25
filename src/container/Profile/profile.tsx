@@ -293,7 +293,7 @@ export default function Profile({
             id: crypto.randomUUID(),
             name: "",
             email: "",
-            status: "ATIVO",
+            status: "PENDENTE",
           },
     );
     navigate("member");
@@ -833,37 +833,50 @@ export default function Profile({
                       }
                     />
                   </label>
-                  {existingMember && (
-                    <label
-                      className="profile-field"
-                      htmlFor="profile-member-status"
-                    >
-                      Status:
-                      <select
-                        id="profile-member-status"
-                        aria-label="Status do membro"
-                        value={member.status}
-                        className={`profile-status profile-status--${member.status.toLowerCase()}`}
-                        disabled={busy}
-                        onChange={(event) => {
-                          const nextStatus = event.currentTarget.value as Extract<
-                            CompanyMember["status"],
-                            "ATIVO" | "AFASTADO"
-                          >;
-                          if (nextStatus !== member.status) {
-                            requestAction({
-                              type: "status",
-                              member,
-                              status: nextStatus,
-                            });
-                          }
-                        }}
+                  {existingMember &&
+                    (member.status === "PENDENTE" ? (
+                      <div className="profile-field">
+                        <span>Status:</span>
+                        <strong className="profile-status profile-status--pendente">
+                          PENDENTE
+                        </strong>
+                        <p className="profile-member-pending-note">
+                          Aguardando confirmação do convite enviado por e-mail e
+                          definição da senha pelo funcionário.
+                        </p>
+                      </div>
+                    ) : (
+                      <label
+                        className="profile-field"
+                        htmlFor="profile-member-status"
                       >
-                        <option value="ATIVO">Ativo</option>
-                        <option value="AFASTADO">Afastado</option>
-                      </select>
-                    </label>
-                  )}
+                        Status:
+                        <select
+                          id="profile-member-status"
+                          aria-label="Status do membro"
+                          value={member.status}
+                          className={`profile-status profile-status--${member.status.toLowerCase()}`}
+                          disabled={busy}
+                          onChange={(event) => {
+                            const nextStatus = event.currentTarget
+                              .value as Extract<
+                              CompanyMember["status"],
+                              "ATIVO" | "AFASTADO"
+                            >;
+                            if (nextStatus !== member.status) {
+                              requestAction({
+                                type: "status",
+                                member,
+                                status: nextStatus,
+                              });
+                            }
+                          }}
+                        >
+                          <option value="ATIVO">Ativo</option>
+                          <option value="AFASTADO">Afastado</option>
+                        </select>
+                      </label>
+                    ))}
                   {existingMember && (
                     <button
                       type="button"

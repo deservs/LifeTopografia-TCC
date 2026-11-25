@@ -47,6 +47,40 @@ export async function updateMemberStatus(
     return check
   }
 
+  const { data: currentProfile, error: fetchError } = await supabaseAdmin
+    .from('perfis')
+    .select('id, status')
+    .eq('id', memberId)
+    .neq('status', 'EXCLUIDO')
+    .maybeSingle()
+
+  if (fetchError) {
+    return {
+      ok: false,
+      httpStatus: 500,
+      code: 'MEMBER_STATUS_UPDATE_FAILED',
+      message: 'Não foi possível consultar o status atual do membro.',
+    }
+  }
+
+  if (!currentProfile) {
+    return {
+      ok: false,
+      httpStatus: 404,
+      code: 'NOT_FOUND',
+      message: 'Membro não encontrado.',
+    }
+  }
+
+  if (currentProfile.status === 'PENDENTE') {
+    return {
+      ok: false,
+      httpStatus: 400,
+      code: 'MEMBER_PENDING',
+      message: 'Este membro ainda está pendente de confirmação do convite.',
+    }
+  }
+
   const { data, error } = await supabaseAdmin
     .from('perfis')
     .update({ status })
@@ -55,21 +89,12 @@ export async function updateMemberStatus(
     .select('id, status')
     .maybeSingle()
 
-  if (error) {
+  if (error || !data) {
     return {
       ok: false,
       httpStatus: 500,
       code: 'MEMBER_STATUS_UPDATE_FAILED',
       message: 'Não foi possível atualizar o status do membro.',
-    }
-  }
-
-  if (!data) {
-    return {
-      ok: false,
-      httpStatus: 404,
-      code: 'NOT_FOUND',
-      message: 'Membro não encontrado.',
     }
   }
 

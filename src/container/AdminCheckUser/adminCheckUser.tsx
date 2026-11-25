@@ -320,10 +320,13 @@ export default function AdminCheckUser() {
 
   const memberSummary = useMemo(() => {
     let activeCount = 0;
+    let pendingCount = 0;
     let removedCount = 0;
     for (const member of modalMembers) {
       if (member.bondStatus === "REMOVIDO") {
         removedCount += 1;
+      } else if (member.bondStatus === "PENDENTE") {
+        pendingCount += 1;
       } else {
         activeCount += 1;
       }
@@ -331,6 +334,7 @@ export default function AdminCheckUser() {
     return {
       total: modalMembers.length,
       activeCount,
+      pendingCount,
       removedCount,
     };
   }, [modalMembers]);
@@ -807,6 +811,9 @@ export default function AdminCheckUser() {
               <span className="is-active">
                 Ativos: <strong>{memberSummary.activeCount}</strong>
               </span>
+              <span className="is-pending">
+                Pendentes: <strong>{memberSummary.pendingCount}</strong>
+              </span>
               <span className="is-removed">
                 Removidos: <strong>{memberSummary.removedCount}</strong>
               </span>
@@ -843,8 +850,10 @@ export default function AdminCheckUser() {
                 >
                   {modalMembers.map((member) => {
                     const isRemoved = member.bondStatus === "REMOVIDO";
+                    const isPending = member.bondStatus === "PENDENTE";
                     const hasDetailStatus =
                       member.rawStatus !== "ATIVO" &&
+                      member.rawStatus !== "PENDENTE" &&
                       member.rawStatus !== "REMOVIDO" &&
                       member.rawStatus !== "EXCLUIDO";
 
@@ -852,7 +861,11 @@ export default function AdminCheckUser() {
                       <li
                         key={member.vinculoId ?? member.id}
                         className={`admin-users-member-item${
-                          isRemoved ? " is-removed" : ""
+                          isRemoved
+                            ? " is-removed"
+                            : isPending
+                              ? " is-pending"
+                              : ""
                         }`}
                       >
                         <UserAvatar
@@ -872,10 +885,18 @@ export default function AdminCheckUser() {
 
                         <span
                           className={`admin-users-bond-badge ${
-                            isRemoved ? "is-removed" : "is-active"
+                            isRemoved
+                              ? "is-removed"
+                              : isPending
+                                ? "is-pending"
+                                : "is-active"
                           }`}
                         >
-                          {isRemoved ? "Removido" : "Ativo"}
+                          {isRemoved
+                            ? "Removido"
+                            : isPending
+                              ? "Pendente"
+                              : "Ativo"}
                           {hasDetailStatus ? ` · ${member.rawStatus}` : ""}
                         </span>
                       </li>
