@@ -59,7 +59,6 @@ function App() {
             </Route>
 
             <Route element={<AppLayout showTopbar={true} showFooter={false} />}>
-              <Route path="/definir-senha" element={<DefinirSenha />} />
               <Route element={<GuestRoute />}>
                 <Route path="/cadastrar" element={<Cadastrar />} />
                 <Route path="/login" element={<Login />} />
@@ -78,6 +77,7 @@ function App() {
                 <Route path="/perfil" element={<Profile />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/pagamento" element={<Pagamento />} />
+              <Route path="/definir-senha" element={<DefinirSenha />} />
               </Route>
 
               <Route element={<AdminRoute />}>

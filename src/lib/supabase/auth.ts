@@ -214,10 +214,12 @@ export async function ConfirmOTP(accessToken: string, email: string) {
 export async function ConfirmResetPassword(newPassword: string) {
   const { data, error } = await supabase.auth.updateUser({
     password: newPassword,
+    data: { password_defined: true },
   });
   if (error) {
     throw new Error(error.message);
   }
+  await supabase.auth.signOut({scope: "others"});
   return data;
 }
 
