@@ -1,54 +1,57 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import "./App.css";
 
 import Home from "./container/Home/home";
 
-import Cadastrar from "./container/Auth/cadastrar";
-import Login from "./container/Auth/login";
-import CheckSession from "./container/Auth/checar";
+const Cadastrar = lazy(() => import("./container/Auth/cadastrar"));
+const Login = lazy(() => import("./container/Auth/login"));
+const CheckSession = lazy(() => import("./container/Auth/checar"));
 
-import Pagamento from "./components/Pop-Up/Pagamento/pagamento";
-import Services from "./container/Services/services";
-import Profile from "./container/Profile/profile";
-import Teste from "./container/Enviar-arquivos/enviar_arquivos";
-import Teste2 from "./container/Enviar-arquivos/enviar_email";
-import Erro404 from "./container/Error/erro404";
-import Chat from "./container/Chat/chat";
-import FAQ from "./container/FAQ/faq";
+const Pagamento = lazy(() => import("./components/Pop-Up/Pagamento/pagamento"));
+const Services = lazy(() => import("./container/Services/services"));
+const Profile = lazy(() => import("./container/Profile/profile"));
+const Teste = lazy(() => import("./container/Enviar-arquivos/enviar_arquivos"));
+const Teste2 = lazy(() => import("./container/Enviar-arquivos/enviar_email"));
+const Erro404 = lazy(() => import("./container/Error/erro404"));
+const Chat = lazy(() => import("./container/Chat/chat"));
+const FAQ = lazy(() => import("./container/FAQ/faq"));
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/cadastrar"
-          element={
-            <>
-              <CheckSession />
-              <Cadastrar />
-            </>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <>
-              <CheckSession />
-              <Login />
-            </>
-          }
-        />
-        <Route path="/pagamento" element={<Pagamento />} />
-        <Route path="/servicos" element={<Services />} />
-        <Route path="/teste" element={<Teste />} />
-        <Route path="/teste2" element={<Teste2 />} />
-        <Route path="/perfil" element={<Profile />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/FAQ" element={<FAQ />} />
-        <Route path="*" element={<Erro404 />} />
-      </Routes>
+      <Suspense fallback={<div aria-busy="true">Carregando...</div>}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/cadastrar"
+            element={
+              <>
+                <CheckSession />
+                <Cadastrar />
+              </>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <>
+                <CheckSession />
+                <Login />
+              </>
+            }
+          />
+          <Route path="/pagamento" element={<Pagamento />} />
+          <Route path="/servicos" element={<Services />} />
+          <Route path="/teste" element={<Teste />} />
+          <Route path="/teste2" element={<Teste2 />} />
+          <Route path="/perfil" element={<Profile />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/FAQ" element={<FAQ />} />
+          <Route path="*" element={<Erro404 />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

@@ -1,10 +1,19 @@
-import * as pdfjsLib from "pdfjs-dist";
+import type { PDFPageProxy } from "pdfjs-dist";
 
-//configuração do worker para o pdfjs
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.mjs",
-  import.meta.url,
-).toString();
+let pdfjsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
+
+async function getPdfJs() {
+  if (!pdfjsPromise) {
+    pdfjsPromise = import("pdfjs-dist").then((pdfjsLib) => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        "pdfjs-dist/build/pdf.worker.mjs",
+        import.meta.url,
+      ).toString();
+      return pdfjsLib;
+    });
+  }
+  return pdfjsPromise;
+}
 
 export async function getPdfArrayBuffer(file: File): Promise<ArrayBuffer> {
   // Converte a referência do arquivo em bytes crus na memória RAM
@@ -37,12 +46,13 @@ export async function PdfpageToImage(
   file: File,
   pageNumber: number = 1,
 ): Promise<ImageData> {
+  const pdfjsLib = await getPdfJs();
   // converter o arquivo em ArrayBuffer
   const arrayBuffer = await getPdfArrayBuffer(file);
 
   let loadingTask: ReturnType<typeof pdfjsLib.getDocument> | null = null;
   let canvas: HTMLCanvasElement | null = null;
-  let page: pdfjsLib.PDFPageProxy | null = null;
+  let page: PDFPageProxy | null = null;
   try {
     // Carrega a estrutura na memória
     loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
@@ -134,6 +144,7 @@ export function normalizarPageRanges(
  * Retorna o número total de páginas de um PDF.
  */
 export async function getPdfPageCount(file: File): Promise<number> {
+  const pdfjsLib = await getPdfJs();
   const arrayBuffer = await getPdfArrayBuffer(file);
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
   const pdfDoc = await loadingTask.promise;
@@ -150,6 +161,7 @@ export async function extrairTextoNativoPagina(
   file: File,
   pageNumber: number,
 ): Promise<string> {
+  const pdfjsLib = await getPdfJs();
   const arrayBuffer = await getPdfArrayBuffer(file);
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
   try {
@@ -214,6 +226,7 @@ export async function extrairTextoNativoPaginas(
   foiNativo: boolean;
 }> {
   const arrayBuffer = await getPdfArrayBuffer(file);
+  const pdfjsLib = await getPdfJs();
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
   try {
     const pdfDoc = await loadingTask.promise;
@@ -299,6 +312,7 @@ export async function extrairTextoNativoPaginas(
 export async function detectarPaginasComDescricao(
   file: File,
 ): Promise<{ paginasSugeridas: number[]; totalPaginas: number }> {
+  const pdfjsLib = await getPdfJs();
   const arrayBuffer = await getPdfArrayBuffer(file);
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
   try {
