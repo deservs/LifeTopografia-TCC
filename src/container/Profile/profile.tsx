@@ -10,7 +10,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import ChangePasswordForm from "../../components/ChangePasswordForm/ChangePasswordForm";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hook/useAuth";
 import {
   DeleteAccount,
   RemoveCompanyMember,

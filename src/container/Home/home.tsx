@@ -2,7 +2,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { Link } from "react-router-dom";
 
-import { useLayout } from "../../components/Layout/AppLayout";
+import { useLayout } from "../../hook/useLayout";
 
 import Fundo1 from "../../assets/image/background/firstcard.webp";
 import Fundo2 from "../../assets/image/background/secondcard.webp";

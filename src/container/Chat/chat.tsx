@@ -6,8 +6,8 @@ import {
   type ChangeEvent,
 } from "react";
 import { Link } from "react-router-dom";
-import { useLayout } from "../../components/Layout/AppLayout";
-import { useAuth } from "../../context/AuthContext";
+import { useLayout } from "../../hook/useLayout";
+import { useAuth } from "../../hook/useAuth";
 import "./chat.css";
 
 export interface MessageFile {

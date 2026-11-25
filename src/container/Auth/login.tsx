@@ -13,7 +13,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hook/useAuth";
 import { env } from "../../lib/env";
 
 const PasswordInput = lazy(

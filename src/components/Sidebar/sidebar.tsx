@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hook/useAuth";
 import { formatRoleLabel } from "../../types/auth.types";
 
 import "./sidebar.css";
