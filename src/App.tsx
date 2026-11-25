@@ -14,6 +14,7 @@ import Home from "./container/Home/home";
 
 const About = lazy(() => import("./container/About/about"));
 const Cadastrar = lazy(() => import("./container/Auth/cadastrar"));
+const DefinirSenha = lazy(() => import("./container/Auth/definirSenha"));
 const Login = lazy(() => import("./container/Auth/login"));
 
 const Pagamento = lazy(() => import("./components/Pop-Up/Pagamento/pagamento"));
@@ -58,6 +59,7 @@ function App() {
             </Route>
 
             <Route element={<AppLayout showTopbar={true} showFooter={false} />}>
+              <Route path="/definir-senha" element={<DefinirSenha />} />
               <Route element={<GuestRoute />}>
                 <Route path="/cadastrar" element={<Cadastrar />} />
                 <Route path="/login" element={<Login />} />

@@ -1,0 +1,341 @@
+/* =========================================================
+   PÁGINA DE DEFINIR SENHA
+   ========================================================= */
+
+.definir-senha-page {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 40px;
+  background-color: #ffffff;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.definir-senha-main {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+}
+
+/* =========================================================
+   TÍTULO E DIVISÓRIA
+   ========================================================= */
+
+.definir-senha-title-container {
+  width: 100%;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.definir-senha-title {
+  margin: 0 0 10px;
+  color: #0b50bd;
+  font-size: clamp(1.8rem, 7vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.definir-senha-divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.definir-senha-divider .line {
+  flex: 1;
+  height: 2.5px;
+  background-color: #0b50bd;
+}
+
+.definir-senha-divider .rhombus {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  margin: 0 10px;
+  background-color: #00ff00;
+  transform: rotate(45deg);
+  box-shadow: 0 0 6px rgba(0, 255, 0, 0.8);
+}
+
+/* =========================================================
+   CARTÃO E FORMULÁRIO
+   ========================================================= */
+
+.definir-senha-card {
+  width: 100%;
+  padding: 22px 20px;
+  background-color: #dcdcdc;
+  border-radius: 28px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.definir-senha-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.definir-senha-group {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.definir-senha-group--align-start {
+  align-items: flex-start;
+}
+
+.definir-senha-group--align-start .definir-senha-icon-box {
+  margin-top: 24px;
+}
+
+.definir-senha-icon-box {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #dcdcdc;
+  border: 1.5px solid #8e939d;
+  border-radius: 14px;
+  color: #0b132b;
+}
+
+.definir-senha-icon-box svg {
+  width: 28px;
+  height: 28px;
+}
+
+.definir-senha-check-badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.definir-senha-check-badge.is-valid {
+  background-color: #00c853;
+}
+
+.definir-senha-check-badge.is-invalid {
+  background-color: #d32f2f;
+}
+
+.definir-senha-field {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.definir-senha-field label {
+  margin-bottom: 3px;
+  color: #0b50bd;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.definir-senha-field input {
+  width: 100%;
+  height: 44px;
+  padding: 0 38px 0 10px;
+  color: #000000;
+  background-color: #ffffff;
+  border: 1px solid #8e939d;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.definir-senha-field input:focus {
+  border-color: #0b50bd;
+  box-shadow: 0 0 3px rgba(11, 80, 189, 0.5);
+}
+
+/* =========================================================
+   REQUISITOS DE SENHA
+   ========================================================= */
+
+.definir-senha-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.definir-senha-requirements li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.definir-senha-requirements li span {
+  width: 16px;
+  flex-shrink: 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.definir-senha-requirements .is-valid {
+  color: #16803c;
+}
+
+.definir-senha-requirements .is-invalid {
+  color: #d32f2f;
+}
+
+/* =========================================================
+   FEEDBACK E BOTÕES
+   ========================================================= */
+
+.definir-senha-feedback {
+  margin: 0;
+  padding: 10px 12px;
+  color: #c62828;
+  background-color: #ffe5e5;
+  border: 1px solid #d66a6a;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.definir-senha-submit {
+  width: 100%;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  color: #ffffff;
+  background-color: #0b50bd;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.definir-senha-submit:hover:not(:disabled) {
+  background-color: #083d93;
+  transform: translateY(-1px);
+}
+
+.definir-senha-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.definir-senha-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.definir-senha-submit:focus-visible,
+.definir-senha-cancel:focus-visible {
+  outline: 2px solid #0b50bd;
+  outline-offset: 3px;
+}
+
+.definir-senha-cancel {
+  align-self: center;
+  margin-top: 4px;
+  padding: 4px 6px;
+  background: transparent;
+  border: none;
+  color: #333333;
+  font-family: inherit;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.definir-senha-cancel:hover:not(:disabled) {
+  color: #0b50bd;
+}
+
+.definir-senha-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVO E ACESSIBILIDADE
+   ========================================================= */
+
+@media screen and (min-width: 768px) {
+  .definir-senha-main {
+    max-width: 480px;
+    padding-top: 30px;
+  }
+
+  .definir-senha-card {
+    padding: 26px 28px;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .definir-senha-main {
+    padding: 20px 12px;
+  }
+
+  .definir-senha-card {
+    padding: 18px 14px;
+    border-radius: 22px;
+  }
+
+  .definir-senha-icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .definir-senha-icon-box svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .definir-senha-field label {
+    font-size: 0.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .definir-senha-field input,
+  .definir-senha-submit {
+    transition: none;
+  }
+}
