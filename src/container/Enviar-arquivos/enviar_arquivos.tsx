@@ -238,19 +238,19 @@ export default function EnviarArquivos() {
   };
 
   // GERAÇÃO DE DXF
-  const handleDownloadDxfIndividual = (terreno: TerrenoExtraido) => {
+  const handleDownloadDxfIndividual = async (terreno: TerrenoExtraido) => {
     const val = validacoes[terreno.id];
     if (!val || !val.resumo.permiteGeracaoDXF) return;
 
     const nomeBase = arquivoNome.replace(/\.pdf$/i, "");
-    const res = gerarDXF(terreno.resultado, val, {
+    const res = await gerarDXF(terreno.resultado, val, {
       ...opcoesDxf,
       nomeArquivo: `${nomeBase}_${terreno.id}.dxf`,
     });
     setResultadoDxf(res);
   };
 
-  const handleDownloadDxfUnificado = () => {
+  const handleDownloadDxfUnificado = async () => {
     const itens = terrenos.map((t) => ({
       id: t.id,
       titulo: t.titulo,
@@ -259,7 +259,7 @@ export default function EnviarArquivos() {
     }));
 
     const nomeBase = arquivoNome.replace(/\.pdf$/i, "");
-    const res = gerarDXFMultiplosTerrenos(itens, {
+    const res = await gerarDXFMultiplosTerrenos(itens, {
       ...opcoesDxf,
       nomeArquivo: `${nomeBase}_completo.dxf`,
     });
