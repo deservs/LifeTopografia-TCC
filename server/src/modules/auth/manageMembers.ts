@@ -117,7 +117,7 @@ export async function removeCompanyMember(
   }
 
   const { error } = await supabaseAdmin
-    .from('membros_empresa')
+    .from('MEMBRO_EMPRESA')
     .delete()
     .eq('empresa_id', companyId)
     .eq('funcionario_id', memberId)
