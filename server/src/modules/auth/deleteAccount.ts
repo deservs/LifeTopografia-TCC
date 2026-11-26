@@ -32,7 +32,10 @@ export async function DeleteAccount(
   const { error: banError } = await supabaseAdmin.auth.admin.updateUserById(
     userId,
     {
+      email: `deleted_${userId}_${Date.now()}@anon.lifetopografia.local`,
+      email_confirm: true,
       ban_duration: "876000h",
+      user_metadata: { deleted_at: new Date().toISOString() },
     },
   );
   if (banError) {

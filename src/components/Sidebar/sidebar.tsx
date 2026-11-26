@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { to: "/sobre", label: "SOBRE NÓS" },
   { to: "/servicos", label: "SERVIÇOS" },
   { to: "/faq", label: "FAQ" },
-  { to: "/chat", label: "CONTATO" },
+  { to: "/chat", label: "CHAT" },
 ] as const;
 
 interface SidebarProps {
