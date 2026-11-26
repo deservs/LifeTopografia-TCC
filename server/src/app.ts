@@ -581,7 +581,6 @@ app.delete(
     }
 
     try {
-      console.log('CheckPassword called with email:', userEmail, 'and password:', parsedBody.data.password); // Log the input parameters
       const passwordStatus = await CheckPassword(userId, parsedBody.data.password)
       if (passwordStatus === 'invalid_password') {
         return reply.code(401).send({
