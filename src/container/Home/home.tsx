@@ -42,6 +42,68 @@ export default function Home() {
         content="Página inicial da Life Topografia, com informações sobre a empresa e seus serviços."
       />
       <div id="initial-card">
+        {/*
+         * As imagens não possuem informação necessária para
+         * compreensão do conteúdo da página.
+         *
+         * O conteúdo textual já está disponível no elemento
+         * principal, portanto o carrossel fica oculto para
+         * tecnologias assistivas.
+         */}
+        <Swiper
+          id="init-carrossel"
+          modules={[Autoplay]}
+          slidesPerView={1}
+          spaceBetween={0}
+          loop
+          speed={3000}
+          autoplay={
+            prefersReducedMotion
+              ? false
+              : {
+                  delay: 8000,
+                  disableOnInteraction: false,
+                }
+          }
+          aria-hidden="true"
+        >
+          <SwiperSlide>
+            <img
+              id="bg1"
+              src={Fundo1}
+              alt=""
+              width={1920}
+              height={1345}
+              loading="eager"
+              fetchPriority="high"
+            />
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <img
+              id="bg2"
+              src={Fundo2}
+              alt=""
+              width={1920}
+              height={1108}
+              loading="eager"
+              decoding="async"
+            />
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <img
+              id="bg3"
+              src={Fundo3}
+              alt=""
+              width={1920}
+              height={1198}
+              loading="eager"
+              decoding="async"
+            />
+          </SwiperSlide>
+        </Swiper>
+
         <main id="superposition">
           <div id="main-content">
             <div id="barra-lateral">
@@ -106,66 +168,6 @@ export default function Home() {
             </div>
           </div>
         </main>
-
-        {/*
-         * As imagens não possuem informação necessária para
-         * compreensão do conteúdo da página.
-         *
-         * O conteúdo textual já está disponível no elemento
-         * principal, portanto o carrossel fica oculto para
-         * tecnologias assistivas.
-         */}
-        <Swiper
-          id="init-carrossel"
-          modules={[Autoplay]}
-          slidesPerView={1}
-          spaceBetween={0}
-          loop
-          speed={3000}
-          autoplay={
-            prefersReducedMotion
-              ? false
-              : {
-                  delay: 8000,
-                  disableOnInteraction: false,
-                }
-          }
-          aria-hidden="true"
-        >
-          <SwiperSlide>
-            <img
-              id="bg1"
-              src={Fundo1}
-              alt=""
-              width={1920}
-              height={1345}
-              loading="eager"
-              fetchPriority="high"
-            />
-          </SwiperSlide>
-
-          <SwiperSlide>
-            <img
-              id="bg2"
-              src={Fundo2}
-              alt=""
-              width={1920}
-              height={1108}
-              loading="lazy"
-            />
-          </SwiperSlide>
-
-          <SwiperSlide>
-            <img
-              id="bg3"
-              src={Fundo3}
-              alt=""
-              width={1920}
-              height={1198}
-              loading="lazy"
-            />
-          </SwiperSlide>
-        </Swiper>
       </div>
     </>
   );

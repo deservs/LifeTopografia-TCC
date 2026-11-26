@@ -1720,18 +1720,23 @@ export default function Chat() {
                     +
                   </button>
 
-                  <input
-                    type="text"
-                    className="chat-text-input"
-                    placeholder={
-                      isAdmin
-                        ? "Responder cliente como Administrador..."
-                        : "Digite sua mensagem para a Life Topografia..."
-                    }
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    aria-label="Mensagem de atendimento"
-                  />
+                  <div
+                    className="chat-input-pill"
+                    data-replicated-value={inputText}
+                  >
+                    <textarea
+                      rows={1}
+                      className="chat-text-input"
+                      placeholder={
+                        isAdmin
+                          ? "Responder cliente como Administrador..."
+                          : "Digite sua mensagem para a Life Topografia..."
+                      }
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
+                      aria-label="Mensagem de atendimento"
+                    />
+                  </div>
 
                   <button
                     type="submit"
