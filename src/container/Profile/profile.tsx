@@ -24,6 +24,7 @@ import {
   type CompanyMember,
   type UserProfile,
 } from "../../types/auth.types";
+import AdminHelpersPanel from "./AdminHelpersPanel";
 
 import "./profile.css";
 
@@ -46,7 +47,7 @@ interface ProfileProps {
   initialMembers?: CompanyMember[];
 }
 
-type PageView = "profile" | "members" | "member" | "password";
+type PageView = "profile" | "members" | "member" | "password" | "helpers";
 
 function EditIcon() {
   return (
@@ -481,6 +482,7 @@ export default function Profile({
   }
 
   const company = !!profile && isCompanyRole(profile.role);
+  const isAdmin = !!profile && profile.role.toUpperCase() === "ADMIN";
   const deletingAccount = action?.type === "delete_account";
   const confirmationPerson = deletingAccount ? profile : action?.member;
   const deletionPhrase = company
@@ -501,7 +503,9 @@ export default function Profile({
           : "ADICIONAR MEMBRO"
         : view === "password"
           ? "ALTERAR SENHA"
-          : "EDITAR PERFIL";
+          : view === "helpers"
+            ? "GERENCIAR AJUDANTES"
+            : "EDITAR PERFIL";
   const feedbackNode = feedback && (
     <p
       className={`profile-feedback${feedbackIsError ? " profile-feedback--error" : ""}`}
@@ -519,7 +523,10 @@ export default function Profile({
         content="Gerencie seus dados de perfil, foto, senha e membros da empresa na Life Topografia."
       />
       <div className="profile-page">
-        <main className="profile-main" aria-busy={loading}>
+        <main
+          className={`profile-main${isAdmin && view === "helpers" ? " profile-main--wide" : ""}`}
+          aria-busy={loading}
+        >
           <div className="profile-title-container">
             <h1 ref={headingRef} tabIndex={-1}>
               {title}
@@ -601,7 +608,11 @@ export default function Profile({
                     </div>
                     <p>
                       <span>Status:</span>{" "}
-                      {company ? "Empresa" : "Pessoa Física"}
+                      {isAdmin
+                        ? "Administrador"
+                        : company
+                          ? "Empresa"
+                          : "Pessoa Física"}
                     </p>
                   </div>
                   <div className="profile-field">
@@ -669,6 +680,21 @@ export default function Profile({
                     >
                       Alterar senha <EditIcon />
                     </button>
+                    {isAdmin && (
+                      <>
+                        <button
+                          className="profile-text-button"
+                          type="button"
+                          disabled={busy}
+                          onClick={() => navigate("helpers")}
+                        >
+                          Gerenciar ajudantes <span aria-hidden="true">⚙</span>
+                        </button>
+                        <Link className="profile-text-button" to="/admin/usuarios">
+                          Ver usuários da página <span aria-hidden="true">↗</span>
+                        </Link>
+                      </>
+                    )}
                     {company && (
                       <button
                         className="profile-text-button"
@@ -908,6 +934,8 @@ export default function Profile({
                   }}
                 />
               )}
+
+              {isAdmin && view === "helpers" && <AdminHelpersPanel />}
             </>
           )}
         </main>

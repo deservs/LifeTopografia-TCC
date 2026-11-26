@@ -4,6 +4,7 @@ import {
   useEffect,
   type FormEvent,
   type ChangeEvent,
+  type ClipboardEvent,
 } from "react";
 import { Link } from "react-router-dom";
 import { useLayout } from "../../hook/useLayout";
@@ -41,16 +42,24 @@ export type ChatStatus = "open" | "closed";
 
 export type ServiceStatus = "not_started" | "in_progress" | "completed";
 
-export interface ChatThread {
+export interface AdminClientChat {
   id: string;
-  clientName: string;
-  clientType: "pessoa" | "empresa";
-  document: string;
+  ticketCode: string;
+  title: string;
   lastMessageTime: string;
   unreadCount: number;
   chatStatus: ChatStatus;
   serviceStatus: ServiceStatus;
   messages: ChatMessage[];
+}
+
+export interface AdminClientGroup {
+  id: string;
+  clientName: string;
+  clientType: "pessoa" | "empresa";
+  document: string;
+  lastInteractionTime: string;
+  chats: AdminClientChat[];
 }
 
 /**
@@ -100,6 +109,27 @@ function downloadDxfFile(fileName: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
+const MAX_BUDGET_CENTS = 99_999_999_99;
+
+function formatCentsToBRL(cents: number): string {
+  const value = cents / 100;
+  const [intPart, decPart] = value.toFixed(2).split(".");
+  const paddedInt = intPart
+    .padStart(2, "0")
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `R$ ${paddedInt},${decPart}`;
+}
+
+function extractCentsFromDigits(raw: string): number {
+  const digits = raw.replace(/\D/g, "").replace(/^0+/, "").slice(0, 11);
+  if (!digits) return 0;
+  return Math.min(Number(digits), MAX_BUDGET_CENTS);
+}
+
+function formatBudgetAmountDisplay(amount: string): string {
+  return amount.startsWith("R$") ? amount : `R$ ${amount}`;
+}
+
 // Mensagens fictícias para demonstrar a visualização do cliente.
 const DEFAULT_CLIENT_MESSAGES: ChatMessage[] = [
   {
@@ -140,7 +170,7 @@ const DEFAULT_CLIENT_MESSAGES: ChatMessage[] = [
     budget: {
       id: "orc-101",
       serviceTitle: "Levantamento Planialtimétrico Cadastral + ART",
-      amount: "2.450,00",
+      amount: formatCentsToBRL(245000),
       description:
         "Mapeamento topográfico com curvas de nível de 1m, georreferenciamento ao SIRGAS 2000, memorial descritivo e ART emitida.",
       status: "pending",
@@ -149,93 +179,150 @@ const DEFAULT_CLIENT_MESSAGES: ChatMessage[] = [
   },
 ];
 
-// Atendimentos fictícios usados para demonstrar a visualização administrativa.
-const INITIAL_ADMIN_THREADS: ChatThread[] = [
+// Atendimentos fictícios agrupados por Cliente -> Chats para demonstrar a gaveta administrativa.
+const INITIAL_ADMIN_CLIENTS: AdminClientGroup[] = [
   {
-    id: "thread-cliente-1",
+    id: "client-1",
     clientName: "Construtora São Paulo Engenharia",
     clientType: "empresa",
     document: "CNPJ 24.891.042/0001-80",
-    lastMessageTime: "09:12",
-    unreadCount: 1,
-    chatStatus: "open",
-    serviceStatus: "in_progress",
-    messages: [
+    lastInteractionTime: "09:12",
+    chats: [
       {
-        id: "adm-m1",
-        sender: "client",
-        senderName: "Construtora São Paulo",
-        text: "Olá! Precisamos da conversão de coordenadas da matrícula em PDF para DXF e do orçamento para locação de obra.",
-        time: "09:02",
-        type: "text",
+        id: "chat-c1-02",
+        ticketCode: "#02",
+        title: "Loteamento Residencial",
+        lastMessageTime: "09:12",
+        unreadCount: 1,
+        chatStatus: "open",
+        serviceStatus: "in_progress",
+        messages: [
+          {
+            id: "adm-m1",
+            sender: "client",
+            senderName: "Construtora São Paulo",
+            text: "Olá! Precisamos da conversão de coordenadas da matrícula em PDF para DXF e do orçamento para locação de obra.",
+            time: "09:02",
+            type: "text",
+          },
+          {
+            id: "adm-m2",
+            sender: "client",
+            senderName: "Construtora São Paulo",
+            time: "09:03",
+            type: "file",
+            file: {
+              name: "matricula_loteamento_residencial.pdf",
+              size: "2.4 MB",
+              type: "pdf",
+            },
+          },
+          {
+            id: "adm-m3",
+            sender: "admin",
+            senderName: "Life Topografia (Admin)",
+            text: "Documento recebido! Estamos analisando as confrontações para gerar as coordenadas em DXF.",
+            time: "09:10",
+            type: "text",
+          },
+        ],
       },
       {
-        id: "adm-m2",
-        sender: "client",
-        senderName: "Construtora São Paulo",
-        time: "09:03",
-        type: "file",
-        file: {
-          name: "matricula_loteamento_residencial.pdf",
-          size: "2.4 MB",
-          type: "pdf",
-        },
-      },
-      {
-        id: "adm-m3",
-        sender: "admin",
-        senderName: "Life Topografia (Admin)",
-        text: "Documento recebido! Estamos analisando as confrontações para gerar as coordenadas em DXF.",
-        time: "09:10",
-        type: "text",
+        id: "chat-c1-01",
+        ticketCode: "#01",
+        title: "Georreferenciamento Sítio",
+        lastMessageTime: "12/11",
+        unreadCount: 0,
+        chatStatus: "closed",
+        serviceStatus: "completed",
+        messages: [
+          {
+            id: "adm-c1-01-m1",
+            sender: "client",
+            senderName: "Construtora São Paulo",
+            text: "Precisamos do georreferenciamento e memorial descritivo para certificação no SIGEF.",
+            time: "12/11 10:15",
+            type: "text",
+          },
+          {
+            id: "adm-c1-01-m2",
+            sender: "admin",
+            senderName: "Life Topografia (Admin)",
+            time: "12/11 16:40",
+            type: "file",
+            file: {
+              name: "georreferenciamento_sitio_final.dxf",
+              size: "510 KB",
+              type: "dxf",
+              dxfContent: generateCadDxfContent("sitio_sigef.pdf"),
+              isConverted: true,
+            },
+          },
+          {
+            id: "adm-c1-01-m3",
+            sender: "client",
+            senderName: "Construtora São Paulo",
+            text: "Recebido e validado com sucesso. Obrigado pelo atendimento!",
+            time: "12/11 17:05",
+            type: "text",
+          },
+        ],
       },
     ],
   },
   {
-    id: "thread-cliente-2",
+    id: "client-2",
     clientName: "Mariana Alencar Ferreira",
     clientType: "pessoa",
     document: "CPF ***.482.198-**",
-    lastMessageTime: "Ontem",
-    unreadCount: 0,
-    chatStatus: "open",
-    serviceStatus: "in_progress",
-    messages: [
+    lastInteractionTime: "Ontem",
+    chats: [
       {
-        id: "adm-m4",
-        sender: "client",
-        senderName: "Mariana Alencar",
-        text: "Boa tarde! Gostaria de um orçamento para regularização e desdobro de terreno.",
-        time: "Ontem 15:20",
-        type: "text",
-      },
-      {
-        id: "adm-m5",
-        sender: "client",
-        senderName: "Mariana Alencar",
-        time: "Ontem 15:22",
-        type: "file",
-        file: {
-          name: "escritura_terreno_interior.pdf",
-          size: "1.2 MB",
-          type: "pdf",
-        },
-      },
-      {
-        id: "adm-m6",
-        sender: "admin",
-        senderName: "Life Topografia (Admin)",
-        time: "Ontem 15:45",
-        type: "budget",
-        budget: {
-          id: "orc-102",
-          serviceTitle: "Desdobro de Lote Urbano e Memorial Descritivo",
-          amount: "1.980,00",
-          description:
-            "Levantamento de confrontações, planta de situação e memorial descritivo para cartório.",
-          status: "accepted",
-          createdAt: "Ontem 15:45",
-        },
+        id: "chat-c2-01",
+        ticketCode: "#01",
+        title: "Desdobro de Terreno",
+        lastMessageTime: "Ontem",
+        unreadCount: 0,
+        chatStatus: "open",
+        serviceStatus: "in_progress",
+        messages: [
+          {
+            id: "adm-m4",
+            sender: "client",
+            senderName: "Mariana Alencar",
+            text: "Boa tarde! Gostaria de um orçamento para regularização e desdobro de terreno.",
+            time: "Ontem 15:20",
+            type: "text",
+          },
+          {
+            id: "adm-m5",
+            sender: "client",
+            senderName: "Mariana Alencar",
+            time: "Ontem 15:22",
+            type: "file",
+            file: {
+              name: "escritura_terreno_interior.pdf",
+              size: "1.2 MB",
+              type: "pdf",
+            },
+          },
+          {
+            id: "adm-m6",
+            sender: "admin",
+            senderName: "Life Topografia (Admin)",
+            time: "Ontem 15:45",
+            type: "budget",
+            budget: {
+              id: "orc-102",
+              serviceTitle: "Desdobro de Lote Urbano e Memorial Descritivo",
+              amount: "1.980,00",
+              description:
+                "Levantamento de confrontações, planta de situação e memorial descritivo para cartório.",
+              status: "accepted",
+              createdAt: "Ontem 15:45",
+            },
+          },
+        ],
       },
     ],
   },
@@ -263,12 +350,14 @@ export default function Chat() {
     score: number;
     comment: string;
   } | null>(null);
-  // Estado do chat para Administradores
-  const [adminThreads, setAdminThreads] = useState<ChatThread[]>(
-    INITIAL_ADMIN_THREADS,
+  // Estado do chat para Administradores (Gaveta Cliente -> Chats)
+  const [adminClients, setAdminClients] = useState<AdminClientGroup[]>(
+    INITIAL_ADMIN_CLIENTS,
   );
-  const [activeThreadId, setActiveThreadId] =
-    useState<string>("thread-cliente-1");
+  const [activeChatId, setActiveChatId] = useState<string>("chat-c1-02");
+  const [expandedClientIds, setExpandedClientIds] = useState<
+    Record<string, boolean>
+  >({ "client-1": true });
 
   // Inputs e controles de mensagens
   const [inputText, setInputText] = useState("");
@@ -278,11 +367,13 @@ export default function Chat() {
   // Modal de orçamento (exclusivo para Administrador)
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [budgetTitle, setBudgetTitle] = useState("");
-  const [budgetAmount, setBudgetAmount] = useState("");
+  const [budgetCents, setBudgetCents] = useState<number>(0);
+  const [budgetAmountError, setBudgetAmountError] = useState("");
   const [budgetDescription, setBudgetDescription] = useState("");
 
-  // Busca na lista de clientes (visão admin)
+  // Busca e filtro na lista de clientes (visão admin)
   const [searchTerm, setSearchTerm] = useState("");
+  const [sidebarFilter, setSidebarFilter] = useState<"all" | "unread">("all");
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -292,7 +383,14 @@ export default function Chat() {
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const isScrolledUpRef = useRef(false);
   const [unreadWhileScrolled, setUnreadWhileScrolled] = useState(0);
-  const [mobileView, setMobileView] = useState<"list" | "chat">("chat");
+  const [mobileView, setMobileView] = useState<"list" | "chat">(() =>
+    user?.role === "ADMIN" ? "list" : "chat",
+  );
+
+  const closeBudgetModal = () => {
+    setShowBudgetModal(false);
+    setBudgetAmountError("");
+  };
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesContainerRef.current) {
@@ -321,7 +419,9 @@ export default function Chat() {
 
   // Sincroniza papel inicial com o usuário autenticado no AuthContext
   useEffect(() => {
-    setActiveRole(user?.role === "ADMIN" ? "admin" : "client");
+    const nextIsAdmin = user?.role === "ADMIN";
+    setActiveRole(nextIsAdmin ? "admin" : "client");
+    setMobileView(nextIsAdmin ? "list" : "chat");
   }, [user?.role]);
 
   // Configura o seletor de perfil demonstrativo na Topbar compartilhada
@@ -333,10 +433,9 @@ export default function Chat() {
           type="button"
           className={`role-toggle-btn ${activeRole === "admin" ? "is-admin" : "is-client"}`}
           onClick={() => {
-            setActiveRole((previous) =>
-              previous === "admin" ? "client" : "admin",
-            );
-            setMobileView("chat");
+            const nextRole = activeRole === "admin" ? "client" : "admin";
+            setActiveRole(nextRole);
+            setMobileView(nextRole === "admin" ? "list" : "chat");
           }}
           title="Alternar visão entre Cliente e Administrador para testes de hierarquia"
         >
@@ -359,14 +458,15 @@ export default function Chat() {
     setShowBudgetModal(false);
     setInputText("");
     setBudgetTitle("");
-    setBudgetAmount("");
+    setBudgetCents(0);
+    setBudgetAmountError("");
     setBudgetDescription("");
     setRating(0);
     setRatingComment("");
     setRatingSubmitted(false);
     setSubmittedRating(null);
     setShowRatingModal(false);
-  }, [activeRole, activeThreadId]);
+  }, [activeRole, activeChatId]);
 
   // Rolagem inteligente para o fim das mensagens
   useEffect(() => {
@@ -375,13 +475,13 @@ export default function Chat() {
     } else {
       setUnreadWhileScrolled((prev) => prev + 1);
     }
-  }, [clientMessages, adminThreads]);
+  }, [clientMessages, adminClients]);
 
   // Ao trocar conversa ou papel, sempre posiciona no fim
   useEffect(() => {
     scrollToBottom("auto");
     setUnreadWhileScrolled(0);
-  }, [activeThreadId, activeRole]);
+  }, [activeChatId, activeRole]);
 
   // Fecha modais e menus de ação com tecla Escape
   useEffect(() => {
@@ -398,37 +498,91 @@ export default function Chat() {
 
   const isAdmin = activeRole === "admin";
 
-  // Obter conversa ativa
-  const currentAdminThread = adminThreads.find((t) => t.id === activeThreadId);
-  // Os estados de atendimento são vinculados à conversa selecionada, não globais.
-  // A alternância de perfil é apenas uma visualização demonstrativa do frontend.
-  const clientChatStatus = currentAdminThread?.chatStatus ?? "open";
+  // Localiza cliente e chat selecionados na estrutura Cliente -> chats[]
+  let activeClient: AdminClientGroup | undefined;
+  let activeAdminChat: AdminClientChat | undefined;
+  for (const client of adminClients) {
+    const foundChat = client.chats.find((chat) => chat.id === activeChatId);
+    if (foundChat) {
+      activeClient = client;
+      activeAdminChat = foundChat;
+      break;
+    }
+  }
+  const activeSelection =
+    activeClient && activeAdminChat
+      ? { client: activeClient, chat: activeAdminChat }
+      : null;
+
+  const clientChatStatus = activeSelection?.chat.chatStatus ?? "open";
   const clientServiceStatus =
-    currentAdminThread?.serviceStatus ?? "not_started";
+    activeSelection?.chat.serviceStatus ?? "not_started";
+  const activeChatIsClosed =
+    (isAdmin ? activeSelection?.chat.chatStatus : clientChatStatus) ===
+    "closed";
 
   const activeMessages = isAdmin
-    ? currentAdminThread?.messages || []
+    ? activeSelection?.chat.messages || []
     : clientMessages;
 
   const currentChatTitle = isAdmin
-    ? currentAdminThread
-      ? `${currentAdminThread.clientName} (${currentAdminThread.clientType === "empresa" ? "Empresa" : "Pessoa Física"})`
+    ? activeSelection
+      ? `${activeSelection.client.clientName} (${activeSelection.client.clientType === "empresa" ? "Empresa" : "Pessoa Física"})`
       : "Atendimento ao Cliente"
     : "Life Topografia • Atendimento & Engenharia";
 
   const currentChatSubtitle = isAdmin
-    ? currentAdminThread?.document || "Documento não informado"
+    ? activeSelection
+      ? `Chamado ${activeSelection.chat.ticketCode} — ${activeSelection.chat.title} • ${activeSelection.client.document}`
+      : "Selecione um chamado na fila"
     : "Canal Oficial com agrimensores e topógrafos responsáveis (CREA/SP)";
+
+  const updateAdminChat = (
+    chatId: string,
+    updater: (chat: AdminClientChat) => AdminClientChat,
+    nextLastInteractionTime?: string,
+  ) => {
+    setAdminClients((previous) =>
+      previous.map((client) => {
+        const hasTargetChat = client.chats.some((chat) => chat.id === chatId);
+        if (!hasTargetChat) return client;
+        return {
+          ...client,
+          lastInteractionTime:
+            nextLastInteractionTime ?? client.lastInteractionTime,
+          chats: client.chats.map((chat) =>
+            chat.id === chatId ? updater(chat) : chat,
+          ),
+        };
+      }),
+    );
+  };
+
+  const handleToggleClientDrawer = (clientId: string) => {
+    setExpandedClientIds((previous) => ({
+      ...previous,
+      [clientId]: !previous[clientId],
+    }));
+  };
+
+  const handleSelectAdminChat = (clientId: string, chatId: string) => {
+    setActiveChatId(chatId);
+    setExpandedClientIds((previous) => ({
+      ...previous,
+      [clientId]: true,
+    }));
+    updateAdminChat(chatId, (chat) =>
+      chat.unreadCount === 0 ? chat : { ...chat, unreadCount: 0 },
+    );
+    setMobileView("chat");
+  };
 
   /**
    * Envia mensagem de texto
    */
   const handleSendMessage = (e?: FormEvent) => {
     if (e) e.preventDefault();
-    const chatIsClosed = isAdmin
-      ? currentAdminThread?.chatStatus === "closed"
-      : clientChatStatus === "closed";
-    if (chatIsClosed) return;
+    if (activeChatIsClosed) return;
     const text = inputText.trim();
     if (!text) return;
 
@@ -450,17 +604,15 @@ export default function Chat() {
     };
 
     if (isAdmin) {
-      if (!activeThreadId) return;
-      setAdminThreads((prev) =>
-        prev.map((thread) =>
-          thread.id === activeThreadId
-            ? {
-                ...thread,
-                lastMessageTime: formattedTime,
-                messages: [...thread.messages, newMessage],
-              }
-            : thread,
-        ),
+      if (!activeChatId) return;
+      updateAdminChat(
+        activeChatId,
+        (chat) => ({
+          ...chat,
+          lastMessageTime: formattedTime,
+          messages: [...chat.messages, newMessage],
+        }),
+        formattedTime,
       );
     } else {
       setClientMessages((prev) => [...prev, newMessage]);
@@ -476,10 +628,7 @@ export default function Chat() {
    * O arquivo não é enviado nem armazenado sem integração de backend.
    */
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const chatIsClosed = isAdmin
-      ? currentAdminThread?.chatStatus === "closed"
-      : clientChatStatus === "closed";
-    if (chatIsClosed) {
+    if (activeChatIsClosed) {
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -519,17 +668,15 @@ export default function Chat() {
     };
 
     if (isAdmin) {
-      if (!activeThreadId) return;
-      setAdminThreads((prev) =>
-        prev.map((thread) =>
-          thread.id === activeThreadId
-            ? {
-                ...thread,
-                lastMessageTime: formattedTime,
-                messages: [...thread.messages, newMessage],
-              }
-            : thread,
-        ),
+      if (!activeChatId) return;
+      updateAdminChat(
+        activeChatId,
+        (chat) => ({
+          ...chat,
+          lastMessageTime: formattedTime,
+          messages: [...chat.messages, newMessage],
+        }),
+        formattedTime,
       );
     } else {
       setClientMessages((prev) => [...prev, newMessage]);
@@ -551,6 +698,7 @@ export default function Chat() {
       return;
     }
 
+    const targetChatId = activeChatId;
     setConvertingPdfId(msgId);
 
     // Simulação visual: as coordenadas abaixo são dados de exemplo, não extraídos do PDF.
@@ -587,21 +735,15 @@ export default function Chat() {
         text: `Demonstração concluída para "${pdfName}". Foi gerado um DXF de exemplo com coordenadas fictícias; nenhum dado foi extraído do PDF original.`,
       };
 
-      if (activeThreadId) {
-        setAdminThreads((prev) =>
-          prev.map((thread) =>
-            thread.id === activeThreadId
-              ? {
-                  ...thread,
-                  lastMessageTime: formattedTime,
-                  messages: [
-                    ...thread.messages,
-                    systemNotice,
-                    convertedMessage,
-                  ],
-                }
-              : thread,
-          ),
+      if (targetChatId) {
+        updateAdminChat(
+          targetChatId,
+          (chat) => ({
+            ...chat,
+            lastMessageTime: formattedTime,
+            messages: [...chat.messages, systemNotice, convertedMessage],
+          }),
+          formattedTime,
         );
       } else {
         setClientMessages((prev) => [...prev, systemNotice, convertedMessage]);
@@ -610,6 +752,26 @@ export default function Chat() {
       setConvertingPdfId(null);
       setTimeout(() => scrollToBottom("smooth"), 40);
     }, 1200);
+  };
+
+  const handleBudgetAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const nextCents = extractCentsFromDigits(e.target.value);
+    setBudgetCents(nextCents);
+    if (nextCents > 0) {
+      setBudgetAmountError("");
+    }
+  };
+
+  const handleBudgetAmountPaste = (e: ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text");
+    if (pasted.replace(/\D/g, "").length === 0) return;
+
+    const nextCents = extractCentsFromDigits(pasted);
+    setBudgetCents(nextCents);
+    if (nextCents > 0) {
+      setBudgetAmountError("");
+    }
   };
 
   /**
@@ -622,11 +784,15 @@ export default function Chat() {
       return;
     }
 
+    if (budgetCents <= 0) {
+      setBudgetAmountError("Informe um valor maior que R$ 00,00.");
+      return;
+    }
+
     if (
       !budgetTitle.trim() ||
-      !budgetAmount.trim() ||
-      !activeThreadId ||
-      currentAdminThread?.chatStatus === "closed"
+      !activeChatId ||
+      activeSelection?.chat.chatStatus === "closed"
     )
       return;
 
@@ -645,7 +811,7 @@ export default function Chat() {
       budget: {
         id: `orc-${Date.now()}`,
         serviceTitle: budgetTitle.trim(),
-        amount: budgetAmount.trim(),
+        amount: formatCentsToBRL(budgetCents),
         description:
           budgetDescription.trim() ||
           "Proposta técnica detalhada com ART, planta topográfica e memorial descritivo.",
@@ -654,20 +820,19 @@ export default function Chat() {
       },
     };
 
-    setAdminThreads((prev) =>
-      prev.map((thread) =>
-        thread.id === activeThreadId
-          ? {
-              ...thread,
-              lastMessageTime: formattedTime,
-              messages: [...thread.messages, newBudgetMessage],
-            }
-          : thread,
-      ),
+    updateAdminChat(
+      activeChatId,
+      (chat) => ({
+        ...chat,
+        lastMessageTime: formattedTime,
+        messages: [...chat.messages, newBudgetMessage],
+      }),
+      formattedTime,
     );
 
     setBudgetTitle("");
-    setBudgetAmount("");
+    setBudgetCents(0);
+    setBudgetAmountError("");
     setBudgetDescription("");
     setShowBudgetModal(false);
     setTimeout(() => scrollToBottom("smooth"), 40);
@@ -734,11 +899,7 @@ export default function Chat() {
    * Não significa que o serviço foi concluído.
    */
   const handleCloseChat = () => {
-    const chatIsAlreadyClosed = isAdmin
-      ? currentAdminThread?.chatStatus === "closed"
-      : clientChatStatus === "closed";
-
-    if (chatIsAlreadyClosed) return;
+    if (activeChatIsClosed) return;
 
     const confirmed = window.confirm(
       "Deseja realmente encerrar esta conversa? O serviço não será marcado como concluído.",
@@ -746,15 +907,11 @@ export default function Chat() {
 
     if (!confirmed) return;
 
-    if (currentAdminThread) {
-      // Atualiza somente a conversa selecionada, independentemente da visualização.
-      setAdminThreads((prev) =>
-        prev.map((thread) =>
-          thread.id === activeThreadId
-            ? { ...thread, chatStatus: "closed" }
-            : thread,
-        ),
-      );
+    if (activeSelection) {
+      updateAdminChat(activeSelection.chat.id, (chat) => ({
+        ...chat,
+        chatStatus: "closed",
+      }));
     }
 
     setShowQuickActions(false);
@@ -765,8 +922,8 @@ export default function Chat() {
    * Nesta versão, somente o administrador pode executar a ação.
    */
   const handleCompleteService = () => {
-    if (!isAdmin || !currentAdminThread) return;
-    if (currentAdminThread.serviceStatus === "completed") return;
+    if (!isAdmin || !activeSelection) return;
+    if (activeSelection.chat.serviceStatus === "completed") return;
 
     const confirmed = window.confirm(
       "Confirma que o serviço deste cliente foi concluído? Esta ação também encerrará a conversa.",
@@ -774,20 +931,12 @@ export default function Chat() {
 
     if (!confirmed) return;
 
-    setAdminThreads((prev) =>
-      prev.map((thread) =>
-        thread.id === activeThreadId
-          ? {
-              ...thread,
-              serviceStatus: "completed",
-              chatStatus: "closed",
-            }
-          : thread,
-      ),
-    );
+    updateAdminChat(activeSelection.chat.id, (chat) => ({
+      ...chat,
+      serviceStatus: "completed",
+      chatStatus: "closed",
+    }));
 
-    // O perfil de cliente lê o status da mesma conversa selecionada.
-    // Não há persistência nem sincronização entre dispositivos nesta versão.
     setShowQuickActions(false);
   };
 
@@ -808,11 +957,28 @@ export default function Chat() {
     setShowRatingModal(false);
   };
 
-  const filteredAdminThreads = adminThreads.filter(
-    (t) =>
-      t.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.document.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredAdminClients = adminClients
+    .map((client) => {
+      const visibleChats =
+        sidebarFilter === "unread"
+          ? client.chats.filter((chat) => chat.unreadCount > 0)
+          : client.chats;
+      return { ...client, chats: visibleChats };
+    })
+    .filter((client) => {
+      if (client.chats.length === 0) return false;
+      if (!normalizedSearch) return true;
+      return (
+        client.clientName.toLowerCase().includes(normalizedSearch) ||
+        client.document.toLowerCase().includes(normalizedSearch) ||
+        client.chats.some(
+          (chat) =>
+            chat.ticketCode.toLowerCase().includes(normalizedSearch) ||
+            chat.title.toLowerCase().includes(normalizedSearch),
+        )
+      );
+    });
 
   return (
     <>
@@ -867,11 +1033,33 @@ export default function Chat() {
               - No modo CLIENTE: Mostra o canal direto com a Life Topografia e status. */}
             <aside className="chat-sidebar-panel">
               <div className="chat-sidebar-panel__header">
-                <h2>
-                  {isAdmin
-                    ? "Fila de Atendimento aos Clientes"
-                    : "Canal Oficial"}
-                </h2>
+                <div className="sidebar-header-top">
+                  <h2>{isAdmin ? "Atendimentos" : "Canal Oficial"}</h2>
+                  {isAdmin && (
+                    <div
+                      className="sidebar-filter-tabs"
+                      role="group"
+                      aria-label="Filtrar atendimentos"
+                    >
+                      <button
+                        type="button"
+                        className={`sidebar-filter-tab ${sidebarFilter === "all" ? "is-active" : ""}`}
+                        aria-pressed={sidebarFilter === "all"}
+                        onClick={() => setSidebarFilter("all")}
+                      >
+                        Todos
+                      </button>
+                      <button
+                        type="button"
+                        className={`sidebar-filter-tab ${sidebarFilter === "unread" ? "is-active" : ""}`}
+                        aria-pressed={sidebarFilter === "unread"}
+                        onClick={() => setSidebarFilter("unread")}
+                      >
+                        Não lidos
+                      </button>
+                    </div>
+                  )}
+                </div>
                 {isAdmin && (
                   <div className="chat-search-box">
                     <span className="search-icon" aria-hidden="true">
@@ -879,10 +1067,10 @@ export default function Chat() {
                     </span>
                     <input
                       type="text"
-                      placeholder="Filtrar por nome ou CNPJ/CPF..."
+                      placeholder="Buscar nome, CNPJ/CPF ou assunto..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      aria-label="Buscar clientes"
+                      aria-label="Buscar clientes ou chamados"
                     />
                   </div>
                 )}
@@ -890,74 +1078,147 @@ export default function Chat() {
 
               <div className="chat-conversations-list" role="list">
                 {isAdmin ? (
-                  filteredAdminThreads.length === 0 ? (
+                  filteredAdminClients.length === 0 ? (
                     <div className="chat-empty-search" role="status">
                       <span className="empty-search-icon" aria-hidden="true">
                         🔍
                       </span>
-                      <p>Nenhum cliente encontrado para "{searchTerm}".</p>
+                      <p>
+                        {normalizedSearch
+                          ? `Nenhum cliente encontrado para "${searchTerm}".`
+                          : "Nenhum atendimento não lido no momento."}
+                      </p>
                     </div>
                   ) : (
-                    filteredAdminThreads.map((thread) => {
-                      const isActive = thread.id === activeThreadId;
-                      const lastMsg =
-                        thread.messages[thread.messages.length - 1];
-                      const previewText =
-                        lastMsg?.type === "file"
-                          ? `📎 Arquivo: ${lastMsg.file?.name}`
-                          : lastMsg?.type === "budget"
-                            ? `💼 Orçamento: R$ ${lastMsg.budget?.amount}`
-                            : lastMsg?.text || "Inicie a conversa...";
+                    filteredAdminClients.map((client) => {
+                      const isExpanded =
+                        Boolean(expandedClientIds[client.id]) ||
+                        normalizedSearch.length > 0 ||
+                        sidebarFilter === "unread";
+                      const totalUnread = client.chats.reduce(
+                        (sum, item) => sum + item.unreadCount,
+                        0,
+                      );
+                      const hasOpenChat = client.chats.some(
+                        (item) => item.chatStatus === "open",
+                      );
+                      const hasActiveChat = client.chats.some(
+                        (item) => item.id === activeChatId,
+                      );
+                      const drawerId = `client-drawer-${client.id}`;
 
                       return (
                         <div
-                          key={thread.id}
+                          key={client.id}
                           role="listitem"
-                          className={`conversation-item ${isActive ? "is-active" : ""}`}
-                          onClick={() => {
-                            setActiveThreadId(thread.id);
-                            setMobileView("chat");
-                          }}
-                          tabIndex={0}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              setActiveThreadId(thread.id);
-                              setMobileView("chat");
-                            }
-                          }}
+                          className={`client-drawer-group ${hasActiveChat ? "has-active-chat" : ""}`}
                         >
-                          <div className="conversation-avatar-box">
-                            <div className="conversation-avatar">
-                              {thread.clientName.charAt(0)}
+                          <button
+                            type="button"
+                            className={`client-drawer-trigger ${isExpanded ? "is-expanded" : ""}`}
+                            aria-expanded={isExpanded}
+                            aria-controls={drawerId}
+                            onClick={() => handleToggleClientDrawer(client.id)}
+                          >
+                            <div className="conversation-avatar-box is-compact">
+                              <div className="conversation-avatar">
+                                {client.clientName.charAt(0)}
+                              </div>
+                              {hasOpenChat && (
+                                <span
+                                  className="online-indicator"
+                                  title="Cliente com atendimento aberto"
+                                />
+                              )}
                             </div>
-                            {thread.chatStatus === "open" && (
-                              <span
-                                className="online-indicator"
-                                title="Conversa aberta"
-                              />
-                            )}
-                          </div>
 
-                          <div className="conversation-details">
-                            <div className="conversation-top-row">
-                              <span className="conversation-name">
-                                {thread.clientName}
-                              </span>
-                              <span className="conversation-time">
-                                {thread.lastMessageTime}
-                              </span>
-                            </div>
-                            <span className="conversation-role">
-                              {thread.clientType === "empresa"
-                                ? "Empresa"
-                                : "Pessoa Física"}{" "}
-                              • {thread.document}
+                            <span className="client-drawer-name">
+                              {client.clientName}
                             </span>
-                            <p className="conversation-preview">
-                              {previewText}
-                            </p>
-                          </div>
+
+                            <span className="client-trigger-meta">
+                              {totalUnread > 0 && (
+                                <span
+                                  className="client-unread-badge"
+                                  aria-label={`${totalUnread} mensagem(ns) não lida(s)`}
+                                >
+                                  {totalUnread}
+                                </span>
+                              )}
+                              <span
+                                className="client-drawer-chevron"
+                                aria-hidden="true"
+                              >
+                                {isExpanded ? "▾" : "▸"}
+                              </span>
+                            </span>
+                          </button>
+
+                          {isExpanded && (
+                            <div
+                              id={drawerId}
+                              className="client-chats-sublist"
+                              role="list"
+                              aria-label={`Atendimentos de ${client.clientName}`}
+                            >
+                              {client.chats.map((chat) => {
+                                const isChatActive = chat.id === activeChatId;
+                                const lastMsg =
+                                  chat.messages[chat.messages.length - 1];
+                                const previewText =
+                                  lastMsg?.type === "file"
+                                    ? `📎 Arquivo: ${lastMsg.file?.name}`
+                                    : lastMsg?.type === "budget"
+                                      ? `💼 Orçamento: ${formatBudgetAmountDisplay(lastMsg.budget?.amount || "")}`
+                                      : lastMsg?.text ||
+                                        "Inicie a conversa...";
+
+                                return (
+                                  <button
+                                    key={chat.id}
+                                    type="button"
+                                    role="listitem"
+                                    className={`client-chat-item ${isChatActive ? "is-active" : ""} ${chat.chatStatus === "closed" ? "is-closed" : ""}`}
+                                    onClick={() =>
+                                      handleSelectAdminChat(client.id, chat.id)
+                                    }
+                                  >
+                                    <div className="client-chat-item__top">
+                                      <span
+                                        className={`chat-status-dot ${chat.chatStatus === "open" ? "is-open" : "is-closed"}`}
+                                        title={
+                                          chat.chatStatus === "open"
+                                            ? "Aberto"
+                                            : "Encerrado"
+                                        }
+                                        aria-hidden="true"
+                                      />
+                                      <span className="client-chat-item__title">
+                                        {chat.title}
+                                      </span>
+                                      <span className="client-chat-item__time">
+                                        {chat.lastMessageTime}
+                                      </span>
+                                    </div>
+
+                                    <div className="client-chat-item__bottom">
+                                      <span className="client-chat-item__preview">
+                                        {previewText}
+                                      </span>
+                                      {chat.unreadCount > 0 && (
+                                        <span className="client-chat-item__meta">
+                                          <span
+                                            className="chat-unread-dot"
+                                            aria-label="Mensagem não lida"
+                                          />
+                                        </span>
+                                      )}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       );
                     })
@@ -1004,128 +1265,127 @@ export default function Chat() {
             <div className="chat-window-panel">
               {/* Header da Conversa Ativa */}
               <header className="chat-active-header">
-                <div className="active-attendant-info">
-                  {isAdmin && (
-                    <button
-                      type="button"
-                      className="btn-mobile-back"
-                      onClick={() => setMobileView("list")}
-                      aria-label="Voltar para lista de conversas"
-                      title="Voltar para lista de clientes"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="18"
-                        height="18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
+                <div className="chat-header-main">
+                  <div className="chat-header-row-top">
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        className="btn-mobile-back"
+                        onClick={() => setMobileView("list")}
+                        aria-label="Voltar para lista de clientes"
+                        title="Voltar para lista de clientes"
                       >
-                        <polyline points="15 18 9 12 15 6" />
-                      </svg>
-                      <span className="btn-mobile-back-text">Clientes</span>
-                    </button>
-                  )}
-
-                  <div
-                    className={`active-attendant-avatar ${isAdmin ? "" : "brand-avatar"}`}
-                    aria-hidden="true"
-                  >
-                    {isAdmin ? currentChatTitle.charAt(0) : "LT"}
-                    {(isAdmin
-                      ? currentAdminThread?.chatStatus
-                      : clientChatStatus) === "open" && (
-                      <span
-                        className="online-indicator"
-                        title="Conversa ativa"
-                      />
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="16"
+                          height="16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                        <span>Clientes</span>
+                      </button>
                     )}
-                  </div>
 
-                  <div className="active-attendant-text">
-                    <div className="active-attendant-title-row">
-                      <h3
-                        className="active-attendant-name"
-                        title={currentChatTitle}
-                      >
-                        {currentChatTitle}
-                      </h3>
-                      <span
-                        className={`chat-status-label ${
-                          (isAdmin
-                            ? currentAdminThread?.chatStatus
-                            : clientChatStatus) === "closed"
-                            ? "is-closed"
-                            : "is-open"
-                        }`}
-                      >
-                        <span className="status-dot" aria-hidden="true" />
-                        <span className="status-label-text">
-                          {(isAdmin
-                            ? currentAdminThread?.chatStatus
-                            : clientChatStatus) === "closed"
-                            ? "Chat encerrado"
-                            : "Chat aberto"}
-                        </span>
-                      </span>
+                    <div
+                      className={`active-attendant-avatar ${isAdmin ? "" : "brand-avatar"}`}
+                      aria-hidden="true"
+                    >
+                      {isAdmin ? currentChatTitle.charAt(0) : "LT"}
+                      {!activeChatIsClosed && (
+                        <span
+                          className="online-indicator"
+                          title="Conversa ativa"
+                        />
+                      )}
                     </div>
 
-                    <span
-                      className="active-attendant-status"
-                      title={currentChatSubtitle}
-                    >
-                      {(isAdmin
-                        ? currentAdminThread?.chatStatus
-                        : clientChatStatus) === "closed" ? (
-                        "Atendimento encerrado"
-                      ) : (
-                        <span className="online-status-line">
-                          <span className="pulse-dot" aria-hidden="true" />
-                          Ativo agora • {currentChatSubtitle}
+                    <div className="active-attendant-text">
+                      <div className="active-attendant-title-row">
+                        <h3
+                          className="active-attendant-name"
+                          title={currentChatTitle}
+                        >
+                          {currentChatTitle}
+                        </h3>
+                        <span
+                          className={`chat-status-label ${
+                            activeChatIsClosed ? "is-closed" : "is-open"
+                          }`}
+                        >
+                          <span className="status-dot" aria-hidden="true" />
+                          <span className="status-label-text">
+                            {activeChatIsClosed
+                              ? "Chat encerrado"
+                              : "Chat aberto"}
+                          </span>
                         </span>
-                      )}
-                    </span>
+                      </div>
+
+                      <span
+                        className="active-attendant-status active-attendant-status--desktop"
+                        title={currentChatSubtitle}
+                      >
+                        {activeChatIsClosed ? (
+                          `Atendimento encerrado • ${currentChatSubtitle}`
+                        ) : (
+                          <span className="online-status-line">
+                            <span className="pulse-dot" aria-hidden="true" />
+                            {currentChatSubtitle}
+                          </span>
+                        )}
+                      </span>
+                    </div>
                   </div>
+
+                  <span
+                    className="active-attendant-status active-attendant-status--mobile"
+                    title={currentChatSubtitle}
+                  >
+                    {currentChatSubtitle}
+                  </span>
                 </div>
 
                 {/* Ações e status do atendimento */}
                 <div className="active-header-actions">
-                  {isAdmin && currentAdminThread && (
+                  {isAdmin && activeSelection && (
                     <>
                       <button
                         type="button"
                         className="btn-header-budget"
                         onClick={() => setShowBudgetModal(true)}
-                        disabled={currentAdminThread.chatStatus === "closed"}
+                        disabled={activeChatIsClosed}
                       >
                         + Orçamento
                       </button>
 
-                      {currentAdminThread.serviceStatus !== "completed" && (
+                      {activeSelection.chat.serviceStatus !== "completed" && (
                         <button
                           type="button"
                           className="btn-complete-service"
                           onClick={handleCompleteService}
                         >
-                          Concluir Serviço
+                          Concluir
+                          <span className="action-btn-extra"> Serviço</span>
                         </button>
                       )}
                     </>
                   )}
 
-                  {(isAdmin
-                    ? currentAdminThread?.chatStatus
-                    : clientChatStatus) === "open" && (
+                  {!activeChatIsClosed && (
                     <button
                       type="button"
                       className="btn-close-chat"
                       onClick={handleCloseChat}
                       title="Encerrar conversa atual"
                     >
-                      Encerrar Chat
+                      Encerrar
+                      <span className="action-btn-extra"> Chat</span>
                     </button>
                   )}
                 </div>
@@ -1295,7 +1555,7 @@ export default function Chat() {
                                 Valor total do serviço:
                               </span>
                               <span className="sumup-price">
-                                R$ {msg.budget.amount}
+                                {formatBudgetAmountDisplay(msg.budget.amount)}
                               </span>
                             </div>
 
@@ -1434,82 +1694,61 @@ export default function Chat() {
                 </>
               )}
 
-              {(isAdmin ? currentAdminThread?.chatStatus : clientChatStatus) ===
-                "closed" && (
+              {activeChatIsClosed ? (
                 <div className="chat-closed-notice" role="status">
-                  Esta conversa foi encerrada. O envio de mensagens e arquivos
-                  está desabilitado.
+                  Este atendimento foi encerrado. Histórico disponível apenas
+                  para consulta.
                 </div>
-              )}
+              ) : (
+                /* Barra de Entrada de Mensagens */
+                <form className="chat-input-bar" onSubmit={handleSendMessage}>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    accept=".pdf,application/pdf"
+                    onChange={handleFileUpload}
+                  />
 
-              {/* Barra de Entrada de Mensagens */}
-              <form className="chat-input-bar" onSubmit={handleSendMessage}>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                  accept=".pdf,application/pdf"
-                  onChange={handleFileUpload}
-                  disabled={
-                    (isAdmin
-                      ? currentAdminThread?.chatStatus
-                      : clientChatStatus) === "closed"
-                  }
-                />
-
-                <button
-                  type="button"
-                  className={`btn-action-trigger ${showQuickActions ? "is-active" : ""}`}
-                  onClick={() => setShowQuickActions(!showQuickActions)}
-                  aria-label="Abrir opções de anexo"
-                  title="Anexar matrícula em PDF ou ações rápidas"
-                  disabled={
-                    (isAdmin
-                      ? currentAdminThread?.chatStatus
-                      : clientChatStatus) === "closed"
-                  }
-                >
-                  +
-                </button>
-
-                <input
-                  type="text"
-                  className="chat-text-input"
-                  placeholder={
-                    isAdmin
-                      ? "Responder cliente como Administrador..."
-                      : "Digite sua mensagem para a Life Topografia..."
-                  }
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  disabled={
-                    (isAdmin
-                      ? currentAdminThread?.chatStatus
-                      : clientChatStatus) === "closed"
-                  }
-                  aria-label="Mensagem de atendimento"
-                />
-
-                <button
-                  type="submit"
-                  className="btn-send-message"
-                  disabled={
-                    !inputText.trim() ||
-                    (isAdmin
-                      ? currentAdminThread?.chatStatus
-                      : clientChatStatus) === "closed"
-                  }
-                  aria-label="Enviar mensagem"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
+                  <button
+                    type="button"
+                    className={`btn-action-trigger ${showQuickActions ? "is-active" : ""}`}
+                    onClick={() => setShowQuickActions(!showQuickActions)}
+                    aria-label="Abrir opções de anexo"
+                    title="Anexar matrícula em PDF ou ações rápidas"
                   >
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                  </svg>
-                </button>
-              </form>
+                    +
+                  </button>
+
+                  <input
+                    type="text"
+                    className="chat-text-input"
+                    placeholder={
+                      isAdmin
+                        ? "Responder cliente como Administrador..."
+                        : "Digite sua mensagem para a Life Topografia..."
+                    }
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    aria-label="Mensagem de atendimento"
+                  />
+
+                  <button
+                    type="submit"
+                    className="btn-send-message"
+                    disabled={!inputText.trim()}
+                    aria-label="Enviar mensagem"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                  </button>
+                </form>
+              )}
             </div>
           </section>
 
@@ -1546,7 +1785,7 @@ export default function Chat() {
           {showBudgetModal && isAdmin && (
             <div
               className="budget-modal-backdrop"
-              onClick={() => setShowBudgetModal(false)}
+              onClick={closeBudgetModal}
             >
               <div
                 className="budget-modal-content"
@@ -1563,7 +1802,7 @@ export default function Chat() {
                   <button
                     type="button"
                     className="btn-close-modal"
-                    onClick={() => setShowBudgetModal(false)}
+                    onClick={closeBudgetModal}
                     aria-label="Fechar modal"
                   >
                     ✕
@@ -1590,16 +1829,37 @@ export default function Chat() {
 
                   <div className="modal-field-group">
                     <label htmlFor="budget-service-amount">
-                      Valor Total (R$):
+                      Valor Total:
                     </label>
                     <input
                       id="budget-service-amount"
                       type="text"
-                      placeholder="Ex.: 2.450,00"
-                      value={budgetAmount}
-                      onChange={(e) => setBudgetAmount(e.target.value)}
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="R$ 00,00"
+                      value={formatCentsToBRL(budgetCents)}
+                      onChange={handleBudgetAmountChange}
+                      onPaste={handleBudgetAmountPaste}
+                      aria-invalid={Boolean(budgetAmountError)}
+                      aria-describedby="budget-amount-feedback"
                       required
                     />
+                    {budgetAmountError ? (
+                      <p
+                        id="budget-amount-feedback"
+                        className="modal-field-error"
+                        role="alert"
+                      >
+                        {budgetAmountError}
+                      </p>
+                    ) : budgetCents <= 0 ? (
+                      <p
+                        id="budget-amount-feedback"
+                        className="modal-field-hint"
+                      >
+                        Informe um valor maior que R$ 00,00.
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="modal-field-group">
@@ -1619,11 +1879,15 @@ export default function Chat() {
                     <button
                       type="button"
                       className="btn-modal-cancel"
-                      onClick={() => setShowBudgetModal(false)}
+                      onClick={closeBudgetModal}
                     >
                       Cancelar
                     </button>
-                    <button type="submit" className="btn-modal-submit">
+                    <button
+                      type="submit"
+                      className="btn-modal-submit"
+                      disabled={budgetCents <= 0 || !budgetTitle.trim()}
+                    >
                       Enviar Proposta ao Cliente
                     </button>
                   </footer>
