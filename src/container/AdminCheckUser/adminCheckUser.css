@@ -253,6 +253,7 @@
 
 .admin-users-toolbar-right {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
@@ -996,6 +997,15 @@
   .admin-users-col-actions {
     white-space: normal;
   }
+
+  .admin-users-actions-group {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .admin-users-type-badges {
+    justify-content: flex-end;
+  }
 }
 
 @media screen and (max-width: 600px) {
@@ -1018,7 +1028,8 @@
 
   .admin-users-toolbar-right {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .admin-users-pagination {
@@ -1034,6 +1045,212 @@
   .admin-users-bond-badge {
     margin-left: auto;
   }
+
+  .admin-users-confirm-footer {
+    flex-direction: column-reverse;
+  }
+
+  .admin-users-confirm-footer .admin-users-btn {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   FILTRO DE STATUS, BADGES E AÇÕES DE INATIVAR / REATIVAR
+   ========================================================= */
+
+.admin-users-status-select {
+  font-weight: 500;
+}
+
+.admin-users-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--acu-green-border);
+  background-color: var(--acu-green-soft);
+  color: var(--acu-green-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.admin-users-status-banner-close {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--acu-green-text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.admin-users-status-banner-close:hover {
+  background-color: #dcfce7;
+  border-color: var(--acu-green-border);
+}
+
+.admin-users-type-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-users-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-users-status-pill.is-inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.admin-users-status-pill.is-deleted {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.admin-users-table tbody tr.is-inactive > td:not(.admin-users-col-actions) {
+  opacity: 0.65;
+}
+
+.admin-users-table tbody tr.is-deleted > td:not(.admin-users-col-actions) {
+  opacity: 0.55;
+}
+
+.admin-users-table tbody tr.is-inactive > td.admin-users-col-actions,
+.admin-users-table tbody tr.is-deleted > td.admin-users-col-actions {
+  opacity: 1;
+}
+
+.admin-users-actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.admin-users-self-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: var(--acu-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-users-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-users-action-btn--inactivate {
+  border: 1px solid #dc2626;
+  color: #dc2626;
+}
+
+.admin-users-action-btn--inactivate:hover {
+  background-color: #fef2f2;
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
+.admin-users-action-btn--reactivate {
+  border: 1px solid #16a34a;
+  color: #16a34a;
+}
+
+.admin-users-action-btn--reactivate:hover {
+  background-color: #f0fdf4;
+  border-color: #15803d;
+  color: #15803d;
+}
+
+.admin-users-confirm-dialog {
+  max-width: 480px;
+}
+
+.admin-users-confirm-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border: 1px solid var(--acu-border);
+  border-radius: 12px;
+  background-color: #f8fafc;
+}
+
+.admin-users-confirm-message {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--acu-text);
+}
+
+.admin-users-confirm-warning {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #d97706;
+  border-radius: 10px;
+  background-color: #fffbeb;
+  color: #92400e;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.admin-users-confirm-footer {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-users-btn--danger {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+.admin-users-btn--danger:hover {
+  background-color: #b91c1c;
+}
+
+.admin-users-btn--success {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.admin-users-btn--success:hover {
+  background-color: #15803d;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1047,6 +1264,7 @@
   .admin-users-filter-btn,
   .admin-users-refresh-btn,
   .admin-users-members-btn,
+  .admin-users-action-btn,
   .admin-users-page-btn,
   .admin-users-btn {
     transition: none;

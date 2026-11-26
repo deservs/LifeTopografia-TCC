@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Link, useLocation } from "react-router-dom";
 
+import { useAuth } from "../../hook/useAuth";
 import { useLayout } from "../../hook/useLayout";
 
 import {
@@ -28,10 +29,39 @@ const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
 
 type AccountFilter = "ALL" | AccountKind;
+type AccountVisualStatus = "ativo" | "pendente" | "inativo" | "excluido";
+type StatusFilter = "ALL" | "ativo" | "inativo" | "excluido";
+
+interface PendingStatusAction {
+  account: AdminUserItem;
+  targetStatus: "inativo" | "ativo";
+}
 
 interface ErrorState {
   kind: AdminApiErrorKind;
   message: string;
+}
+
+const MOCK_INACTIVE_USER: AdminUserItem = {
+  id: "mock-inactive-account-1",
+  name: "Marcos Andrade",
+  email: "marcos.andrade@topografiasul.com.br",
+  accountType: "PESSOA_FISICA",
+  isAdminAccount: false,
+  status: "inativo",
+};
+
+function normalizeVisualStatus(rawStatus?: string): AccountVisualStatus {
+  const token = (rawStatus ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase();
+
+  if (token === "INATIVO") return "inativo";
+  if (token === "EXCLUIDO" || token === "REMOVIDO") return "excluido";
+  if (token === "PENDENTE") return "pendente";
+  return "ativo";
 }
 
 function getInitials(name: string): string {
@@ -41,7 +71,10 @@ function getInitials(name: string): string {
   return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
 }
 
-function buildPageRange(current: number, totalPages: number): Array<number | "ellipsis"> {
+function buildPageRange(
+  current: number,
+  totalPages: number,
+): Array<number | "ellipsis"> {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, idx) => idx + 1);
   }
@@ -95,9 +128,13 @@ function UserAvatar({
 
 export default function AdminCheckUser() {
   const location = useLocation();
+  const { user: currentUser } = useAuth();
   const searchInputId = useId();
+  const statusSelectId = useId();
   const pageSizeSelectId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const statusDialogRef = useRef<HTMLDialogElement>(null);
+  const noticeTimerRef = useRef<number | null>(null);
   const { setTopbarRightContent } = useLayout();
 
   const [users, setUsers] = useState<AdminUserItem[]>([]);
@@ -111,12 +148,21 @@ export default function AdminCheckUser() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(DEFAULT_PAGE_SIZE);
   const [accountFilter, setAccountFilter] = useState<AccountFilter>("ALL");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [searchDraft, setSearchDraft] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [reloadTick, setReloadTick] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<ErrorState | null>(null);
+
+  // Estados visuais locais para inativação/reativação (sem persistência em backend)
+  const [statusOverrides, setStatusOverrides] = useState<
+    Record<string, AccountVisualStatus>
+  >({});
+  const [pendingStatusAction, setPendingStatusAction] =
+    useState<PendingStatusAction | null>(null);
+  const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
   // Estado do modal de membros da empresa (PJ)
   const [selectedCompany, setSelectedCompany] = useState<AdminUserItem | null>(
@@ -289,12 +335,75 @@ export default function AdminCheckUser() {
     };
   }, [selectedCompany]);
 
+  // Limpa timer de notificação temporária ao desmontar.
+  useEffect(() => {
+    return () => {
+      if (noticeTimerRef.current !== null) {
+        window.clearTimeout(noticeTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Controla a abertura e acessibilidade do <dialog> de confirmação de status.
+  useEffect(() => {
+    const dialog = statusDialogRef.current;
+    if (!dialog) return;
+
+    if (!pendingStatusAction) {
+      if (dialog.open) dialog.close();
+      return;
+    }
+
+    const previouslyFocused = document.activeElement;
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    return () => {
+      if (dialog.open) dialog.close();
+      if (
+        previouslyFocused instanceof HTMLElement &&
+        previouslyFocused.isConnected
+      ) {
+        previouslyFocused.focus();
+      }
+    };
+  }, [pendingStatusAction]);
+
   const handleCloseModal = useCallback(() => {
     setSelectedCompany(null);
     setModalMembers([]);
     setModalError(null);
     setModalLoading(false);
   }, []);
+
+  const handleCloseStatusModal = useCallback(() => {
+    setPendingStatusAction(null);
+  }, []);
+
+  const handleConfirmStatusChange = useCallback(() => {
+    if (!pendingStatusAction) return;
+
+    const { account, targetStatus } = pendingStatusAction;
+    setStatusOverrides((previous) => ({
+      ...previous,
+      [account.id]: targetStatus,
+    }));
+    setPendingStatusAction(null);
+
+    if (noticeTimerRef.current !== null) {
+      window.clearTimeout(noticeTimerRef.current);
+    }
+    setStatusNotice(
+      targetStatus === "inativo"
+        ? `Conta de ${account.name} inativada com sucesso.`
+        : `Conta de ${account.name} reativada com sucesso.`,
+    );
+    noticeTimerRef.current = window.setTimeout(() => {
+      setStatusNotice(null);
+      noticeTimerRef.current = null;
+    }, 4500);
+  }, [pendingStatusAction]);
 
   const handleFilterChange = useCallback((nextFilter: AccountFilter) => {
     setAccountFilter(nextFilter);
@@ -310,8 +419,49 @@ export default function AdminCheckUser() {
     setSearchDraft("");
     setDebouncedSearch("");
     setAccountFilter("ALL");
+    setStatusFilter("ALL");
     setPage(1);
   }, []);
+
+  const displayedUsers = useMemo(() => {
+    const hasInactiveInPage = users.some(
+      (item) => normalizeVisualStatus(item.status) === "inativo",
+    );
+    const matchesAccountFilter =
+      accountFilter === "ALL" ||
+      accountFilter === MOCK_INACTIVE_USER.accountType;
+    const lowerSearch = debouncedSearch.toLowerCase();
+    const matchesSearch =
+      lowerSearch.length === 0 ||
+      MOCK_INACTIVE_USER.name.toLowerCase().includes(lowerSearch) ||
+      MOCK_INACTIVE_USER.email.toLowerCase().includes(lowerSearch);
+
+    const baseUsers =
+      !hasInactiveInPage &&
+      page === 1 &&
+      matchesAccountFilter &&
+      matchesSearch
+        ? [...users, MOCK_INACTIVE_USER]
+        : users;
+
+    return baseUsers
+      .map((account) => ({
+        account,
+        visualStatus:
+          statusOverrides[account.id] ?? normalizeVisualStatus(account.status),
+      }))
+      .filter(
+        ({ visualStatus }) =>
+          statusFilter === "ALL" || visualStatus === statusFilter,
+      );
+  }, [
+    users,
+    accountFilter,
+    debouncedSearch,
+    page,
+    statusOverrides,
+    statusFilter,
+  ]);
 
   const pageNumbers = useMemo(
     () => buildPageRange(pagination.page, pagination.totalPages),
@@ -340,7 +490,9 @@ export default function AdminCheckUser() {
   }, [modalMembers]);
 
   const hasActiveFilters =
-    debouncedSearch.length > 0 || accountFilter !== "ALL";
+    debouncedSearch.length > 0 ||
+    accountFilter !== "ALL" ||
+    statusFilter !== "ALL";
   const rangeStart =
     pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
   const rangeEnd = Math.min(
@@ -400,7 +552,9 @@ export default function AdminCheckUser() {
             role="alert"
             aria-labelledby="admin-forbidden-title"
           >
-            <h2 id="admin-forbidden-title">Acesso restrito a administradores</h2>
+            <h2 id="admin-forbidden-title">
+              Acesso restrito a administradores
+            </h2>
             <p>{errorState.message}</p>
             <div className="admin-users-state-actions">
               <Link
@@ -497,6 +651,27 @@ export default function AdminCheckUser() {
 
               <div className="admin-users-toolbar-right">
                 <label
+                  htmlFor={statusSelectId}
+                  className="admin-users-limit-label"
+                >
+                  <select
+                    id={statusSelectId}
+                    className="admin-users-limit-select admin-users-status-select"
+                    aria-label="Filtrar por status da conta"
+                    value={statusFilter}
+                    disabled={loading}
+                    onChange={(event) =>
+                      setStatusFilter(event.target.value as StatusFilter)
+                    }
+                  >
+                    <option value="ALL">Status: Todos</option>
+                    <option value="ativo">Ativos</option>
+                    <option value="inativo">Inativos</option>
+                    <option value="excluido">Excluídos</option>
+                  </select>
+                </label>
+
+                <label
                   htmlFor={pageSizeSelectId}
                   className="admin-users-limit-label"
                 >
@@ -529,6 +704,24 @@ export default function AdminCheckUser() {
               </div>
             </div>
 
+            {statusNotice && (
+              <div
+                className="admin-users-status-banner"
+                role="status"
+                aria-live="polite"
+              >
+                <span>{statusNotice}</span>
+                <button
+                  type="button"
+                  className="admin-users-status-banner-close"
+                  aria-label="Fechar aviso"
+                  onClick={() => setStatusNotice(null)}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             {loading ? (
               <div
                 className="admin-users-skeleton-list"
@@ -559,7 +752,7 @@ export default function AdminCheckUser() {
                   Tentar novamente
                 </button>
               </div>
-            ) : users.length === 0 ? (
+            ) : displayedUsers.length === 0 ? (
               <div className="admin-users-empty-state" role="status">
                 <h2>Nenhuma conta encontrada</h2>
                 <p>
@@ -593,16 +786,28 @@ export default function AdminCheckUser() {
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map((account) => {
+                      {displayedUsers.map(({ account, visualStatus }) => {
                         const isCompany = account.accountType === "EMPRESA";
                         const canInspectMembers =
                           isCompany ||
                           Boolean(account.cnpj) ||
                           (account.members !== undefined &&
                             account.members.length > 0);
+                        const isSelf = Boolean(
+                          currentUser?.id && account.id === currentUser.id,
+                        );
+                        const rowStatusClass =
+                          visualStatus === "inativo"
+                            ? "is-inactive"
+                            : visualStatus === "excluido"
+                              ? "is-deleted"
+                              : "";
 
                         return (
-                          <tr key={account.id}>
+                          <tr
+                            key={account.id}
+                            className={rowStatusClass || undefined}
+                          >
                             <td data-label="Usuário">
                               <div className="admin-users-identity">
                                 <UserAvatar
@@ -629,13 +834,25 @@ export default function AdminCheckUser() {
                             </td>
 
                             <td data-label="Tipo">
-                              <span
-                                className={`admin-users-type-badge ${
-                                  isCompany ? "is-company" : "is-person"
-                                }`}
-                              >
-                                {isCompany ? "Empresa" : "Pessoa Física"}
-                              </span>
+                              <div className="admin-users-type-badges">
+                                <span
+                                  className={`admin-users-type-badge ${
+                                    isCompany ? "is-company" : "is-person"
+                                  }`}
+                                >
+                                  {isCompany ? "Empresa" : "Pessoa Física"}
+                                </span>
+                                {visualStatus === "inativo" && (
+                                  <span className="admin-users-status-pill is-inactive">
+                                    Inativo
+                                  </span>
+                                )}
+                                {visualStatus === "excluido" && (
+                                  <span className="admin-users-status-pill is-deleted">
+                                    Excluído
+                                  </span>
+                                )}
+                              </div>
                             </td>
 
                             <td data-label="CNPJ">
@@ -654,25 +871,68 @@ export default function AdminCheckUser() {
                             </td>
 
                             <td
-                              data-label="Membros"
+                              data-label="Ações"
                               className="admin-users-col-actions"
                             >
-                              {canInspectMembers ? (
-                                <button
-                                  type="button"
-                                  className="admin-users-members-btn"
-                                  onClick={() => setSelectedCompany(account)}
-                                >
-                                  Ver membros
-                                  {typeof account.membersCount === "number" && (
-                                    <span className="admin-users-count-pill">
-                                      {account.membersCount}
+                              <div className="admin-users-actions-group">
+                                {canInspectMembers && (
+                                  <button
+                                    type="button"
+                                    className="admin-users-members-btn"
+                                    onClick={() => setSelectedCompany(account)}
+                                  >
+                                    Ver membros
+                                    {typeof account.membersCount ===
+                                      "number" && (
+                                      <span className="admin-users-count-pill">
+                                        {account.membersCount}
+                                      </span>
+                                    )}
+                                  </button>
+                                )}
+
+                                {isSelf ? (
+                                  <span className="admin-users-self-badge">
+                                    Você
+                                  </span>
+                                ) : visualStatus === "ativo" ||
+                                  visualStatus === "pendente" ? (
+                                  <button
+                                    type="button"
+                                    className="admin-users-action-btn admin-users-action-btn--inactivate"
+                                    onClick={() =>
+                                      setPendingStatusAction({
+                                        account,
+                                        targetStatus: "inativo",
+                                      })
+                                    }
+                                  >
+                                    Inativar
+                                  </button>
+                                ) : visualStatus === "inativo" ? (
+                                  <button
+                                    type="button"
+                                    className="admin-users-action-btn admin-users-action-btn--reactivate"
+                                    onClick={() =>
+                                      setPendingStatusAction({
+                                        account,
+                                        targetStatus: "ativo",
+                                      })
+                                    }
+                                  >
+                                    Reativar
+                                  </button>
+                                ) : (
+                                  !canInspectMembers && (
+                                    <span
+                                      className="admin-users-muted-dash"
+                                      aria-label="Nenhuma ação disponível"
+                                    >
+                                      —
                                     </span>
-                                  )}
-                                </button>
-                              ) : (
-                                <span className="admin-users-muted-dash">—</span>
-                              )}
+                                  )
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );
@@ -913,6 +1173,135 @@ export default function AdminCheckUser() {
                 onClick={handleCloseModal}
               >
                 Fechar
+              </button>
+            </div>
+          </div>
+        )}
+      </dialog>
+
+      <dialog
+        ref={statusDialogRef}
+        className="admin-users-dialog admin-users-confirm-dialog"
+        aria-labelledby="admin-status-dialog-title"
+        onCancel={(event) => {
+          event.preventDefault();
+          handleCloseStatusModal();
+        }}
+        onClick={(event) => {
+          if (event.target === statusDialogRef.current) {
+            handleCloseStatusModal();
+          }
+        }}
+      >
+        {pendingStatusAction && (
+          <div className="admin-users-dialog-body">
+            <div className="admin-users-dialog-header">
+              <div className="admin-users-dialog-heading">
+                <span
+                  className={`admin-users-type-badge ${
+                    pendingStatusAction.account.accountType === "EMPRESA"
+                      ? "is-company"
+                      : "is-person"
+                  }`}
+                >
+                  {pendingStatusAction.account.accountType === "EMPRESA"
+                    ? "Empresa"
+                    : "Pessoa Física"}
+                </span>
+                <h2 id="admin-status-dialog-title">
+                  {pendingStatusAction.targetStatus === "inativo"
+                    ? "Inativar conta"
+                    : "Reativar conta"}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                className="admin-users-dialog-close"
+                aria-label="Fechar confirmação"
+                onClick={handleCloseStatusModal}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="admin-users-dialog-content">
+              <div className="admin-users-confirm-account">
+                <UserAvatar
+                  name={pendingStatusAction.account.name}
+                  avatarUrl={pendingStatusAction.account.avatarUrl}
+                  size="sm"
+                />
+                <div className="admin-users-member-info">
+                  <span className="admin-users-member-name">
+                    {pendingStatusAction.account.name}
+                  </span>
+                  <span className="admin-users-member-email">
+                    {pendingStatusAction.account.email}
+                  </span>
+                </div>
+              </div>
+
+              {pendingStatusAction.targetStatus === "inativo" ? (
+                <>
+                  <p className="admin-users-confirm-message">
+                    {pendingStatusAction.account.accountType === "EMPRESA" ? (
+                      <>
+                        Deseja inativar a conta da empresa{" "}
+                        <strong>{pendingStatusAction.account.name}</strong>? O
+                        acesso à plataforma será suspenso imediatamente até a
+                        reativação.
+                      </>
+                    ) : (
+                      <>
+                        Deseja inativar a conta de{" "}
+                        <strong>{pendingStatusAction.account.name}</strong>? O
+                        usuário perderá o acesso à plataforma imediatamente até
+                        ser reativado.
+                      </>
+                    )}
+                  </p>
+                  {(pendingStatusAction.account.accountType === "EMPRESA" ||
+                    Boolean(pendingStatusAction.account.cnpj)) && (
+                    <div
+                      className="admin-users-confirm-warning"
+                      role="note"
+                    >
+                      Atenção: todos os funcionários vinculados em{" "}
+                      <code>membros_empresa</code> também terão o acesso
+                      suspenso enquanto esta empresa estiver inativa.
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="admin-users-confirm-message">
+                  Deseja reativar a conta de{" "}
+                  <strong>{pendingStatusAction.account.name}</strong>? O acesso
+                  à plataforma será restabelecido imediatamente.
+                </p>
+              )}
+            </div>
+
+            <div className="admin-users-dialog-footer admin-users-confirm-footer">
+              <button
+                type="button"
+                className="admin-users-btn admin-users-btn--secondary"
+                onClick={handleCloseStatusModal}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={`admin-users-btn ${
+                  pendingStatusAction.targetStatus === "inativo"
+                    ? "admin-users-btn--danger"
+                    : "admin-users-btn--success"
+                }`}
+                onClick={handleConfirmStatusChange}
+              >
+                {pendingStatusAction.targetStatus === "inativo"
+                  ? "Confirmar inativação"
+                  : "Confirmar reativação"}
               </button>
             </div>
           </div>
