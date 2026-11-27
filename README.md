@@ -50,7 +50,7 @@ Os modelos estão em `public/models/ocr/`, e os arquivos usados pelo ONNX Runtim
 | `src/components/` | Elementos reutilizáveis, como Sidebar e aviso 404. |
 | `src/lib/supabase/` | Cliente Supabase e funções de autenticação. |
 | `src/hook/` | Estado e ciclo de vida do pipeline de OCR. |
-| `src/lib/sumup/` | Arquivo inicial da futura integração de pagamento; sem operação ativa. |
+| `src/lib/MercadoPago/` | Arquivo inicial da futura integração de pagamento; sem operação ativa. |
 | `src/utils/` | Funções auxiliares, como a conversão de PDF. |
 | `server/src/` | Servidor Fastify, configuração e módulos do backend. |
 | `public/` | Arquivos servidos diretamente, incluindo modelos de OCR e WASM. |

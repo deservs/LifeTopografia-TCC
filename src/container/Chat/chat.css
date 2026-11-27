@@ -1206,10 +1206,10 @@
 }
 
 /* =========================================================
-   CARDS DE PROPOSTA DE ORÇAMENTO (SUMUP)
+   CARDS DE PROPOSTA DE ORÇAMENTO (MERCADO PAGO)
    ========================================================= */
 
-.sumup-proposal-card {
+.MercadoPago-proposal-card {
   background-color: #ffffff;
   color: #0f172a;
   border-radius: 14px;
@@ -1223,14 +1223,14 @@
   box-sizing: border-box;
 }
 
-.sumup-card-header {
+.MercadoPago-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
 }
 
-.sumup-brand-tag {
+.MercadoPago-brand-tag {
   font-size: 0.85rem;
   font-weight: 900;
   letter-spacing: 0.5px;
@@ -1259,21 +1259,21 @@
   background-color: #fee2e2;
 }
 
-.sumup-service-name {
+.MercadoPago-service-name {
   margin: 0 0 4px;
   font-size: 0.95rem;
   font-weight: 700;
   color: #0f172a;
 }
 
-.sumup-service-desc {
+.MercadoPago-service-desc {
   margin: 0 0 10px;
   font-size: 0.8rem;
   color: #64748b;
   line-height: 1.4;
 }
 
-.sumup-pricing-row {
+.MercadoPago-pricing-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -1283,12 +1283,12 @@
   margin-bottom: 12px;
 }
 
-.sumup-label {
+.MercadoPago-label {
   font-size: 0.8rem;
   color: #475569;
 }
 
-.sumup-price {
+.MercadoPago-price {
   font-size: 1.25rem;
   font-weight: 800;
   color: #0b50bd;
@@ -1347,11 +1347,11 @@
   cursor: not-allowed;
 }
 
-.sumup-footer-actions {
+.MercadoPago-footer-actions {
   margin-top: 10px;
 }
 
-.sumup-pay-button {
+.MercadoPago-pay-button {
   display: block;
   text-align: center;
   background-color: #00c724;
@@ -1367,7 +1367,7 @@
     transform 0.15s ease;
 }
 
-.sumup-pay-button:hover {
+.MercadoPago-pay-button:hover {
   background-color: #00b020;
   transform: translateY(-1px);
 }
@@ -1614,7 +1614,7 @@
   margin-bottom: 20px;
 }
 
-.sumup-badge-pill {
+.MercadoPago-badge-pill {
   font-size: 0.72rem;
   font-weight: 800;
   color: #0b50bd;
@@ -2167,7 +2167,7 @@
     line-height: 1;
   }
 
-  .sumup-proposal-card {
+  .MercadoPago-proposal-card {
     width: 100%;
     min-width: 0;
   }
