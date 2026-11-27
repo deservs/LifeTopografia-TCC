@@ -1,0 +1,392 @@
+/* =========================================================
+   MODAL DE TERMOS DE USO E POLÍTICA DE PRIVACIDADE
+   ========================================================= */
+
+.termos-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(16px + env(safe-area-inset-top, 0px))
+    calc(16px + env(safe-area-inset-right, 0px))
+    calc(16px + env(safe-area-inset-bottom, 0px))
+    calc(16px + env(safe-area-inset-left, 0px));
+  background: rgba(4, 12, 31, 0.75);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+
+.termos-modal-card {
+  position: relative;
+  width: min(100%, 660px);
+  max-height: 85vh;
+  max-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 22px;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  animation: termos-modal-enter 0.22s ease-out both;
+}
+
+.termos-modal-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, #0b50bd 0%, #00a2ff 75%, #00c853 100%);
+  z-index: 2;
+}
+
+.termos-modal-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.termos-modal-heading {
+  min-width: 0;
+  flex: 1;
+}
+
+.termos-modal-badge {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #0b50bd;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.termos-modal-heading h2 {
+  margin: 0;
+  color: #0b132b;
+  font-size: clamp(1.15rem, 3.6vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.termos-modal-updated {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.termos-modal-close {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.termos-modal-close:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.termos-modal-close:focus-visible,
+.termos-modal-tab:focus-visible,
+.termos-btn-secondary:focus-visible,
+.termos-btn-primary:focus-visible {
+  outline: 3px solid #00a2ff;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   ABAS INTERNAS
+   ========================================================= */
+
+.termos-modal-tabs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 10px 24px;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.termos-modal-tab {
+  flex: 1;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.termos-modal-tab:hover:not(.is-active) {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0b132b;
+}
+
+.termos-modal-tab.is-active {
+  background-color: #0b50bd;
+  border-color: #0b50bd;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(11, 80, 189, 0.22);
+}
+
+/* =========================================================
+   CORPO DE LEITURA COM SCROLL
+   ========================================================= */
+
+.termos-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+.termos-modal-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.termos-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.termos-modal-body::-webkit-scrollbar-thumb {
+  background-color: #94a3b8;
+  border-radius: 999px;
+}
+
+.termos-modal-document {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.termos-doc-lead {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.termos-doc-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.termos-doc-section h3 {
+  margin: 0;
+  color: #0b50bd;
+  font-size: 0.98rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.termos-doc-section p {
+  margin: 0;
+  color: #334155;
+  font-size: 0.88rem;
+  line-height: 1.62;
+}
+
+.termos-doc-section ul {
+  margin: 2px 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #334155;
+  font-size: 0.87rem;
+  line-height: 1.55;
+}
+
+.termos-doc-callout {
+  padding: 10px 13px;
+  border-radius: 10px;
+  border-left: 4px solid #0b50bd;
+  background-color: #eff6ff;
+  color: #0b132b;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   RODAPÉ DE AÇÕES
+   ========================================================= */
+
+.termos-modal-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 14px 24px 18px;
+  border-top: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.termos-btn-secondary,
+.termos-btn-primary {
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.termos-btn-secondary {
+  border: 1.5px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #334155;
+}
+
+.termos-btn-secondary:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0b132b;
+}
+
+.termos-btn-primary {
+  border: 2px solid #0b50bd;
+  background-color: #0b50bd;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(11, 80, 189, 0.22);
+}
+
+.termos-btn-primary:hover {
+  background-color: #083d93;
+  border-color: #083d93;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(11, 80, 189, 0.28);
+}
+
+.termos-btn-primary:active {
+  transform: translateY(0);
+}
+
+@keyframes termos-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .termos-modal-overlay {
+    padding: calc(12px + env(safe-area-inset-top, 0px))
+      calc(12px + env(safe-area-inset-right, 0px))
+      calc(12px + env(safe-area-inset-bottom, 0px))
+      calc(12px + env(safe-area-inset-left, 0px));
+  }
+
+  .termos-modal-card {
+    max-height: 85vh;
+    max-height: 85dvh;
+    border-radius: 18px;
+  }
+
+  .termos-modal-header {
+    padding: 18px 16px 12px;
+  }
+
+  .termos-modal-tabs {
+    padding: 8px 16px;
+    gap: 6px;
+  }
+
+  .termos-modal-tab {
+    font-size: 0.82rem;
+    padding: 7px 10px;
+  }
+
+  .termos-modal-body {
+    padding: 16px;
+  }
+
+  .termos-modal-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 16px 16px;
+  }
+
+  .termos-btn-secondary,
+  .termos-btn-primary {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .termos-modal-card {
+    animation: none;
+  }
+
+  .termos-modal-close,
+  .termos-modal-tab,
+  .termos-btn-secondary,
+  .termos-btn-primary {
+    transition: none;
+  }
+}

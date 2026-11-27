@@ -378,6 +378,68 @@
 }
 
 /* =========================================================
+   ACEITE DE TERMOS E POLÍTICA DE PRIVACIDADE
+   ========================================================= */
+
+.terms-checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.72);
+  border: 1px solid #b8bec9;
+}
+
+.terms-checkbox-input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  flex-shrink: 0;
+  accent-color: #0b50bd;
+  cursor: pointer;
+}
+
+.terms-checkbox-input:focus-visible {
+  outline: 2px solid #0b50bd;
+  outline-offset: 2px;
+}
+
+.terms-checkbox-label {
+  color: #1e293b;
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.terms-inline-link {
+  display: inline;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #0b50bd;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  line-height: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.terms-inline-link:hover {
+  color: #083d93;
+}
+
+.terms-inline-link:focus-visible {
+  outline: 2px solid #0b50bd;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* =========================================================
    BOTÃO DE CADASTRO
    ========================================================= */
 
@@ -409,17 +471,25 @@
 
   transition:
     background-color 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.btn-action-cadastrar:hover {
+.btn-action-cadastrar:hover:not(:disabled) {
   background-color: #083d93;
 
   transform: translateY(-1px);
 }
 
-.btn-action-cadastrar:active {
+.btn-action-cadastrar:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.btn-action-cadastrar:disabled {
+  background-color: #7c97c2;
+  opacity: 0.75;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .btn-action-cadastrar:focus-visible {
@@ -588,6 +658,10 @@
   .input-field-wrapper label {
     font-size: 0.95rem;
   }
+
+  .terms-checkbox-label {
+    font-size: 0.82rem;
+  }
 }
 
 /* =========================================================
@@ -597,6 +671,7 @@
 @media (prefers-reduced-motion: reduce) {
   .tab-btn,
   .input-field-wrapper input,
+  .terms-inline-link,
   .btn-action-cadastrar,
   .btn-login-redirect {
     transition: none;
