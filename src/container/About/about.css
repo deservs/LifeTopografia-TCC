@@ -219,6 +219,88 @@
 }
 
 /* =========================================================
+   NOSSA SEDE (LOCALIZAÇÃO E MAPA)
+   ========================================================= */
+
+.about-card.about-card--location {
+  display: block;
+  padding: clamp(10px, 2.4vw, 18px);
+}
+
+.about-location {
+  --location-radius: 22px;
+  position: relative;
+  width: 100%;
+  border-radius: var(--location-radius);
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #f3f4f6;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(#ffffff, #000000);
+}
+
+.about-location__header {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border-radius: var(--location-radius);
+  padding: clamp(14px, 3.2vw, 24px) clamp(12px, 4vw, 28px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  isolation: isolate;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.about-location__icon {
+  display: block;
+  width: clamp(32px, 8vw, 44px);
+  height: clamp(32px, 8vw, 44px);
+  flex-shrink: 0;
+}
+
+.about-location__title {
+  margin: 2px 0 0;
+  color: #11499e;
+  font-size: clamp(1rem, 3.6vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.about-location__address {
+  margin: 2px 0 0;
+  max-width: 100%;
+  color: #111111;
+  font-size: clamp(0.84rem, 3vw, 1.12rem);
+  font-weight: 700;
+  line-height: 1.38;
+  overflow-wrap: break-word;
+}
+
+.about-location__map {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: clamp(240px, 52vw, 340px);
+  border: 0;
+  border-radius: 0 0 var(--location-radius) var(--location-radius);
+  margin-top: calc(var(--location-radius) * -1);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* =========================================================
    TABLET E DESKTOP
    ========================================================= */
 
@@ -256,6 +338,10 @@
     padding-top: 0;
     overflow: hidden;
   }
+
+  .about-location__map {
+    height: 360px;
+  }
 }
 
 @media screen and (min-width: 860px) {
@@ -270,6 +356,24 @@
   .about-pillars-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px 22px;
+  }
+
+  .about-location__map {
+    height: 400px;
+  }
+}
+
+/* =========================================================
+   CELULARES E TELAS ESTREITAS
+   ========================================================= */
+
+@media screen and (max-width: 480px) {
+  .about-location {
+    --location-radius: 18px;
+  }
+
+  .about-location__map {
+    height: clamp(230px, 60vw, 290px);
   }
 }
 
@@ -287,6 +391,26 @@
     border-radius: 20px;
   }
 
+  .about-card.about-card--location {
+    padding: 10px;
+  }
+
+  .about-location {
+    --location-radius: 16px;
+  }
+
+  .about-location__header {
+    padding: 12px 10px;
+  }
+
+  .about-location__address {
+    font-size: 0.8rem;
+  }
+
+  .about-location__map {
+    height: 220px;
+  }
+
   .about-card__image {
     margin: 0 10px 8px 0;
     border-radius: 16px;
@@ -295,5 +419,15 @@
   .about-card__image--history,
   .about-card__image--why {
     width: 96px;
+  }
+}
+
+/* =========================================================
+   MODO PAISAGEM EM TELAS BAIXAS
+   ========================================================= */
+
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .about-location__map {
+    height: 230px;
   }
 }

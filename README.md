@@ -14,7 +14,7 @@ Essas etapas descrevem o objetivo do TCC. Elas ainda não formam um fluxo comple
 | Recuperação de senha | Solicitação de e-mail, verificação do código, definição da nova senha e encerramento da sessão usam o Supabase Auth. | O fluxo ainda precisa de testes completos, incluindo cancelamento, reenvio e falhas de rede. |
 | Sessão, Sidebar e perfil | O cliente Supabase mantém a sessão no navegador. A Sidebar busca dados básicos do perfil quando é montada. `/perfil` mostra uma interface de conta e membros. | A Sidebar não acompanha continuamente mudanças de autenticação. As ações de gravação, gestão de membros e exclusão de conta no perfil dependem de serviços ainda não conectados. |
 | PDF e OCR | A rota `/teste` recebe um PDF, renderiza a primeira página com PDF.js e executa PaddleOCR no navegador. | O texto aparece apenas no console. Ainda não há leitura de todas as páginas, aproveitamento do texto já presente no PDF nem extração das informações topográficas. |
-| Atendimento | Existem arquivos iniciais para chat, e-mail, AutoCAD e SumUp. | Chat, envio de arquivos ao atendimento, pagamento e avaliação ainda não estão integrados. |
+| Atendimento | Existem arquivos iniciais para chat, e-mail, AutoCAD e Mercado Pago. | Chat, envio de arquivos ao atendimento, pagamento e avaliação ainda não estão integrados. |
 | Pagamento | Existe uma tela visual em `/pagamento`. | **Nenhum pagamento é processado.** A mensagem de sucesso mostrada nessa tela é demonstrativa e não confirma uma transação. |
 
 ## Rotas atuais

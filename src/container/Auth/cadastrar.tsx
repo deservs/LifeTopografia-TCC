@@ -15,6 +15,9 @@ import { env } from "../../lib/env";
 import { SignUp } from "../../lib/supabase/auth";
 
 import NoticeModal from "../../components/Pop-Up/NoticeModal/noticeModal";
+import TermosModal, {
+  type TermosModalTab,
+} from "../../components/Pop-Up/TermosModal/TermosModal";
 
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
@@ -37,6 +40,10 @@ export const Cadastrar = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [formError, setFormError] = useState("");
   const [showNoticeModal, setShowNoticeModal] = useState(false);
+  const [termosAceitos, setTermosAceitos] = useState(false);
+  const [termosModalOpen, setTermosModalOpen] = useState(false);
+  const [termosModalTab, setTermosModalTab] =
+    useState<TermosModalTab>("termos");
 
   const captcha = useRef<TurnstileInstance | null>(null); // Referência para o componente Turnstile
 
@@ -121,9 +128,29 @@ export const Cadastrar = () => {
     }
   };
 
+  const openTermosModal = (tab: TermosModalTab) => {
+    setTermosModalTab(tab);
+    setTermosModalOpen(true);
+  };
+
+  const handleAcceptTermos = () => {
+    setTermosAceitos(true);
+    setTermosModalOpen(false);
+    if (formError) {
+      setFormError("");
+    }
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormError("");
+
+    if (!termosAceitos) {
+      setFormError(
+        "Você precisa ler e concordar com os Termos de Uso e a Política de Privacidade para concluir o cadastro.",
+      );
+      return;
+    }
 
     if (!captchaToken) {
       setFormError("Por favor, complete o captcha.");
@@ -456,7 +483,44 @@ export const Cadastrar = () => {
                   {formError}
                 </p>
               )}
-
+              <div className="terms-checkbox-group">
+                <input
+                  type="checkbox"
+                  id="aceitar-termos"
+                  name="aceitarTermos"
+                  className="terms-checkbox-input"
+                  checked={termosAceitos}
+                  onChange={(event) => {
+                    setTermosAceitos(event.target.checked);
+                    if (formError) {
+                      setFormError("");
+                    }
+                  }}
+                  required
+                />
+                <label
+                  htmlFor="aceitar-termos"
+                  className="terms-checkbox-label"
+                >
+                  Li e concordo com os{" "}
+                  <button
+                    type="button"
+                    className="terms-inline-link"
+                    onClick={() => openTermosModal("termos")}
+                  >
+                    Termos de Uso
+                  </button>{" "}
+                  e a{" "}
+                  <button
+                    type="button"
+                    className="terms-inline-link"
+                    onClick={() => openTermosModal("privacidade")}
+                  >
+                    Política de Privacidade
+                  </button>
+                  .
+                </label>
+              </div>
               <div className="captcha-container">
                 <Turnstile
                   options={{
@@ -472,7 +536,12 @@ export const Cadastrar = () => {
                 />
               </div>
 
-              <button type="submit" className="btn-action-cadastrar">
+              <button
+                type="submit"
+                className="btn-action-cadastrar"
+                disabled={!termosAceitos}
+                aria-disabled={!termosAceitos}
+              >
                 <svg
                   viewBox="0 0 24 24"
                   className="btn-add-user-icon"
@@ -509,6 +578,12 @@ export const Cadastrar = () => {
           message={`Enviamos um link de ativação para ${formData.email}. O acesso à conta só será liberado após a confirmação (cheque também o spam).`}
         />
       )}
+      <TermosModal
+        isOpen={termosModalOpen}
+        initialTab={termosModalTab}
+        onClose={() => setTermosModalOpen(false)}
+        onAccept={handleAcceptTermos}
+      />
     </>
   );
 }

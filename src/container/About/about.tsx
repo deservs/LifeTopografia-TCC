@@ -73,7 +73,13 @@ const WHY_PILLARS: readonly AboutPillar[] = [
       "Garantimos agilidade e responsabilidade na entrega dos serviços, cumprindo cronogramas com qualidade.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="8.75" stroke="currentColor" strokeWidth="2" />
+        <circle
+          cx="12"
+          cy="12"
+          r="8.75"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
         <path
           d="M12 7.2v5l3.5 2.1"
           stroke="currentColor"
@@ -96,6 +102,32 @@ function CheckCircleIcon() {
         strokeWidth="1.9"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function PinLocalizacao({ size = 24, color = "#11499E", ...props }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      fill="none"
+      {...props}
+    >
+      <path
+        d="M19 47.5C13.5 49 10 51.3 10 54C10 58.4 19.8 62 32 62C44.2 62 54 58.4 54 54C54 51.3 50.5 49 45 47.5"
+        stroke={color}
+        strokeWidth="4.5"
+        strokeLinecap="round"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M32 4C20.954 4 12 12.954 12 24C12 37.5 29.2 51.8 30.8 53.1C31.5 53.65 32.5 53.65 33.2 53.1C34.8 51.8 52 37.5 52 24C52 12.954 43.046 4 32 4ZM32 31C36.418 31 40 27.418 40 23C40 18.582 36.418 15 32 15C27.582 15 24 18.582 24 23C24 27.418 27.582 31 32 31Z"
+        fill={color}
       />
     </svg>
   );
@@ -192,6 +224,38 @@ export default function About() {
               </li>
             ))}
           </ul>
+        </section>
+        <section
+          className="about-card about-card--location"
+          aria-labelledby="about-location-title"
+        >
+          <div className="about-location">
+            <div className="about-location__header">
+              <PinLocalizacao
+                size={42}
+                color="#11499E"
+                className="about-location__icon"
+                aria-hidden="true"
+              />
+              <h2 id="about-location-title" className="about-location__title">
+                NOSSA SEDE
+              </h2>
+              <p className="about-location__address">
+                Rua das Rosas, 688 - Parque Sinai
+                <br />
+                Santana de Parnaíba/SP, 06532-320.
+              </p>
+            </div>
+
+            <iframe
+              className="about-location__map"
+              title="Localização da sede da Life Topografia"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3660.5821149075377!2d-46.881873225630535!3d-23.439458078884147!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf1ccb74078913%3A0x65484879783df94a!2sR.%20das%20Rosas%2C%20688%20-%20Parque%20Sinai%2C%20Santana%20de%20Parna%C3%ADba%20-%20SP%2C%2006532-320!5e0!3m2!1spt-BR!2sbr!4v1795741980258!5m2!1spt-BR!2sbr"
+              allowFullScreen={false}
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
         </section>
       </main>
     </div>
