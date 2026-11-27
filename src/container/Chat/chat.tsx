@@ -378,8 +378,10 @@ export default function Chat() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Controle de scroll e navegação responsiva mobile
+  const [isInputScrollable, setIsInputScrollable] = useState(false);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const isScrolledUpRef = useRef(false);
   const [unreadWhileScrolled, setUnreadWhileScrolled] = useState(0);
@@ -496,7 +498,21 @@ export default function Chat() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Habilita rolagem interna no textarea apenas quando o texto ultrapassa max-height
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el || !inputText) {
+      setIsInputScrollable(false);
+      return;
+    }
+    const maxHeight = parseFloat(window.getComputedStyle(el).maxHeight) || 120;
+    setIsInputScrollable(el.scrollHeight > maxHeight + 1);
+  }, [inputText, activeRole, activeChatId]);
+
   const isAdmin = activeRole === "admin";
+  const inputPlaceholder = isAdmin
+    ? "Responder cliente como Administrador..."
+    : "Digite sua mensagem para a Life Topografia...";
 
   // Localiza cliente e chat selecionados na estrutura Cliente -> chats[]
   let activeClient: AdminClientGroup | undefined;
@@ -1336,7 +1352,9 @@ export default function Chat() {
                         ) : (
                           <span className="online-status-line">
                             <span className="pulse-dot" aria-hidden="true" />
-                            {currentChatSubtitle}
+                            <span className="online-status-text">
+                              {currentChatSubtitle}
+                            </span>
                           </span>
                         )}
                       </span>
@@ -1462,7 +1480,10 @@ export default function Chat() {
                             <div className="file-info">
                               <span className="file-name">{msg.file.name}</span>
                               <span className="file-meta">
-                                {msg.file.size} •{" "}
+                                <span className="file-size-value">
+                                  {msg.file.size}
+                                </span>{" "}
+                                •{" "}
                                 {msg.file.type === "pdf"
                                   ? "Documento Matrícula (PDF)"
                                   : "Arquivo CAD (DXF SIRGAS 2000)"}
@@ -1722,16 +1743,13 @@ export default function Chat() {
 
                   <div
                     className="chat-input-pill"
-                    data-replicated-value={inputText}
+                    data-replicated-value={inputText || inputPlaceholder}
                   >
                     <textarea
+                      ref={textareaRef}
                       rows={1}
-                      className="chat-text-input"
-                      placeholder={
-                        isAdmin
-                          ? "Responder cliente como Administrador..."
-                          : "Digite sua mensagem para a Life Topografia..."
-                      }
+                      className={`chat-text-input ${isInputScrollable ? "is-scrollable" : ""}`}
+                      placeholder={inputPlaceholder}
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
                       aria-label="Mensagem de atendimento"
@@ -1862,7 +1880,8 @@ export default function Chat() {
                         id="budget-amount-feedback"
                         className="modal-field-hint"
                       >
-                        Informe um valor maior que R$ 00,00.
+                        Informe um valor maior que{" "}
+                        <span className="nowrap-value">R$ 00,00</span>.
                       </p>
                     ) : null}
                   </div>

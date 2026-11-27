@@ -1,83 +1,19 @@
 /* =========================================================
-   CONTAINER PRINCIPAL
+   CONTAINER PRINCIPAL (MOBILE-FIRST)
    ========================================================= */
 
 #initial-card {
   position: relative;
 
   width: 100%;
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
 
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   isolation: isolate;
 
   background-color: #000;
-}
-
-/* =========================================================
-   CAMADA DE CONTEÚDO
-   ========================================================= */
-
-/*
- * O conteúdo permanece acima do carrossel.
- *
- * O próprio elemento pode rolar verticalmente em telas menores,
- * evitando que textos ou botões sejam cortados quando a altura
- * disponível for pequena.
- */
-#superposition {
-  position: absolute;
-  inset: 0;
-
-  width: 100%;
-  height: 100%;
-
-  z-index: 2;
-  isolation: isolate;
-
-  display: flex;
-  flex-direction: column;
-
-  box-sizing: border-box;
-
-  background: rgba(0, 0, 0, 0.35);
-
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-/* =========================================================
-   CONTEÚDO PRINCIPAL
-   ========================================================= */
-
-#main-content {
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-
-  width: 100%;
-  min-height: 100%;
-
-  padding: 15px 5vw 40px;
-
-  box-sizing: border-box;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  margin: 0 auto;
-
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
 }
 
 /* =========================================================
@@ -146,11 +82,11 @@
   object-fit: cover;
 
   /*
-     * O desfoque reduz a quantidade de detalhes do fundo
-     * e mantém o texto em primeiro plano mais legível.
-     *
-     * O scale evita que o blur exponha as bordas da imagem.
-     */
+   * O desfoque reduz a quantidade de detalhes do fundo
+   * e mantém o texto em primeiro plano mais legível.
+   *
+   * O scale evita que o blur exponha as bordas da imagem.
+   */
   filter: blur(2px) brightness(0.89);
   -webkit-transform: translateZ(0) scale(1.05);
   transform: translateZ(0) scale(1.05);
@@ -160,10 +96,61 @@
 }
 
 /* =========================================================
-   MENU HAMBÚRGUER
+   CAMADA DE CONTEÚDO (FLUXO NATURAL SEM PRISÃO DE SCROLL)
+   ========================================================= */
+
+#superposition {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* =========================================================
+   CONTEÚDO PRINCIPAL (CSS GRID FLUIDO)
+   ========================================================= */
+
+#main-content {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+
+  width: 100%;
+  max-width: 1440px;
+  min-width: 0;
+  flex: 1;
+
+  margin: 0 auto;
+  padding:
+    max(1rem, env(safe-area-inset-top))
+    clamp(1rem, 4vw, 3rem)
+    max(2rem, env(safe-area-inset-bottom));
+
+  box-sizing: border-box;
+
+  display: grid;
+  grid-template-rows: auto 1fr;
+  row-gap: clamp(1rem, 2.5dvh, 2rem);
+}
+
+/* =========================================================
+   MENU HAMBÚRGUER (TOUCH TARGET >= 44x44px)
    ========================================================= */
 
 #barra-lateral {
+  grid-row: 1;
+  justify-self: stretch;
+  align-self: start;
+
   position: relative;
   z-index: 3;
 
@@ -172,8 +159,7 @@
   justify-content: flex-start;
 
   width: 100%;
-
-  margin-bottom: 5px;
+  min-width: 0;
 }
 
 .btn-menu {
@@ -183,15 +169,18 @@
   flex-direction: column;
   justify-content: space-around;
 
+  min-width: 44px;
+  min-height: 44px;
   width: 44px;
   height: 44px;
 
-  padding: 8px;
+  padding: 10px 8px;
 
   background: none;
   border: none;
 
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .btn-menu span {
@@ -219,6 +208,24 @@
 }
 
 /* =========================================================
+   SEÇÃO HERO (BASE: 360px - 430px)
+   ========================================================= */
+
+.home-hero {
+  grid-row: 2;
+  align-self: center;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 2.4dvh, 1.5rem);
+}
+
+/* =========================================================
    LOGOTIPO
    ========================================================= */
 
@@ -228,12 +235,18 @@
   justify-content: center;
 
   width: 100%;
+  min-width: 0;
+  margin-bottom: clamp(1.75rem, 4vh, 3rem);
 }
 
 #logo img {
-  width: auto;
+  display: block;
 
-  height: clamp(80px, 8vh, 140px);
+  width: clamp(180px, 24vw, 300px);
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 2413 / 991;
+  object-fit: contain;
 
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
 }
@@ -249,11 +262,9 @@
   justify-content: center;
 
   width: 100%;
-
-  margin-top: 10px;
+  min-width: 0;
 
   color: #ffffff;
-
   text-align: center;
 }
 
@@ -262,9 +273,11 @@
 
   color: #ffffff;
 
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.18;
+  text-wrap: balance;
+  overflow-wrap: break-word;
 
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
@@ -274,7 +287,7 @@
 }
 
 /* =========================================================
-   DIVISÓRIAS
+   DIVISÓRIA
    ========================================================= */
 
 .divider-container {
@@ -283,15 +296,15 @@
   justify-content: center;
 
   width: 100%;
-  max-width: 1100px;
-
-  margin: 15px 0;
+  max-width: 100%;
+  min-width: 0;
 
   box-sizing: border-box;
 }
 
 .divider-container .line {
   flex: 1;
+  min-width: 0;
 
   height: 2px;
 
@@ -303,8 +316,8 @@
 .divider-container .rhombus {
   flex-shrink: 0;
 
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
 
   margin: 0 10px;
 
@@ -321,41 +334,53 @@
 
 .home-description {
   width: 100%;
-  max-width: 1000px;
+  max-width: 65ch;
+  min-width: 0;
 
   margin: 0;
 
   color: #ffffff;
 
-  font-size: clamp(1.2rem, 1.8vw, 1.4rem);
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
   font-weight: 400;
   line-height: 1.5;
 
   text-align: center;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
 
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 /* =========================================================
-   BOTÃO DE SOLICITAÇÃO
+   BOTÃO DE SOLICITAÇÃO (TOUCH TARGET >= 44x44px)
    ========================================================= */
 
 #btn-solicite {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
 
   width: 100%;
+  min-width: 0;
 
-  margin-top: 20px;
+  margin-top: clamp(0.5rem, 1.5dvh, 1rem);
 }
 
 #btn-solicite a {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   box-sizing: border-box;
 
-  padding: 14px 32px;
+  width: 100%;
+  max-width: 340px;
+  min-width: 44px;
+  min-height: 48px;
+
+  padding: 0.9rem 1.5rem;
 
   background-color: rgba(0, 110, 255, 0.35);
 
@@ -364,7 +389,7 @@
 
   color: #ffffff;
 
-  font-size: clamp(1.1rem, 1.2vw, 1.15rem);
+  font-size: clamp(0.98rem, 4vw, 1.1rem);
   font-weight: 700;
   letter-spacing: 1px;
 
@@ -372,6 +397,7 @@
   text-decoration: none;
 
   cursor: pointer;
+  touch-action: manipulation;
 
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -404,100 +430,87 @@
 }
 
 /* =========================================================
-   DESKTOP
+   BREAKPOINTS PROGRESSIVOS (MOBILE-FIRST)
    ========================================================= */
 
-@media screen and (min-width: 1024px) {
-  #main-content {
-    padding-top: 3vh;
-  }
-
-  .divider-container {
-    margin: 20px 0;
-  }
-
-  #btn-solicite {
-    margin-top: 25px;
+/* sm: >= 640px */
+@media screen and (min-width: 640px) {
+  #btn-solicite a {
+    width: auto;
+    max-width: 100%;
+    padding: 0.95rem 2.25rem;
+    font-size: clamp(1.02rem, 1.8vw, 1.12rem);
   }
 }
 
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media screen and (max-width: 768px) {
-  #main-content {
-    padding: 20px 20px 40px;
-  }
-
-  #logo img {
-    height: clamp(80px, 14vw, 110px);
-  }
-
-  #text {
-    margin-top: 20px;
-  }
-
-  #text h1 {
-    font-size: clamp(1.8rem, 9vw, 2.3rem);
-  }
-
-  .home-description {
-    margin: 10px 0;
-
-    font-size: clamp(1.05rem, 5vw, 1.35rem);
-    line-height: 1.5;
+/* md: >= 768px */
+@media screen and (min-width: 768px) {
+  .home-hero {
+    gap: clamp(1.15rem, 2.4dvh, 1.65rem);
   }
 
   .divider-container {
-    margin: 22px 0;
+    max-width: min(100%, 46rem);
   }
 
   .divider-container .rhombus {
-    width: 12px;
-    height: 12px;
-  }
-
-  #btn-solicite {
-    margin-top: 25px;
-  }
-
-  #btn-solicite a {
-    width: 100%;
-    max-width: 340px;
-
-    padding: 16px 28px;
-
-    font-size: 1.15rem;
+    width: 10px;
+    height: 10px;
   }
 }
 
-/* =========================================================
-   TELAS MUITO PEQUENAS
-   ========================================================= */
-
-@media screen and (max-width: 380px) {
-  #main-content {
-    padding-right: 16px;
-    padding-left: 16px;
-  }
-
-  #text h1 {
-    font-size: 1.7rem;
-  }
-
-  .home-description {
-    font-size: 1rem;
+/* lg: >= 1024px */
+@media screen and (min-width: 1024px) {
+  .home-hero {
+    gap: clamp(1.25rem, 2.6dvh, 1.85rem);
   }
 
   .divider-container {
-    margin: 16px 0;
+    max-width: min(100%, 58rem);
+  }
+
+  #btn-solicite {
+    margin-top: clamp(0.75rem, 2dvh, 1.5rem);
   }
 
   #btn-solicite a {
-    padding: 14px 20px;
+    min-height: 52px;
+    padding: 1rem 2.5rem;
+    font-size: clamp(1.05rem, 1.15vw, 1.15rem);
+  }
+}
 
-    font-size: 1rem;
+/* xl: >= 1280px */
+@media screen and (min-width: 1280px) {
+  .divider-container {
+    max-width: min(100%, 66rem);
+  }
+
+  #btn-solicite a {
+    min-height: 56px;
+    padding: 1.125rem 2.85rem;
+    font-size: 1.18rem;
+  }
+}
+
+/* 2xl: >= 1536px */
+@media screen and (min-width: 1536px) {
+  #main-content {
+    max-width: 1536px;
+  }
+
+  .home-hero {
+    gap: clamp(1.5rem, 3dvh, 2.25rem);
+  }
+
+  .divider-container {
+    max-width: min(100%, 70rem);
+  }
+
+  #btn-solicite a {
+    min-height: 60px;
+    padding: 1.2rem 3.2rem;
+    font-size: 1.22rem;
   }
 }
 
