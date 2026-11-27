@@ -589,22 +589,24 @@ export default function Profile({
                         onChange={handleAvatarChange}
                         aria-describedby="profile-avatar-hint"
                       />
-                      <button
-                        className="profile-avatar-change"
-                        type="button"
-                        disabled={busy}
-                        onClick={() => avatarInputRef.current?.click()}
-                      >
-                        {avatarFile || draft.avatarUrl
-                          ? "Alterar foto"
-                          : "Adicionar foto"}
-                      </button>
-                      <span
-                        id="profile-avatar-hint"
-                        className="profile-avatar-hint"
-                      >
-                        JPG, PNG ou WEBP · até 5 MB
-                      </span>
+                      <div className="profile-avatar-controls">
+                        <button
+                          className="profile-avatar-change"
+                          type="button"
+                          disabled={busy}
+                          onClick={() => avatarInputRef.current?.click()}
+                        >
+                          {avatarFile || draft.avatarUrl
+                            ? "Alterar foto"
+                            : "Adicionar foto"}
+                        </button>
+                        <span
+                          id="profile-avatar-hint"
+                          className="profile-avatar-hint"
+                        >
+                          JPG, PNG ou WEBP · até 5 MB
+                        </span>
+                      </div>
                     </div>
                     <p>
                       <span>Status:</span>{" "}
@@ -615,61 +617,63 @@ export default function Profile({
                           : "Pessoa Física"}
                     </p>
                   </div>
-                  <div className="profile-field">
-                    <label htmlFor="profile-name">Nome:</label>
-                    <span className="profile-edit-field">
-                      <input
-                        id="profile-name"
-                        name="name"
-                        autoComplete={company ? "organization" : "name"}
-                        value={draft.name}
-                        required
-                        maxLength={160}
-                        pattern=".*\S.*"
-                        disabled={busy}
-                        onChange={(event) =>
-                          setDraft({ ...draft, name: event.target.value })
-                        }
-                      />
-                      <button
-                        type="button"
-                        aria-label="Editar nome"
-                        disabled={busy}
-                        onClick={() =>
-                          document.getElementById("profile-name")?.focus()
-                        }
-                      >
-                        <EditIcon />
-                      </button>
-                    </span>
-                  </div>
-                  <div className="profile-field">
-                    <label htmlFor="profile-email">Email:</label>
-                    <span className="profile-edit-field">
-                      <input
-                        id="profile-email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        value={draft.email}
-                        required
-                        maxLength={254}
-                        disabled={busy}
-                        onChange={(event) =>
-                          setDraft({ ...draft, email: event.target.value })
-                        }
-                      />
-                      <button
-                        type="button"
-                        aria-label="Editar email"
-                        disabled={busy}
-                        onClick={() =>
-                          document.getElementById("profile-email")?.focus()
-                        }
-                      >
-                        <EditIcon />
-                      </button>
-                    </span>
+                  <div className="profile-fields-grid">
+                    <div className="profile-field">
+                      <label htmlFor="profile-name">Nome:</label>
+                      <span className="profile-edit-field">
+                        <input
+                          id="profile-name"
+                          name="name"
+                          autoComplete={company ? "organization" : "name"}
+                          value={draft.name}
+                          required
+                          maxLength={160}
+                          pattern=".*\S.*"
+                          disabled={busy}
+                          onChange={(event) =>
+                            setDraft({ ...draft, name: event.target.value })
+                          }
+                        />
+                        <button
+                          type="button"
+                          aria-label="Editar nome"
+                          disabled={busy}
+                          onClick={() =>
+                            document.getElementById("profile-name")?.focus()
+                          }
+                        >
+                          <EditIcon />
+                        </button>
+                      </span>
+                    </div>
+                    <div className="profile-field">
+                      <label htmlFor="profile-email">Email:</label>
+                      <span className="profile-edit-field">
+                        <input
+                          id="profile-email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          value={draft.email}
+                          required
+                          maxLength={254}
+                          disabled={busy}
+                          onChange={(event) =>
+                            setDraft({ ...draft, email: event.target.value })
+                          }
+                        />
+                        <button
+                          type="button"
+                          aria-label="Editar email"
+                          disabled={busy}
+                          onClick={() =>
+                            document.getElementById("profile-email")?.focus()
+                          }
+                        >
+                          <EditIcon />
+                        </button>
+                      </span>
+                    </div>
                   </div>
                   <div className="profile-actions">
                     <button
