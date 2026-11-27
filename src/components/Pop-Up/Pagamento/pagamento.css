@@ -1,5 +1,778 @@
-.card {
+/* =========================================================
+   POP-UP DE PAGAMENTO — MERCADO PAGO PAYMENT BRICK
+   Identidade visual LifeTopografia (Mobile-First)
+   ========================================================= */
+
+.mp-checkout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    calc(12px + env(safe-area-inset-top, 0px))
+    calc(12px + env(safe-area-inset-right, 0px))
+    calc(12px + env(safe-area-inset-bottom, 0px))
+    calc(12px + env(safe-area-inset-left, 0px));
+
+  background: rgba(4, 12, 31, 0.82);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+
   font-family: "Poppins", sans-serif;
-  color: #a100a1;
-  background-color: aliceblue;
+}
+
+.mp-checkout-modal {
+  position: relative;
+  width: min(100%, 980px);
+  max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  border: 1px solid rgba(0, 162, 255, 0.24);
+  border-radius: 20px;
+  background-color: #0b132b;
+  color: #f8fafc;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55);
+
+  animation: mp-modal-enter 0.22s ease-out both;
+}
+
+.mp-checkout-modal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  z-index: 3;
+  background: linear-gradient(90deg, #0b50bd 0%, #00a2ff 75%, #00c853 100%);
+}
+
+@keyframes mp-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   CABEÇALHO DO MODAL
+   ========================================================= */
+
+.mp-checkout-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 20px 18px 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  background-color: #0b132b;
+}
+
+.mp-checkout-heading {
+  min-width: 0;
+  flex: 1;
+}
+
+.mp-brand-pill {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: rgba(11, 80, 189, 0.25);
+  border: 1px solid rgba(0, 162, 255, 0.35);
+  color: #7dd3fc;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.mp-checkout-heading h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.15rem, 3.8vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.mp-close-btn {
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 12px;
+  background-color: rgba(15, 28, 63, 0.9);
+  color: #e2e8f0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.mp-close-btn:hover {
+  background-color: rgba(239, 68, 68, 0.18);
+  border-color: rgba(248, 113, 113, 0.55);
+  color: #fecaca;
+}
+
+.mp-close-btn:focus-visible,
+.mp-btn-primary:focus-visible,
+.mp-btn-secondary:focus-visible,
+.mp-btn-ghost:focus-visible {
+  outline: 3px solid #00a2ff;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   CORPO COM SCROLL FLUIDO (MOBILE-FIRST)
+   ========================================================= */
+
+.mp-checkout-body {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+.mp-checkout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  min-width: 0;
+}
+
+/* =========================================================
+   COLUNA A: RESUMO DO PEDIDO
+   ========================================================= */
+
+.mp-order-summary {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 162, 255, 0.22);
+  background: linear-gradient(160deg, #111d3a 0%, #0d1733 100%);
+}
+
+.mp-summary-top h2 {
+  margin: 8px 0 0;
+  color: #ffffff;
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.mp-order-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background-color: rgba(0, 162, 255, 0.14);
+  border: 1px solid rgba(0, 162, 255, 0.3);
+  color: #38bdf8;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mp-service-box {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background-color: rgba(11, 19, 43, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.mp-field-caption {
+  display: block;
+  margin-bottom: 4px;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mp-service-description {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.mp-trust-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mp-trust-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.mp-total-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(11, 80, 189, 0.28), rgba(0, 162, 255, 0.16));
+  border: 1px solid rgba(0, 162, 255, 0.35);
+}
+
+.mp-total-label {
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.mp-total-value {
+  color: #ffffff;
+  font-size: clamp(1.35rem, 4vw, 1.65rem);
+  font-weight: 800;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   COLUNA B: PAINEL DO GATEWAY / PAYMENT BRICK
+   ========================================================= */
+
+.mp-gateway-panel {
+  min-width: 0;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background-color: #0f172a;
+}
+
+.mp-gateway-header {
+  margin-bottom: 14px;
+}
+
+.mp-gateway-header h2 {
+  margin: 0 0 4px;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.mp-gateway-header p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.mp-brick-stage {
+  position: relative;
+  min-height: 360px;
+  min-width: 0;
+}
+
+.mp-brick-mount {
+  width: 100%;
+  min-width: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mp-brick-mount.is-loading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mp-brick-mount.is-ready {
+  opacity: 1;
+}
+
+/* Skeleton de carregamento */
+.mp-brick-skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  background-color: #0b132b;
+  border: 1px solid rgba(0, 162, 255, 0.2);
+}
+
+.mp-skeleton-spinner-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #bae6fd;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.mp-spinner {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(0, 162, 255, 0.25);
+  border-top-color: #00a2ff;
+  animation: mp-spin 0.8s linear infinite;
+}
+
+@keyframes mp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mp-skeleton-bar {
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.7) 25%,
+    rgba(51, 65, 85, 0.85) 50%,
+    rgba(30, 41, 59, 0.7) 75%
+  );
+  background-size: 200% 100%;
+  animation: mp-shimmer 1.4s infinite linear;
+}
+
+.mp-skeleton-bar.is-lg {
+  height: 54px;
+}
+
+.mp-skeleton-bar.is-md {
+  height: 44px;
+}
+
+.mp-skeleton-bar.is-btn {
+  height: 48px;
+  margin-top: auto;
+}
+
+.mp-skeleton-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@keyframes mp-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.mp-submitting-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 14px;
+  background: rgba(11, 19, 43, 0.85);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: #f8fafc;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.mp-config-alert {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #fde68a;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.mp-config-alert strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #fef3c7;
+}
+
+.mp-config-alert p {
+  margin: 0;
+}
+
+.mp-config-alert code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background-color: rgba(15, 23, 42, 0.65);
+  color: #ffffff;
+}
+
+/* =========================================================
+   ESTADOS VISUAIS (PIX / APROVADO / ERRO)
+   ========================================================= */
+
+.mp-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  padding: 12px 6px;
+}
+
+.mp-state-card h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.15rem, 3.5vw, 1.4rem);
+  font-weight: 700;
+}
+
+.mp-state-subtitle {
+  margin: 0;
+  max-width: 48ch;
+  color: #cbd5e1;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.mp-state-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.mp-state-pill.is-pix {
+  background-color: rgba(0, 162, 255, 0.16);
+  border: 1px solid rgba(0, 162, 255, 0.35);
+  color: #7dd3fc;
+}
+
+.mp-state-pill.is-success {
+  background-color: rgba(0, 200, 83, 0.16);
+  border: 1px solid rgba(0, 200, 83, 0.4);
+  color: #86efac;
+}
+
+.mp-state-pill.is-error {
+  background-color: rgba(239, 68, 68, 0.16);
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  color: #fca5a5;
+}
+
+.mp-status-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.65rem;
+  font-weight: 800;
+}
+
+.mp-status-icon.is-success {
+  background-color: rgba(0, 200, 83, 0.18);
+  border: 2px solid #00c853;
+  color: #00c853;
+}
+
+.mp-status-icon.is-error {
+  background-color: rgba(239, 68, 68, 0.18);
+  border: 2px solid #f87171;
+  color: #f87171;
+}
+
+/* PIX */
+.mp-pix-qr-frame {
+  padding: 14px;
+  border-radius: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.mp-pix-qr-image {
+  display: block;
+  width: min(210px, 56vw);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+.mp-pix-qr-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 190px;
+  min-height: 150px;
+  color: #0b132b;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.mp-pix-qr-fallback span {
+  font-size: 2rem;
+}
+
+.mp-pix-qr-fallback p {
+  margin: 0;
+}
+
+.mp-pix-expiry {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.mp-pix-copy-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background-color: #0b132b;
+  border: 1px solid rgba(0, 162, 255, 0.25);
+  text-align: left;
+}
+
+.mp-pix-code-preview {
+  width: 100%;
+  max-height: 82px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background-color: #0f1c3f;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #e2e8f0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+/* Comprovante de aprovação */
+.mp-receipt-list {
+  width: 100%;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background-color: #0b132b;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mp-receipt-list > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.mp-receipt-list dt {
+  color: #94a3b8;
+}
+
+.mp-receipt-list dd {
+  margin: 0;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.mp-error-code {
+  margin: 0;
+  color: #fca5a5;
+  font-size: 0.8rem;
+}
+
+.mp-error-code code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background-color: rgba(15, 23, 42, 0.75);
+}
+
+.mp-nowrap {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   BOTÕES DE AÇÃO (TOUCH TARGET >= 44x44px)
+   ========================================================= */
+
+.mp-state-actions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mp-btn-primary,
+.mp-btn-secondary,
+.mp-btn-ghost {
+  min-width: 44px;
+  min-height: 46px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.mp-btn-primary {
+  border: 2px solid #0b50bd;
+  background-color: #0b50bd;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(11, 80, 189, 0.35);
+}
+
+.mp-btn-primary:hover {
+  background-color: #0077e6;
+  border-color: #00a2ff;
+  transform: translateY(-1px);
+}
+
+.mp-btn-primary.is-copied {
+  background-color: #00c853;
+  border-color: #00c853;
+  box-shadow: 0 6px 16px rgba(0, 200, 83, 0.3);
+}
+
+.mp-btn-secondary {
+  border: 1.5px solid rgba(0, 162, 255, 0.45);
+  background-color: rgba(0, 162, 255, 0.14);
+  color: #e0f2fe;
+}
+
+.mp-btn-secondary:hover {
+  background-color: rgba(0, 162, 255, 0.24);
+}
+
+.mp-btn-ghost {
+  border: 1.5px solid rgba(148, 163, 184, 0.3);
+  background-color: transparent;
+  color: #cbd5e1;
+}
+
+.mp-btn-ghost:hover {
+  background-color: rgba(148, 163, 184, 0.12);
+  color: #ffffff;
+}
+
+/* =========================================================
+   BREAKPOINTS PROGRESSIVOS (MOBILE-FIRST)
+   ========================================================= */
+
+@media (min-width: 640px) {
+  .mp-checkout-overlay {
+    padding: 20px;
+  }
+
+  .mp-checkout-modal {
+    max-height: calc(100dvh - 40px);
+  }
+
+  .mp-checkout-header {
+    padding: 24px 26px 16px;
+  }
+
+  .mp-checkout-body {
+    padding: 24px 26px;
+  }
+
+  .mp-order-summary,
+  .mp-gateway-panel {
+    padding: 22px;
+  }
+}
+
+@media (min-width: 900px) {
+  .mp-checkout-grid {
+    grid-template-columns: minmax(290px, 360px) minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  .mp-order-summary {
+    position: sticky;
+    top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-checkout-modal,
+  .mp-spinner,
+  .mp-skeleton-bar {
+    animation: none;
+  }
+
+  .mp-close-btn,
+  .mp-brick-mount,
+  .mp-btn-primary,
+  .mp-btn-secondary,
+  .mp-btn-ghost {
+    transition: none;
+  }
 }

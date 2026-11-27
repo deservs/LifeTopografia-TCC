@@ -106,12 +106,22 @@
 @media screen and (max-width: 639px) {
   .topbar--with-right {
     justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
     padding: 0 12px 0 62px;
+  }
+
+  .topbar--with-right .topbar__logo-link {
+    flex-shrink: 1;
+    min-width: 0;
   }
 
   .topbar--with-right .topbar__right {
     position: static;
     transform: none;
+    min-width: 0;
+    flex-shrink: 1;
+    max-width: 100%;
   }
 
   .topbar--with-right .topbar__logo {
@@ -130,6 +140,10 @@
 
   .topbar__logo {
     width: 145px;
+  }
+
+  .topbar--with-right .topbar__logo {
+    width: 112px;
   }
 }
 

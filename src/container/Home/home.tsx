@@ -106,7 +106,7 @@ export default function Home() {
 
         <main id="superposition">
           <div id="main-content">
-            <div id="barra-lateral">
+            <header id="barra-lateral">
               <button
                 type="button"
                 className="btn-menu"
@@ -119,53 +119,41 @@ export default function Home() {
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
               </button>
-            </div>
+            </header>
 
-            <div id="logo">
-              <img
-                src={Logo}
-                alt="Life Topografia"
-                width={2413}
-                height={991}
-              />
-            </div>
+            <section className="home-hero" aria-labelledby="home-hero-title">
+              <div id="logo">
+                <img
+                  src={Logo}
+                  alt="Life Topografia"
+                  width={2413}
+                  height={991}
+                />
+              </div>
 
-            <div id="text">
-              <h1>
-                Topografia de <span className="highlight">alto nível</span>
-              </h1>
-            </div>
+              <div id="text">
+                <h1 id="home-hero-title">
+                  Topografia de <span className="highlight">alto nível</span>
+                </h1>
+              </div>
 
-            <div className="divider-container" aria-hidden="true">
-              <div className="line"></div>
-              <div className="rhombus"></div>
-              <div className="line"></div>
-            </div>
+              <div className="divider-container" aria-hidden="true">
+                <div className="line"></div>
+                <div className="rhombus"></div>
+                <div className="line"></div>
+              </div>
 
-            <p className="home-description">
-              Precisão, confiança e agilidade para transformar projetos em
-              realidade. Trabalhamos com excelência em levantamentos
-              topográficos, georreferenciamento, acompanhamento de obras e muito
-              mais.
-            </p>
+              <p className="home-description">
+                Precisão, confiança e agilidade para transformar projetos em
+                realidade. Trabalhamos com excelência em levantamentos
+                topográficos, georreferenciamento, acompanhamento de obras e
+                muito mais.
+              </p>
 
-            <div className="divider-container" aria-hidden="true">
-              <div className="line"></div>
-              <div className="rhombus"></div>
-              <div className="line"></div>
-            </div>
-
-            {/*
-             * A rota ainda é provisória porque a página
-             * definitiva de orçamento não está registrada
-             * no App.tsx.
-             *
-             * O backend poderá posteriormente definir o
-             * fluxo de envio/processamento dessa solicitação.
-             */}
-            <div id="btn-solicite">
-              <Link to="/chat">SOLICITE UM ORÇAMENTO</Link>
-            </div>
+              <div id="btn-solicite">
+                <Link to="/chat">SOLICITE UM ORÇAMENTO</Link>
+              </div>
+            </section>
           </div>
         </main>
       </div>
