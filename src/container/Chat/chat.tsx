@@ -876,7 +876,7 @@ export default function Chat() {
 
       const responseText =
         decision === "accepted"
-          ? "✓ Proposta de orçamento aceita! Prosseguindo para o pagamento com SumUp."
+          ? "✓ Proposta de orçamento aceita! Prosseguindo para o pagamento com Mercado Pago."
           : "✕ Proposta de orçamento recusada. Gostaria de solicitar alterações no escopo do serviço.";
 
       const statusMsg: ChatMessage = {
@@ -1008,7 +1008,7 @@ export default function Chat() {
             <p className="chat-subtitle">
               {isAdmin
                 ? "Receba matrículas em PDF de clientes, converta as coordenadas georreferenciadas para DXF e emita propostas oficiais de orçamento."
-                : "Converse com os agrimensores da Life Topografia, envie a certidão de matrícula em PDF e aprove seu orçamento com pagamento SumUp."}
+                : "Converse com os agrimensores da Life Topografia, envie a certidão de matrícula em PDF e aprove seu orçamento com pagamento Mercado Pago."}
             </p>
             <div className="title-divider" aria-hidden="true">
               <span className="line" />
@@ -1526,11 +1526,11 @@ export default function Chat() {
                           </div>
                         )}
 
-                        {/* Proposta de Orçamento SumUp */}
+                        {/* Proposta de Orçamento Mercado Pago */}
                         {msg.type === "budget" && msg.budget && (
-                          <div className="sumup-proposal-card">
-                            <div className="sumup-card-header">
-                              <span className="sumup-brand-tag">sumup®</span>
+                          <div className="MercadoPago-proposal-card">
+                            <div className="MercadoPago-card-header">
+                              <span className="MercadoPago-brand-tag">MercadoPago®</span>
                               <span
                                 className={`budget-status-badge status-${msg.budget.status}`}
                               >
@@ -1543,18 +1543,18 @@ export default function Chat() {
                               </span>
                             </div>
 
-                            <h4 className="sumup-service-name">
+                            <h4 className="MercadoPago-service-name">
                               {msg.budget.serviceTitle}
                             </h4>
-                            <p className="sumup-service-desc">
+                            <p className="MercadoPago-service-desc">
                               {msg.budget.description}
                             </p>
 
-                            <div className="sumup-pricing-row">
-                              <span className="sumup-label">
+                            <div className="MercadoPago-pricing-row">
+                              <span className="MercadoPago-label">
                                 Valor total do serviço:
                               </span>
-                              <span className="sumup-price">
+                              <span className="MercadoPago-price">
                                 {formatBudgetAmountDisplay(msg.budget.amount)}
                               </span>
                             </div>
@@ -1591,14 +1591,14 @@ export default function Chat() {
                               </div>
                             )}
 
-                            {/* Se o orçamento foi ACEITO: botão de pagamento SumUp liberado */}
+                            {/* Se o orçamento foi ACEITO: botão de pagamento Mercado Pago liberado */}
                             {msg.budget.status === "accepted" && (
-                              <div className="sumup-footer-actions">
+                              <div className="MercadoPago-footer-actions">
                                 <Link
                                   to="/pagamento"
-                                  className="sumup-pay-button"
+                                  className="MercadoPago-pay-button"
                                 >
-                                  💳 Pagar com SumUp (Cartão ou Pix) →
+                                  💳 Pagar com Mercado Pago (Cartão ou Pix) →
                                 </Link>
                               </div>
                             )}
@@ -1681,7 +1681,7 @@ export default function Chat() {
                         <span className="quick-action-icon">💼</span>
                         <div>
                           <strong>Gerar Proposta de Orçamento</strong>
-                          <p>Emitir proposta oficial com cobrança via SumUp®</p>
+                          <p>Emitir proposta oficial com cobrança via Mercado Pago®</p>
                         </div>
                       </button>
                     ) : (
@@ -1800,8 +1800,8 @@ export default function Chat() {
                 aria-labelledby="modal-budget-title"
               >
                 <header className="budget-modal-header">
-                  <span className="sumup-badge-pill">
-                    sumup® emissão oficial
+                  <span className="MercadoPago-badge-pill">
+                    MercadoPago® emissão oficial
                   </span>
                   <h3 id="modal-budget-title">Gerar Proposta de Orçamento</h3>
                   <button
