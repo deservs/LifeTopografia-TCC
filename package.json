@@ -26,7 +26,6 @@
     "@mercadopago/sdk-react": "^1.0.7",
     "@paddleocr/paddleocr-js": "^0.4.2",
     "@scalar/fastify-api-reference": "^1.78.0",
-    "@sumup/sdk": "^0.2.0",
     "@supabase/supabase-js": "^2.117.3",
     "@tarikjabiri/dxf": "^2.10.1",
     "dotenv": "^17.4.2",
