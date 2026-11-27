@@ -137,6 +137,8 @@ export default function Home() {
               </button>
 
               <div className="home-desktop-nav">
+                <span className="home-desktop-logo-slot" aria-hidden="true" />
+
                 <nav
                   className="home-desktop-links"
                   aria-label="Navegação principal"
