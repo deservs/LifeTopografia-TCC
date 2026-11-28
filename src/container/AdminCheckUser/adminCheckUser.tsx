@@ -437,10 +437,7 @@ export default function AdminCheckUser() {
       MOCK_INACTIVE_USER.email.toLowerCase().includes(lowerSearch);
 
     const baseUsers =
-      !hasInactiveInPage &&
-      page === 1 &&
-      matchesAccountFilter &&
-      matchesSearch
+      !hasInactiveInPage && page === 1 && matchesAccountFilter && matchesSearch
         ? [...users, MOCK_INACTIVE_USER]
         : users;
 
@@ -1263,10 +1260,7 @@ export default function AdminCheckUser() {
                   </p>
                   {(pendingStatusAction.account.accountType === "EMPRESA" ||
                     Boolean(pendingStatusAction.account.cnpj)) && (
-                    <div
-                      className="admin-users-confirm-warning"
-                      role="note"
-                    >
+                    <div className="admin-users-confirm-warning" role="note">
                       Atenção: todos os funcionários vinculados em{" "}
                       <code>membros_empresa</code> também terão o acesso
                       suspenso enquanto esta empresa estiver inativa.

@@ -378,8 +378,7 @@ export default function AdminHelpersPanel() {
           <ul className="profile-members-list profile-helpers-list">
             {helpers.map((helper) => {
               const isSelected = helper.id === selectedHelperId;
-              const initial =
-                helper.name.trim().charAt(0).toUpperCase() || "A";
+              const initial = helper.name.trim().charAt(0).toUpperCase() || "A";
 
               return (
                 <li
@@ -486,10 +485,7 @@ export default function AdminHelpersPanel() {
                 <legend>Conteúdos permitidos:</legend>
                 <div className="profile-helpers-checkboxes">
                   {PERMISSION_OPTIONS.map((option) => (
-                    <label
-                      key={option.key}
-                      className="profile-helper-checkbox"
-                    >
+                    <label key={option.key} className="profile-helper-checkbox">
                       <input
                         type="checkbox"
                         checked={selectedPermissions.includes(option.key)}

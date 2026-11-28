@@ -22,6 +22,7 @@
   color: #111827;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
   text-align: center;
+  box-sizing: border-box;
   animation: notice-modal-enter 0.25s ease-out both;
 }
 
@@ -90,27 +91,38 @@
   border-radius: 12px;
   background: #0b50bd;
   color: #ffffff;
+  font-family: inherit;
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.035em;
   text-decoration: none;
+  cursor: pointer;
   transition:
     background-color 0.2s ease,
     transform 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.notice-modal-action:hover {
+.notice-modal-action:hover:not(:disabled) {
   background: #083d93;
   box-shadow: 0 6px 16px rgba(11, 80, 189, 0.25);
   transform: translateY(-2px);
 }
 
-.notice-modal-action:active {
+.notice-modal-action:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.notice-modal-action:focus-visible {
+.notice-modal-action:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.notice-modal-action:focus-visible,
+.notice-modal-cancel:focus-visible,
+.notice-modal-resend-btn:focus-visible {
   outline: 3px solid #00a2ff;
   outline-offset: 3px;
 }
@@ -118,6 +130,197 @@
 .notice-modal-action span {
   font-size: 1.3rem;
   line-height: 1;
+}
+
+/* =========================================================
+   MODO DE VERIFICAÇÃO OTP (ESCOPADO NO CARD)
+   ========================================================= */
+
+.notice-modal-card--otp .notice-modal-symbol {
+  width: 120px;
+  height: 72px;
+  margin-bottom: 8px;
+}
+
+.notice-modal-card--otp #notice-modal-description {
+  margin-bottom: 14px;
+}
+
+.notice-modal-otp-form {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.notice-modal-otp-email {
+  margin: 0;
+  color: #334155;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.notice-modal-email-highlight {
+  color: #0b50bd;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.notice-modal-card .digits-container {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: clamp(5px, 1.8vw, 10px);
+  margin: 2px 0;
+}
+
+.notice-modal-card .digit-box {
+  box-sizing: border-box;
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  max-width: 52px;
+  height: 50px;
+  padding: 0;
+  color: #0b132b;
+  background-color: #ffffff;
+  border: 2px solid #0b132b;
+  border-radius: 8px;
+  text-align: center;
+  font-family: inherit;
+  font-size: clamp(1.1rem, 4.5vw, 1.45rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.notice-modal-card .digit-box:focus,
+.notice-modal-card .digit-box:focus-visible {
+  border-color: #0b50bd;
+  box-shadow: 0 0 0 3px rgba(11, 80, 189, 0.22);
+}
+
+.notice-modal-card .digit-box[aria-invalid="true"] {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.notice-modal-card .digit-box:disabled {
+  background-color: #f1f5f9;
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.notice-modal-otp-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  background-color: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.notice-modal-otp-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notice-modal-action--button span {
+  font-size: inherit;
+}
+
+.notice-modal-spinner {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.32);
+  border-top-color: #ffffff;
+  animation: notice-modal-spin 0.8s linear infinite;
+}
+
+@keyframes notice-modal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.notice-modal-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.notice-modal-cancel:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0b132b;
+}
+
+.notice-modal-cancel:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.notice-modal-timer-text {
+  margin: 2px 0 0;
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.notice-modal-timer-countdown {
+  font-weight: 600;
+  color: #0b132b;
+  font-variant-numeric: tabular-nums;
+}
+
+.notice-modal-resend-btn {
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #0b50bd;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.notice-modal-resend-btn:hover:not(:disabled) {
+  color: #083d93;
+}
+
+.notice-modal-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @keyframes notice-modal-enter {
@@ -141,10 +344,30 @@
     max-height: calc(100dvh - 32px);
     padding: 30px 24px;
   }
+
+  .notice-modal-card--otp {
+    padding: 26px 18px;
+  }
+
+  .notice-modal-card .digits-container {
+    gap: 5px;
+  }
+
+  .notice-modal-card .digit-box {
+    height: 46px;
+    font-size: 1.2rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .notice-modal-card {
+  .notice-modal-card,
+  .notice-modal-spinner {
     animation: none;
+  }
+
+  .notice-modal-action,
+  .notice-modal-card .digit-box,
+  .notice-modal-cancel {
+    transition: none;
   }
 }

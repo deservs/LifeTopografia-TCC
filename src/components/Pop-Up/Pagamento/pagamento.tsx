@@ -500,10 +500,7 @@ export default function Pagamento({
                             aria-label="Carregando formulário de pagamento"
                           >
                             <div className="mp-skeleton-spinner-row">
-                              <span
-                                className="mp-spinner"
-                                aria-hidden="true"
-                              />
+                              <span className="mp-spinner" aria-hidden="true" />
                               <span>
                                 Conectando ao checkout seguro Mercado Pago…
                               </span>
@@ -629,7 +626,10 @@ export default function Pagamento({
                     role="status"
                     aria-live="polite"
                   >
-                    <div className="mp-status-icon is-success" aria-hidden="true">
+                    <div
+                      className="mp-status-icon is-success"
+                      aria-hidden="true"
+                    >
                       ✓
                     </div>
                     <span className="mp-state-pill is-success">
@@ -661,7 +661,9 @@ export default function Pagamento({
                       {approvedData?.paymentId && (
                         <div>
                           <dt>ID da transação</dt>
-                          <dd className="mp-nowrap">{approvedData.paymentId}</dd>
+                          <dd className="mp-nowrap">
+                            {approvedData.paymentId}
+                          </dd>
                         </div>
                       )}
                     </dl>
@@ -687,7 +689,8 @@ export default function Pagamento({
                       ATENÇÃO NO PAGAMENTO
                     </span>
                     <h2>
-                      {errorData?.title || "Não foi possível concluir o pagamento"}
+                      {errorData?.title ||
+                        "Não foi possível concluir o pagamento"}
                     </h2>
                     <p className="mp-state-subtitle">
                       {errorData?.message ||

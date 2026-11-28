@@ -180,7 +180,7 @@ export const Cadastrar = () => {
       setFormError("Informe o CNPJ da empresa.");
       return;
     }
-    
+
     const cnpjRegex = formData.cnpj.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
     const role = tipoCadastro === "empresa" ? cnpjRegex : undefined;
     /* método de criar um novo usuário */
@@ -586,6 +586,6 @@ export const Cadastrar = () => {
       />
     </>
   );
-}
+};
 
 export default Cadastrar;

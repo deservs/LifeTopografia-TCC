@@ -175,8 +175,7 @@ export async function apiRequest<T>(
     if (!requestHeaders["Content-Type"]) {
       requestHeaders["Content-Type"] = "application/json";
     }
-    serializedBody =
-      typeof body === "string" ? body : JSON.stringify(body);
+    serializedBody = typeof body === "string" ? body : JSON.stringify(body);
   }
 
   try {

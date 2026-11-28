@@ -19,7 +19,7 @@ export const DefinirSenha = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if ( status !== "authenticated" || !user ) return;
+    if (status !== "authenticated" || !user) return;
 
     if (user.status === "PENDENTE") {
       navigate("/", { replace: true });

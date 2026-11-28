@@ -1,25 +1,10 @@
 import { lazy, Suspense, useState, type FormEvent } from "react";
-import { supabase } from "../../lib/supabase/supabaseClient";
 import "./ChangePasswordForm.css";
 
 const PasswordInput = lazy(() => import("../PasswordInput/passwordInput"));
 
 interface ChangePasswordFormProps {
-  onSuccess?: (message: string) => void;
-}
-
-function getReadableUpdateError(message: string): string {
-  const lower = message.toLowerCase();
-  if (lower.includes("different from the old password")) {
-    return "A nova senha deve ser diferente da senha atual.";
-  }
-  if (lower.includes("session") || lower.includes("jwt")) {
-    return "Sua sessão expirou. Faça login novamente para alterar a senha.";
-  }
-  if (lower.includes("weak") || lower.includes("password")) {
-    return "A senha informada não atende aos requisitos mínimos de segurança.";
-  }
-  return message || "Não foi possível alterar a senha. Tente novamente.";
+  onSuccess?: (newPassword: string) => Promise<void> | void;
 }
 
 export default function ChangePasswordForm({
@@ -83,29 +68,14 @@ export default function ChangePasswordForm({
       setFeedbackIsError(true);
       return;
     }
-
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) {
-        setFeedback(getReadableUpdateError(error.message));
-        setFeedbackIsError(true);
-        return;
-      }
-
-      setNewPassword("");
-      setConfirmPassword("");
-      setFeedback("Senha alterada com sucesso.");
-      setFeedbackIsError(false);
-      onSuccess?.("Senha alterada com sucesso.");
-    } catch (error) {
+      await onSuccess?.(newPassword);
+    } catch (err) {
       setFeedback(
-        error instanceof Error
-          ? getReadableUpdateError(error.message)
-          : "Não foi possível alterar a senha. Tente novamente.",
+        err instanceof Error
+          ? err.message
+          : "Não foi possível iniciar a alteração de senha. Tente novamente.",
       );
       setFeedbackIsError(true);
     } finally {

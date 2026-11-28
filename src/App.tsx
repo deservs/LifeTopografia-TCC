@@ -24,7 +24,9 @@ const Teste = lazy(() => import("./container/Enviar-arquivos/enviar_arquivos"));
 const Chat = lazy(() => import("./container/Chat/chat"));
 const FAQ = lazy(() => import("./container/FAQ/faq"));
 
-const NoticeModal = lazy(() => import("./components/Pop-Up/NoticeModal/noticeModal"));
+const NoticeModal = lazy(
+  () => import("./components/Pop-Up/NoticeModal/noticeModal"),
+);
 const AdminCheckUser = lazy(
   () => import("./container/AdminCheckUser/adminCheckUser"),
 );
@@ -54,7 +56,9 @@ function App() {
       <BrowserRouter>
         <Suspense fallback={null}>
           <Routes>
-            <Route element={<AppLayout showTopbar={false} showFooter={false} />}>
+            <Route
+              element={<AppLayout showTopbar={false} showFooter={false} />}
+            >
               <Route path="/" element={<Home />} />
             </Route>
 
@@ -67,7 +71,10 @@ function App() {
 
             <Route element={<AppLayout showTopbar={true} showFooter={true} />}>
               <Route path="/sobre" element={<About />} />
-              <Route path="/sobre-nos" element={<Navigate to="/sobre" replace />} />
+              <Route
+                path="/sobre-nos"
+                element={<Navigate to="/sobre" replace />}
+              />
               <Route path="/about" element={<Navigate to="/sobre" replace />} />
               <Route path="/servicos" element={<Services />} />
               <Route path="/faq" element={<FAQ />} />
@@ -77,7 +84,7 @@ function App() {
                 <Route path="/perfil" element={<Profile />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/pagamento" element={<Pagamento />} />
-              <Route path="/definir-senha" element={<DefinirSenha />} />
+                <Route path="/definir-senha" element={<DefinirSenha />} />
               </Route>
 
               <Route element={<AdminRoute />}>
@@ -101,7 +108,18 @@ function App() {
               </Route>
             </Route>
 
-            <Route path="*" element={<NoticeModal code="ERRO 404" popupTitle="Saímos da rota." message="A página que você procura não foi encontrada. Volte ao início para continuar navegando pela LifeTopografia." buttonText="Voltar ao início" buttonLink="" />} />
+            <Route
+              path="*"
+              element={
+                <NoticeModal
+                  code="ERRO 404"
+                  popupTitle="Saímos da rota."
+                  message="A página que você procura não foi encontrada. Volte ao início para continuar navegando pela LifeTopografia."
+                  buttonText="Voltar ao início"
+                  buttonLink=""
+                />
+              }
+            />
           </Routes>
         </Suspense>
       </BrowserRouter>

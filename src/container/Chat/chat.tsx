@@ -1186,8 +1186,7 @@ export default function Chat() {
                                     ? `📎 Arquivo: ${lastMsg.file?.name}`
                                     : lastMsg?.type === "budget"
                                       ? `💼 Orçamento: ${formatBudgetAmountDisplay(lastMsg.budget?.amount || "")}`
-                                      : lastMsg?.text ||
-                                        "Inicie a conversa...";
+                                      : lastMsg?.text || "Inicie a conversa...";
 
                                 return (
                                   <button
@@ -1551,7 +1550,9 @@ export default function Chat() {
                         {msg.type === "budget" && msg.budget && (
                           <div className="MercadoPago-proposal-card">
                             <div className="MercadoPago-card-header">
-                              <span className="MercadoPago-brand-tag">MercadoPago®</span>
+                              <span className="MercadoPago-brand-tag">
+                                MercadoPago®
+                              </span>
                               <span
                                 className={`budget-status-badge status-${msg.budget.status}`}
                               >
@@ -1702,7 +1703,10 @@ export default function Chat() {
                         <span className="quick-action-icon">💼</span>
                         <div>
                           <strong>Gerar Proposta de Orçamento</strong>
-                          <p>Emitir proposta oficial com cobrança via Mercado Pago®</p>
+                          <p>
+                            Emitir proposta oficial com cobrança via Mercado
+                            Pago®
+                          </p>
                         </div>
                       </button>
                     ) : (
@@ -1806,10 +1810,7 @@ export default function Chat() {
 
           {/* MODAL EXCLUSIVO DO ADMINISTRADOR: Criar Proposta de Orçamento */}
           {showBudgetModal && isAdmin && (
-            <div
-              className="budget-modal-backdrop"
-              onClick={closeBudgetModal}
-            >
+            <div className="budget-modal-backdrop" onClick={closeBudgetModal}>
               <div
                 className="budget-modal-content"
                 onClick={(e) => e.stopPropagation()}
@@ -1851,9 +1852,7 @@ export default function Chat() {
                   </div>
 
                   <div className="modal-field-group">
-                    <label htmlFor="budget-service-amount">
-                      Valor Total:
-                    </label>
+                    <label htmlFor="budget-service-amount">Valor Total:</label>
                     <input
                       id="budget-service-amount"
                       type="text"

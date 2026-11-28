@@ -28,6 +28,7 @@ const envSchemaWithSupabase = envSchema.extend({
     .string()
     .min(1, 'A SUPABASE_PUBLISHABLE_KEY é obrigatória'),
   SUPABASE_SECRET_KEY: z.string().min(1, 'A SUPABASE_SECRET_KEY é obrigatória'),
+  OTP_SECRET_PEPPER: z.string().min(1, 'O OTP_SECRET_PEPPER é obrigatório'),
 })
 
 const envSchemaWithR2 = envSchemaWithSupabase.extend({

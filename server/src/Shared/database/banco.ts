@@ -6,4 +6,9 @@ const supabaseKey = env.VITE_SUPABASE_PUBLISHABLE_KEY
 const supabaseSecretKey = env.SUPABASE_SECRET_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseSecretKey)
+export const supabaseAdmin = createClient(supabaseUrl, supabaseSecretKey, {
+    auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+    },
+})

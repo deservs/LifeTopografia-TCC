@@ -12,8 +12,7 @@
   align-items: center;
   justify-content: center;
 
-  padding:
-    calc(12px + env(safe-area-inset-top, 0px))
+  padding: calc(12px + env(safe-area-inset-top, 0px))
     calc(12px + env(safe-area-inset-right, 0px))
     calc(12px + env(safe-area-inset-bottom, 0px))
     calc(12px + env(safe-area-inset-left, 0px));
@@ -28,7 +27,10 @@
 .mp-checkout-modal {
   position: relative;
   width: min(100%, 980px);
-  max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  max-height: calc(
+    100dvh - 24px - env(safe-area-inset-top, 0px) -
+      env(safe-area-inset-bottom, 0px)
+  );
   min-width: 0;
 
   display: flex;
@@ -256,7 +258,11 @@
   gap: 8px 12px;
   padding: 14px 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(11, 80, 189, 0.28), rgba(0, 162, 255, 0.16));
+  background: linear-gradient(
+    135deg,
+    rgba(11, 80, 189, 0.28),
+    rgba(0, 162, 255, 0.16)
+  );
   border: 1px solid rgba(0, 162, 255, 0.35);
 }
 

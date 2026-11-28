@@ -195,8 +195,7 @@ function normalizeUserRecord(raw: unknown): AdminUserItem | null {
   return {
     id,
     name:
-      readString(raw, ["name", "nome_ou_razao", "nome"]) ??
-      "Usuário sem nome",
+      readString(raw, ["name", "nome_ou_razao", "nome"]) ?? "Usuário sem nome",
     email: readString(raw, ["email"]) ?? "E-mail não informado",
     accountType,
     isAdminAccount: roleToken === "admin" || roleToken === "administrador",
@@ -349,8 +348,7 @@ export async function fetchAdminUsers(
       : {};
     const page = readNumber(rawPagination, ["page"]) ?? params.page;
     const limit = readNumber(rawPagination, ["limit"]) ?? params.limit;
-    const total =
-      readNumber(rawPagination, ["total", "count"]) ?? users.length;
+    const total = readNumber(rawPagination, ["total", "count"]) ?? users.length;
     const totalPages =
       readNumber(rawPagination, ["totalPages", "total_pages"]) ??
       Math.max(1, Math.ceil(total / Math.max(1, limit)));

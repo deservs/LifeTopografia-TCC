@@ -160,7 +160,9 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 <div className="profile-details">
                   <h2 className="user-name">{displayName}</h2>
 
-                  <span className="user-role">{formatRoleLabel(user.role)}</span>
+                  <span className="user-role">
+                    {formatRoleLabel(user.role)}
+                  </span>
 
                   <Link to="/perfil" className="account-link" onClick={onClose}>
                     Acessar perfil

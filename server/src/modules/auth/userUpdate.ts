@@ -9,9 +9,17 @@ type UpdateUserProfileResponse = {
 }
 
 type UpdateUserProfileData = {
-  email?: string
   name?: string
   avatarUrl?: string | null
+}
+
+type UpdateUserCredentialsResponse =
+  | { ok: true; message: string }
+  | { ok: false; httpStatus: 400 | 500; code: string; message: string }
+
+type UpdateUserCredentialsData = {
+  novoEmail?: string
+  novaSenha?: string
 }
 
 export async function updateUserProfile(
@@ -19,7 +27,6 @@ export async function updateUserProfile(
   data: UpdateUserProfileData,
 ): Promise<UpdateUserProfileResponse> {
   const profileUpdates = {
-    ...(data.email && data.email !== user.email ? { email: data.email } : {}),
     ...(data.name !== undefined ? { nome_ou_razao: data.name } : {}),
     ...(data.avatarUrl !== undefined ? { foto_url: data.avatarUrl } : {}),
   }
@@ -47,7 +54,6 @@ export async function updateUserProfile(
   const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
     user.id,
     {
-      ...(data.email && data.email !== user.email ? { email: data.email } : {}),
       user_metadata: {
         ...user.user_metadata,
         ...(data.name !== undefined
@@ -109,5 +115,70 @@ export async function updateUserProfile(
   return {
     ok: true,
     message: 'Perfil atualizado com sucesso.',
+  }
+}
+
+export async function updateUserCredentials(
+  user: User,
+  data: UpdateUserCredentialsData,
+): Promise<UpdateUserCredentialsResponse> {
+  if (data.novoEmail) {
+    const previousEmail = user.email
+
+    const { error: authEmailError } =
+      await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        email: data.novoEmail,
+      })
+
+    if (authEmailError) {
+      return {
+        ok: false,
+        httpStatus: 400,
+        code: 'AUTH_EMAIL_UPDATE_FAILED',
+        message: authEmailError.message,
+      }
+    }
+
+    const { error: profileError } = await supabaseAdmin
+      .from('perfis')
+      .update({ email: data.novoEmail })
+      .eq('id', user.id)
+
+    if (profileError) {
+      if (previousEmail) {
+        await supabaseAdmin.auth.admin
+          .updateUserById(user.id, { email: previousEmail })
+          .catch((rollbackErr) =>
+            console.error('Falha ao reverter e-mail no Auth:', rollbackErr),
+          )
+      }
+      return {
+        ok: false,
+        httpStatus: 500,
+        code: 'PROFILE_EMAIL_SYNC_FAILED',
+        message: 'Erro ao sincronizar o novo e-mail no perfil.',
+      }
+    }
+  }
+
+  if (data.novaSenha) {
+    const { error: authPasswordError } =
+      await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        password: data.novaSenha,
+      })
+
+    if (authPasswordError) {
+      return {
+        ok: false,
+        httpStatus: 400,
+        code: 'AUTH_PASSWORD_UPDATE_FAILED',
+        message: authPasswordError.message,
+      }
+    }
+  }
+
+  return {
+    ok: true,
+    message: 'Credenciais atualizadas com sucesso.',
   }
 }

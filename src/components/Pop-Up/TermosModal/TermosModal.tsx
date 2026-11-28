@@ -151,18 +151,18 @@ export default function TermosModal({
                 </p>
                 <div className="termos-doc-callout">
                   <strong>Aviso de Limitação de Escopo:</strong> A plataforma
-                  LifeTopografia atua unicamente como ferramenta de software para
-                  organização de dados e apoio ao fluxo de trabalho do
+                  LifeTopografia atua unicamente como ferramenta de software
+                  para organização de dados e apoio ao fluxo de trabalho do
                   profissional, não executando, gerindo ou substituindo as
                   medições técnicas de campo, levantamentos topográficos manuais
                   ou validações geodésicas.
                 </div>
                 <p>
-                  Este documento de Termos e Condições de Uso (&ldquo;Termos&rdquo;)
-                  rege o acesso e a utilização de todas as funcionalidades da
-                  plataforma. Ao navegar ou cadastrar-se no sistema, você
-                  declara ter lido, compreendido e aceito integralmente estas
-                  condições.
+                  Este documento de Termos e Condições de Uso
+                  (&ldquo;Termos&rdquo;) rege o acesso e a utilização de todas
+                  as funcionalidades da plataforma. Ao navegar ou cadastrar-se
+                  no sistema, você declara ter lido, compreendido e aceito
+                  integralmente estas condições.
                 </p>
               </section>
 
@@ -208,8 +208,8 @@ export default function TermosModal({
                   <li>
                     <strong>Sintetização de Dados:</strong> O processo
                     automatizado realizado pelo software para ler, extrair e
-                    organizar os dados contidos na matrícula PDF,
-                    convertendo-os em arquivos dxf.
+                    organizar os dados contidos na matrícula PDF, convertendo-os
+                    em arquivos dxf.
                   </li>
                   <li>
                     <strong>Arquivo DXF / AutoCAD:</strong> O arquivo dxf
@@ -231,7 +231,9 @@ export default function TermosModal({
               </section>
 
               <section className="termos-doc-section">
-                <h3>14.2.2. SOBRE AS FUNCIONALIDADES E SINTETIZAÇÃO DE DADOS</h3>
+                <h3>
+                  14.2.2. SOBRE AS FUNCIONALIDADES E SINTETIZAÇÃO DE DADOS
+                </h3>
 
                 <h4>2.1. Funcionalidades da Plataforma</h4>
                 <p>
@@ -241,7 +243,9 @@ export default function TermosModal({
                 </p>
                 <ul className="termos-doc-alpha-list">
                   <li>
-                    <strong>a) Módulo de Upload e Leitura de Matrículas:</strong>{" "}
+                    <strong>
+                      a) Módulo de Upload e Leitura de Matrículas:
+                    </strong>{" "}
                     Espaço para anexar certidões de matrícula em formato PDF
                     para extração e sintetização automatizadas de informações do
                     imóvel.
@@ -257,9 +261,7 @@ export default function TermosModal({
                     informações diretas entre o Cliente e o Topógrafo.
                   </li>
                   <li>
-                    <strong>
-                      d) Mostruário e Acompanhamento de Serviços:
-                    </strong>{" "}
+                    <strong>d) Mostruário e Acompanhamento de Serviços:</strong>{" "}
                     Interface para visualização do portfólio de serviços,
                     acompanhamento de status de solicitações e histórico de
                     orçamentos.
@@ -300,10 +302,10 @@ export default function TermosModal({
 
                 <h4>3.1. Requisitos para Cadastro</h4>
                 <p>
-                  O acesso às áreas restritas da plataforma é permitido a pessoas
-                  físicas capazes e pessoas jurídicas regularmente constituídas.
-                  Cada usuário deverá manter uma única Conta de Acesso vinculada
-                  ao seu número de CPF ou CNPJ.
+                  O acesso às áreas restritas da plataforma é permitido a
+                  pessoas físicas capazes e pessoas jurídicas regularmente
+                  constituídas. Cada usuário deverá manter uma única Conta de
+                  Acesso vinculada ao seu número de CPF ou CNPJ.
                 </p>
 
                 <h4>3.2. Guarda de Credenciais</h4>
@@ -333,8 +335,8 @@ export default function TermosModal({
                 <p>
                   Após a recepção dos dados do terreno e da matrícula em PDF, o
                   administrador (Topógrafo) avaliará a complexidade técnica e a
-                  localização do imóvel para emitir o orçamento correspondente na
-                  área do Cliente e no chat de atendimento.
+                  localização do imóvel para emitir o orçamento correspondente
+                  na área do Cliente e no chat de atendimento.
                 </p>
 
                 <h4>4.2. Meios de Pagamento Integrados</h4>
@@ -349,8 +351,8 @@ export default function TermosModal({
                 <p>
                   O agendamento presencial do serviço topográfico ou a liberação
                   da entrega dos trabalhos fica condicionado à confirmação e
-                  compensação do pagamento pelo intermediador financeiro (Mercado
-                  Pago).
+                  compensação do pagamento pelo intermediador financeiro
+                  (Mercado Pago).
                 </p>
               </section>
 
@@ -421,8 +423,8 @@ export default function TermosModal({
                   Santos Pinto Topografia (CNPJ: 33.175.223/0001-49) coleta,
                   armazena, utiliza, compartilha e protege os dados pessoais dos
                   seus Usuários (Clientes e Administradores), em conformidade
-                  integral com a Lei Geral de Proteção de Dados Pessoais (LGPD
-                  – Lei nº 13.709/2018).
+                  integral com a Lei Geral de Proteção de Dados Pessoais (LGPD –
+                  Lei nº 13.709/2018).
                 </p>
               </section>
 
@@ -442,9 +444,7 @@ export default function TermosModal({
                     criptografado.
                   </li>
                   <li>
-                    <strong>
-                      Dados do Imóvel e Documentação Técnica:
-                    </strong>{" "}
+                    <strong>Dados do Imóvel e Documentação Técnica:</strong>{" "}
                     Informações contidas nas certidões de matrícula enviadas em
                     formato PDF, coordenadas geográficas e dados descritivos
                     fornecidos diretamente pelo Cliente para sintetização e
@@ -611,9 +611,7 @@ export default function TermosModal({
                       armazenamento.
                     </li>
                     <li>
-                      <strong>
-                        Retenção Legal e Fiscal (LGPD – Art. 16):
-                      </strong>{" "}
+                      <strong>Retenção Legal e Fiscal (LGPD – Art. 16):</strong>{" "}
                       A exclusão da conta de usuário não implica o cancelamento
                       imediato de obrigações contratuais ou fiscais decorrentes
                       de serviços já contratados ou executados pela Nilton

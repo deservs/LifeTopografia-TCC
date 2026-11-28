@@ -1,9 +1,5 @@
 export type AccountRole =
-  | "PESSOA_FISICA"
-  | "EMPRESA"
-  | "ADMIN"
-  | "AUXILIAR"
-  | "PESSOA_JURIDICA";
+  "PESSOA_FISICA" | "EMPRESA" | "ADMIN" | "AUXILIAR" | "PESSOA_JURIDICA";
 
 export type ProfileStatus = "ATIVO" | "EXCLUIDO" | "AFASTADO" | "PENDENTE";
 

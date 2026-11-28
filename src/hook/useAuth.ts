@@ -1,8 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 import type { UserProfile } from "../types/auth.types";
-import { } from "react";
+import {} from "react";
 import { useContext, createContext } from "react";
-
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 

@@ -86,7 +86,6 @@ export async function SignIn(
       fieldErrors: response.fieldErrors,
     };
   }
-
   const { data, error } = await supabase.auth.setSession({
     access_token: response.data.session.access_token,
     refresh_token: response.data.session.refresh_token,
@@ -95,10 +94,10 @@ export async function SignIn(
   if (error || !data.session || !data.user) {
     return {
       ok: false,
-      message: "Falha ao obter a sessão do usuário após o login.",
+      message:
+        error?.message || "Falha ao obter a sessão do usuário após o login.",
     };
   }
-
   return {
     ok: true,
     session: data.session,
@@ -219,7 +218,7 @@ export async function ConfirmResetPassword(newPassword: string) {
   if (error) {
     throw new Error(error.message);
   }
-  await supabase.auth.signOut({scope: "others"});
+  await supabase.auth.signOut({ scope: "others" });
   return data;
 }
 
@@ -283,7 +282,13 @@ export async function UpdateMemberStatus(
   );
 
   if (!response.ok) {
-    if (response.code === "INVALID_PASSWORD" || response.status === 401) {
+    if (response.code === "INVALID_PASSWORD") {
+      return "invalid_password";
+    }
+    if (response.code === "UNAUTHENTICATED") {
+      throw new Error(response.message);
+    }
+    if (response.status === 401) {
       return "invalid_password";
     }
     if (response.code === "FORBIDDEN" || response.status === 403) {
@@ -308,7 +313,13 @@ export async function RemoveCompanyMember(
   );
 
   if (!response.ok) {
-    if (response.code === "INVALID_PASSWORD" || response.status === 401) {
+    if (response.code === "INVALID_PASSWORD") {
+      return "invalid_password";
+    }
+    if (response.code === "UNAUTHENTICATED") {
+      throw new Error(response.message);
+    }
+    if (response.status === 401) {
       return "invalid_password";
     }
     if (response.code === "FORBIDDEN" || response.status === 403) {
@@ -323,6 +334,7 @@ export async function RemoveCompanyMember(
 export async function DeleteAccount(
   memberId: string,
   password: string,
+  code: string,
 ): Promise<"invalid_password" | "forbidden" | "blocked" | "deleted"> {
   const response = await apiRequest<{ status: "deleted" }>(
     "/api/delete-account",
@@ -331,12 +343,19 @@ export async function DeleteAccount(
       body: {
         memberId,
         password,
+        code,
       },
     },
   );
 
   if (!response.ok) {
-    if (response.code === "INVALID_PASSWORD" || response.status === 401) {
+    if (response.code === "INVALID_PASSWORD") {
+      return "invalid_password";
+    }
+    if (response.code === "UNAUTHENTICATED") {
+      throw new Error(response.message);
+    }
+    if (response.status === 401) {
       return "invalid_password";
     }
     if (response.code === "BLOCKED") {
@@ -345,8 +364,50 @@ export async function DeleteAccount(
     if (response.code === "FORBIDDEN" || response.status === 403) {
       return "forbidden";
     }
+    if (response.code === "INVALID_CODE") {
+      throw new Error(response.message ?? "Código de confirmação inválido.");
+    }
+    if (response.status === 400) {
+      throw new Error(response.message ?? "Dados inválidos para exclusão.");
+    }
     throw new Error(response.message ?? "Erro ao excluir a conta.");
   }
 
-  return response.data.status;
+  return "deleted";
+}
+
+export async function GetCode(): Promise<void> {
+  const response = await apiRequest<{ message?: string }>(
+    "/api/send-hash-code",
+    {
+      method: "POST",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      response.message ?? "Erro ao enviar código de verificação.",
+    );
+  }
+}
+
+export async function SecureProfileUpdate(payload: {
+  code: string;
+  novoEmail?: string;
+  novaSenha?: string;
+}): Promise<void> {
+  const response = await apiRequest<{ message?: string }>(
+    "/api/secure-update",
+    {
+      method: "PATCH",
+      body: payload,
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      response.message ??
+        "Código inválido ou erro ao atualizar credenciais.",
+    );
+  }
 }

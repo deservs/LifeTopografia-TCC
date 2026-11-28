@@ -18,6 +18,8 @@ import {
   SearchMemberData,
   UpdateMemberStatus,
   UpdateUser,
+  GetCode,
+  SecureProfileUpdate,
 } from "../../lib/supabase/auth";
 import {
   isCompanyRole,
@@ -27,6 +29,7 @@ import {
 import AdminHelpersPanel from "./AdminHelpersPanel";
 
 import "./profile.css";
+import NoticeModal from "../../components/Pop-Up/NoticeModal/noticeModal";
 
 const PasswordInput = lazy(
   () => import("../../components/PasswordInput/passwordInput"),
@@ -48,6 +51,8 @@ interface ProfileProps {
 }
 
 type PageView = "profile" | "members" | "member" | "password" | "helpers";
+
+type PendingOtpAction = "email" | "senha" | "excluir_conta" | null;
 
 function EditIcon() {
   return (
@@ -121,11 +126,17 @@ export default function Profile({
   const [feedbackIsError, setFeedbackIsError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [pendingOtpAction, setPendingOtpAction] =
+    useState<PendingOtpAction>(null);
+  const [isOtpSubmitting, setIsOtpSubmitting] = useState(false);
+  const [otpErrorMessage, setOtpErrorMessage] = useState("");
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const previousViewRef = useRef(view);
   const submittingRef = useRef(false);
+  const [senha, setSenha] = useState("");
+  const [pendingNewEmail, setPendingNewEmail] = useState("");
 
   const loading = !initialProfile && authStatus === "loading";
 
@@ -175,7 +186,7 @@ export default function Profile({
   }, [view]);
 
   useEffect(() => {
-    if (!action) return;
+    if (!action || pendingOtpAction !== null) return;
     const dialog = dialogRef.current;
     const previouslyFocused = document.activeElement;
     dialog?.showModal();
@@ -193,7 +204,7 @@ export default function Profile({
       )
         previouslyFocused.focus();
     };
-  }, [action]);
+  }, [action, pendingOtpAction]);
 
   function notify(message: string, error = false) {
     setFeedback(message);
@@ -209,23 +220,43 @@ export default function Profile({
     event.preventDefault();
     if (!profile || !draft || submittingRef.current) return;
 
+    const trimmedName = draft.name.trim();
+    const trimmedEmail = draft.email.trim();
+    const nameChanged = trimmedName !== profile.name;
+    const emailChanged =
+      trimmedEmail.toLowerCase() !== profile.email.trim().toLowerCase();
+    const avatarChanged = avatarFile !== null;
+
+    if (!nameChanged && !emailChanged && !avatarChanged) {
+      notify("Nenhuma alteração para salvar.");
+      return;
+    }
+
     submittingRef.current = true;
     setBusy(true);
     setFeedback("");
     try {
-      const trimmedName = draft.name.trim();
-      const trimmedEmail = draft.email.trim();
-
-      const updateResponse = await UpdateUser(
-        trimmedName !== profile.name ? trimmedName : undefined,
-        trimmedEmail !== profile.email ? trimmedEmail : undefined,
-        avatarFile ?? undefined,
-      );
-      if (!updateResponse.ok) {
-        notify(
-          updateResponse.message ?? "Erro ao atualizar os dados do usuário.",
-          true,
+      if (nameChanged || avatarChanged) {
+        const updateResponse = await UpdateUser(
+          nameChanged ? trimmedName : undefined,
+          undefined,
+          avatarFile ?? undefined,
         );
+        if (!updateResponse.ok) {
+          notify(
+            updateResponse.message ?? "Erro ao atualizar os dados do usuário.",
+            true,
+          );
+          return;
+        }
+
+        setAvatarFile(null);
+        if (avatarInputRef.current) avatarInputRef.current.value = "";
+      }
+
+      if (emailChanged) {
+        setPendingNewEmail(trimmedEmail);
+        await iniciarConfirmacaoOTP("email");
         return;
       }
 
@@ -240,8 +271,6 @@ export default function Profile({
 
       setProfile(updated);
       setDraft(updated);
-      setAvatarFile(null);
-      if (avatarInputRef.current) avatarInputRef.current.value = "";
       notify("Perfil salvo com sucesso.");
     } catch (err) {
       notify(
@@ -365,6 +394,97 @@ export default function Profile({
     resetDeletionConfirmation();
   }
 
+  async function iniciarConfirmacaoOTP(acao: Exclude<PendingOtpAction, null>) {
+    setOtpErrorMessage("");
+    setIsOtpSubmitting(true);
+
+    try {
+      await GetCode();
+      setPendingOtpAction(acao);
+    } finally {
+      setIsOtpSubmitting(false);
+    }
+  }
+
+  async function confirmarOTP(codigo: string) {
+    if (!pendingOtpAction || !profile || submittingRef.current) return;
+
+    submittingRef.current = true;
+    setIsOtpSubmitting(true);
+    setOtpErrorMessage("");
+
+    try {
+      if (pendingOtpAction === "email") {
+        const targetEmail = (pendingNewEmail || draft?.email || "").trim();
+        await SecureProfileUpdate({
+          code: codigo,
+          novoEmail: targetEmail,
+        });
+        const freshUser = await refreshProfile();
+        const updated: UserProfile = {
+          ...(freshUser ?? draft ?? profile),
+          email: freshUser?.email || targetEmail,
+        };
+        setProfile(updated);
+        setDraft(updated);
+        setPendingNewEmail("");
+        setPendingOtpAction(null);
+        notify("E-mail atualizado com sucesso.");
+      } else if (pendingOtpAction === "senha") {
+        await SecureProfileUpdate({
+          code: codigo,
+          novaSenha: senha,
+        });
+        setSenha("");
+        setPendingOtpAction(null);
+        setView("profile");
+        notify("Senha alterada com sucesso.");
+      } else if (pendingOtpAction === "excluir_conta") {
+        const result = await DeleteAccount(profile.id, password, codigo);
+        if (result === "invalid_password") {
+          setInvalidPassword(true);
+          setPasswordError("Senha incorreta.");
+          setPendingOtpAction(null);
+        } else if (result === "forbidden") {
+          setPasswordError(
+            "Você não tem autorização para excluir esta conta. Procure o responsável pela empresa.",
+          );
+          setPendingOtpAction(null);
+        } else if (result === "blocked") {
+          setPasswordError(
+            "Existem vínculos ou pendências que impedem a exclusão. Resolva-os com o atendimento antes de tentar novamente.",
+          );
+          setPendingOtpAction(null);
+        } else if (result === "deleted") {
+          setPendingOtpAction(null);
+          setAction(null);
+          setPassword("");
+          try {
+            await authSignOut("local");
+          } catch {
+            // Sessão já revogada pelo servidor durante a exclusão.
+          } finally {
+            navigateTo("/", { replace: true });
+          }
+        } else {
+          setPasswordError(
+            "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
+          );
+          setPendingOtpAction(null);
+        }
+      }
+    } catch (error) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível confirmar a operação. Tente novamente.";
+      setOtpErrorMessage(msg);
+    } finally {
+      submittingRef.current = false;
+      setIsOtpSubmitting(false);
+    }
+  }
+
   async function confirmAction(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!profile || !action || submittingRef.current) return;
@@ -386,9 +506,7 @@ export default function Profile({
           return;
         }
         if (result === "forbidden") {
-          setPasswordError(
-            "Você não tem permissão para remover este membro.",
-          );
+          setPasswordError("Você não tem permissão para remover este membro.");
           return;
         }
 
@@ -449,33 +567,15 @@ export default function Profile({
     setBusy(true);
     setPasswordError("");
     setInvalidPassword(false);
-    try {
-      const result = await DeleteAccount(profile.id, password);
-      if (result === "invalid_password") {
-        setInvalidPassword(true);
-        setPasswordError("Senha incorreta. Sua conta não foi excluída.");
-      } else if (result === "forbidden") {
-        setPasswordError(
-          "Você não tem autorização para excluir esta conta. Procure o responsável pela empresa.",
-        );
-      } else if (result === "blocked") {
-        setPasswordError(
-          "Existem vínculos ou pendências que impedem a exclusão. Resolva-os com o atendimento antes de tentar novamente.",
-        );
-      } else if (result === "deleted") {
-        await authSignOut("global");
-        navigateTo("/", { replace: true });
-      } else {
-        setPasswordError(
-          "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
-        );
-      }
-    } catch {
+    try{
+      await iniciarConfirmacaoOTP("excluir_conta");
+    }catch (err) {
       setPasswordError(
-        "Não foi possível confirmar a exclusão. Tente novamente mais tarde.",
+        err instanceof Error
+          ? err.message
+          : "Não foi possível iniciar a exclusão da conta. Tente novamente.",
       );
     } finally {
-      setPassword("");
       submittingRef.current = false;
       setBusy(false);
     }
@@ -694,8 +794,12 @@ export default function Profile({
                         >
                           Gerenciar ajudantes <span aria-hidden="true">⚙</span>
                         </button>
-                        <Link className="profile-text-button" to="/admin/usuarios">
-                          Ver usuários da página <span aria-hidden="true">↗</span>
+                        <Link
+                          className="profile-text-button"
+                          to="/admin/usuarios"
+                        >
+                          Ver usuários da página{" "}
+                          <span aria-hidden="true">↗</span>
                         </Link>
                       </>
                     )}
@@ -932,9 +1036,14 @@ export default function Profile({
 
               {view === "password" && (
                 <ChangePasswordForm
-                  onSuccess={(message) => {
-                    navigate("profile");
-                    notify(message);
+                  onSuccess={async (senhaNova: string) => {
+                    setSenha(senhaNova);
+                    try {
+                      await iniciarConfirmacaoOTP("senha");
+                    } catch (error) {
+                      setSenha("");
+                      throw error;
+                    }
                   }}
                 />
               )}
@@ -945,7 +1054,7 @@ export default function Profile({
         </main>
       </div>
 
-      {action && confirmationPerson && (
+      {action && confirmationPerson && pendingOtpAction === null && (
         <dialog
           className={`profile-dialog${deletingAccount ? " profile-delete-dialog" : ""}`}
           ref={dialogRef}
@@ -1158,6 +1267,48 @@ export default function Profile({
             )}
           </form>
         </dialog>
+      )}
+      {pendingOtpAction !== null && (
+        <NoticeModal
+          showOtpInput={true}
+          code="Segurança 2FA"
+          popupTitle={
+            pendingOtpAction === "excluir_conta"
+              ? "Confirmar exclusão de conta"
+              : pendingOtpAction === "email"
+                ? "Confirmar alteração de e-mail"
+                : "Confirmar alteração de senha"
+          }
+          message={
+            pendingOtpAction === "excluir_conta"
+              ? "Esta ação é irreversível. Confirme sua identidade para encerrar sua conta."
+              : pendingOtpAction === "email"
+                ? "Por segurança, valide o código enviado para o seu e-mail atual antes de atualizar seu endereço de e-mail."
+                : "Por segurança, valide o código antes de atualizar sua senha."
+          }
+          userEmail={profile?.email}
+          buttonText={
+            pendingOtpAction === "excluir_conta"
+              ? "Excluir definitivamente"
+              : pendingOtpAction === "email"
+                ? "Confirmar e-mail"
+                : "Confirmar senha"
+          }
+          isSubmitting={isOtpSubmitting}
+          errorMessage={otpErrorMessage}
+          onConfirmOtp={confirmarOTP}
+          onResendOtp={async () => {
+            setOtpErrorMessage("");
+            await GetCode();
+          }}
+          onCancel={() => {
+            if (isOtpSubmitting) return;
+            setPendingOtpAction(null);
+            setOtpErrorMessage("");
+            setSenha("");
+            setPendingNewEmail("");
+          }}
+        />
       )}
     </>
   );

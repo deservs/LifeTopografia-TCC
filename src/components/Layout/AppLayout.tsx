@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
 import Footer from "../Footer/footer";
@@ -11,7 +6,6 @@ import Sidebar from "../Sidebar/sidebar";
 import Topbar from "../Topbar/topbar";
 import "./AppLayout.css";
 import { LayoutContext } from "../../hook/useLayout";
-
 
 interface AppLayoutProps {
   showTopbar?: boolean;

@@ -64,7 +64,10 @@ export function AdminRoute() {
           Sua conta não possui permissão administrativa para acessar esta área.
         </p>
         <div className="route-guard-actions">
-          <Link to="/perfil" className="route-guard-btn route-guard-btn--primary">
+          <Link
+            to="/perfil"
+            className="route-guard-btn route-guard-btn--primary"
+          >
             Ir para meu perfil
           </Link>
           <Link to="/" className="route-guard-btn route-guard-btn--secondary">

@@ -168,7 +168,9 @@ export default function Home() {
                         <img
                           src={user.avatarUrl}
                           alt=""
-                          onError={() => setFailedAvatarUrl(user.avatarUrl ?? null)}
+                          onError={() =>
+                            setFailedAvatarUrl(user.avatarUrl ?? null)
+                          }
                         />
                       ) : (
                         displayName.charAt(0).toUpperCase()

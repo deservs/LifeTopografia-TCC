@@ -15,8 +15,7 @@ export const envSchema = z.object({
     .url("URL pública do R2 inválida"),
   VITE_TURNSTILE_SITE_KEY: z
     .string({ message: "Chave do Turnstile é obrigatória" })
-    .min(1, "Chave do Turnstile é obrigatória")
-    .default("0x4AAAAAAFabYKAT6aVT3YYq"),
+    .min(1, "Chave do Turnstile é obrigatória"),
 });
 
 const _env = envSchema.safeParse(import.meta.env);

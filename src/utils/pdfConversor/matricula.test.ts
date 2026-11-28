@@ -184,7 +184,7 @@ async function runTests() {
     validacao2.resumo.dxfAproximado,
     "DXF identificado explicitamente como aproximado",
   );
-  
+
   const dxf2 = await gerarDXFString(resultado2, validacao2);
   assert(
     dxf2.stringDxf.includes("REPRESENTACAO ESQUEMATICA"),

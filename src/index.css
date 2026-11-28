@@ -93,8 +93,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("./assets/fonts/Poppins/Poppins-SemiBoldItalic.woff")
-    format("woff");
+  src: url("./assets/fonts/Poppins/Poppins-SemiBoldItalic.woff") format("woff");
   font-weight: 600;
   font-style: italic;
   font-display: swap;
